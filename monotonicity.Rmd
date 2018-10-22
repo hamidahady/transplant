@@ -1,0 +1,72 @@
+---
+title: Investigating the thoracic data
+author:
+
+- Hamidreza Ahady Dolatsara^[Auburn University, [hamid@auburn.edu](mailto:hamid@auburn.edu)]
+- Fadel Megahed^[University of Miami Ohio, [fmegahed@miamioh.edu](mailto:fmegahed@miamioh.edu)]
+- Ying-Ju Tessa Chen^[Dayton University, [ychen4@udayton.edu](mailto:ychen4@udayton.edu)]
+- Christy Evans^[Auburn University, [cje0010@auburn.edu](mailto:cje0010@auburn.edu)]
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    code_folding: hide
+    df_print: paged
+    number_sections: yes
+    toc: yes
+    toc_float: yes
+  word_document:
+    toc: yes
+---
+
+  
+
+****
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+In the following block, required ***R*** libraries are checked for existance and then installed if it's needed.
+
+
+```{r, message=FALSE, cache=FALSE, error=FALSE}
+
+rm(list = ls()) # clears global environment (functions and variables)
+graphics.off() # clears graphics
+if(!("pacman" %in% rownames(installed.packages()))){install.packages("pacman")}# pacman would be installed if it's not existed
+library(pacman) 
+p_load(rio)
+ 
+```
+Here we check different values that a variable might have.
+```{r , message=FALSE, cache=TRUE, error=FALSE, results="hide", warning=FALSE}
+
+thoracic_data<-import(c("https://auburn.box.com/shared/static/bcyulwlkmnhg21fmi1tvnuajv8xjhn1d.sas7bdat"))
+nrows=ncol(thoracic_data)
+
+var_table<-matrix(NA, ncol = 2, nrow = nrows)
+var_table<-as.data.frame(var_table)
+names(var_table) <- c("vars","data")
+
+var_table$vars<-colnames(thoracic_data)
+
+for(i in 1:ncol(thoracic_data)){
+  if(length(as.data.frame(table(thoracic_data[i]))[,1])<100){
+    var_table$data[i]<-paste(as.data.frame(table(thoracic_data[i]))[,1],collapse=",")
+  }else{var_table$data[i]<-"numeric or too many levels"}
+  
+  
+}
+
+```
+<br />
+<br />
+If the levels of variables are more than 100, I assume they are numerical or there are uselessly too many levels. Some of variables are empty and some of them have a lot of levels (like states' name). Here, you can see possible values of different variables in the thoracic dataset:
+```{r , message=FALSE, cache=FALSE, error=FALSE}
+  DT::datatable(var_table)
+```
+
+
+
