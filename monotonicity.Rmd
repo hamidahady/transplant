@@ -37,12 +37,23 @@ rm(list = ls()) # clears global environment (functions and variables)
 graphics.off() # clears graphics
 if(!("pacman" %in% rownames(installed.packages()))){install.packages("pacman")}# pacman would be installed if it's not existed
 library(pacman) 
-p_load(rio)
+p_load(caret)
  
 ```
 Here we check different values that a variable might have.
 ```{r , message=FALSE, cache=TRUE, error=FALSE, results="hide", warning=FALSE}
 
+list.files("https://github.com/hamidahady/transplant/tree/master/data/raw")
+
+list.files("C:/Users/hza0020/Box/Transplant/Thesis/github/transplant/transplant/data/raw")
+
+saveRDS(x, "x.rds")
+
+
+load(url("https://github.com/hamidahady/transplant/blob/master/data/raw/thoracic_data_1_9000L.RData?raw=true"))
+load(url("https://github.com/hamidahady/transplant/blob/master/data/raw/thoracic_data_9001_18000L.RData?raw=true"))
+
+  
 thoracic_data<-import(c("https://auburn.box.com/shared/static/bcyulwlkmnhg21fmi1tvnuajv8xjhn1d.sas7bdat"))
 nrows=ncol(thoracic_data)
 
