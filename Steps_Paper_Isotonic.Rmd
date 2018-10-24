@@ -1,0 +1,425 @@
+---
+title: "Monotonicity"
+author: "Hamid"
+date: "6/10/2018"
+output: html_document
+# Initilization and Set up
+rm(list = ls()) # clear environment
+cat("\014") # clear console
+graphics.off() # Remove Graphics
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# loading all the required functions
+source("/users/PMIU0138/miu0150/all_functions.R")
+```
+
+
+now I upload German Study file then run Analysis
+```{r}
+
+#feature selection for the German Study
+German_object<-reading(app_gui)
+German_object<-ADP_lit(ADP_lit(ADP(initialization(reading(app_gui)))))
+German_object<-lremove_conso(remove_conso(ADP_lit(ADP_lit(ADP(initialization(reading(app_gui)))))))
+German_object<-Random_Forrest(lremove_conso(remove_conso(ADP_lit(ADP_lit(ADP(initialization(reading(app_gui))))))))
+German_object<-Lasso_Binomial(German_object)
+German_object<-FFS(German_object)
+  
+German_object<-FFS(Lasso_Binomial(Random_Forrest(lremove_conso(remove_conso(ADP_lit(ADP_lit(ADP(initialization(reading(app_gui))))))))))
+
+German_object<-consolidate(FFS(Lasso_Binomial(Random_Forrest(lremove_conso(remove_conso(ADP_lit(ADP_lit(ADP(initialization(reading(app_gui)))))))))))
+
+German_object<-data_iso_testing(German_object)
+
+#Prediction for the German Study
+German_object<-Bino_pred(German_object)
+
+# #delete later
+if(German_object$parameters["platform","content"]=="OSC Server"){save_folder<-getwd()}else{save_folder<-German_object$parameters["root_folder","content"]}
+save(German_object,file=paste(c(save_folder,"/German_object_after_prediction.RData"),collapse = ""))
+# #delete later
+
+German_object<-isotonic_maker(Bino_pred(German_object))
+
+#making data ready for monotonicity evaluation
+German_object<-data_iso_testing(German_object)
+
+#train data with all of the models to check isotonicity performance
+{
+  log_train_German<-iso_train(German_object,"log")
+  if(input_object$parameters["platform","content"]=="OS Server"){save_folder<-getwd()}else{ save_folder<-input_object$parameters["root_folder","content"]}
+  save(log_train_German,file=paste(c(save_folder,"/log_train_German.RData"),collapse = ""))
+  
+  # #making log-train lighter
+  # for (i in 0:10) {
+  #   for (j in 1:10) {
+  #     g<-log_train_German[[paste("mod_log_year",i,"_fold",j,sep="")]]
+  #     g$trainingData<-NULL
+  #     g$terms<-NULL
+  #     g$finalModel$data<-NULL
+  #     g$finalModel$R<-NULL
+  #     g$finalModel$model<-NULL
+  #     g$finalModel$control$index<-NULL
+  #     log_train_German[[paste("mod_log_year",i,"_fold",j,sep="")]]<-g
+  #     
+  #   }
+  #   
+  # }
+  
+  CRT_train_German<-iso_train(German_object,"CRT")
+  save(CRT_train_German,file=paste(c(save_folder,"/CRT_train_German.RData"),collapse = ""))
+  
+  svm_train_German<-iso_train(German_object,"svm")
+  save(svm_train_German,file=paste(c(save_folder,"/svm_train_German.RData"),collapse = ""))
+  
+  # svm_lighter<-list()
+  # for (i in 0:10) {
+  #   for (j in 1:10) {
+  #     g<-svm_train_German[[paste("mod_svm_year",i,"_fold",j,sep="")]]
+  #     g$trainingData<-NULL
+  #     svm_lighter[[paste("mod_svm_year",i,"_fold",j,sep="")]]<-g
+  #     
+  #   }
+  #   
+  # }
+  
+  NNET_train_German<-iso_train(German_object,"NNET")
+  save(NNET_train_German,file=paste(c(save_folder,"/NNET_train_German.RData"),collapse = ""))
+  
+  
+  tan_train_German<-iso_train(German_object,"tan")
+  save(tan_train_German,file=paste(c(save_folder,"/tan_train_German.RData"),collapse = ""))
+}
+
+#now
+
+```
+
+After executing all the models for the years and all the folds it's time to check its performnce
+```{r}
+ 
+  if(input_object$parameters["platform","content"]=="OS Server"){save_folder<-getwd()}else{      save_folder<-input_object$parameters["root_folder","content"]}
+  load(paste(c(save_folder,"/log_train_German.RData"),collapse = ""))
+  
+
+  log_eval_German<-iso_evluation(German_object,log_train_German,"log")
+  
+  if(German_object$parameters["platform","content"]=="OSC Server"){save_folder<-getwd()}else{ save_folder<-German_object$parameters["root_folder","content"]}
+
+save(log_eval_German,file=paste(c(save_folder,"/log_eval_German.RData"),collapse = ""))
+
+
+
+CRT_eval_German<-iso_evluation(German_object,CRT_train_German,"CRT")
+
+if(German_object$parameters["platform","content"]=="OSC Server"){save_folder<-getwd()}else{ save_folder<-German_object$parameters["root_folder","content"]}
+
+save(CRT_eval_German,file=paste(c(save_folder,"/CRT_eval_German.RData"),collapse = ""))
+
+  
+
+svm_eval_German<-iso_evluation(German_object,svm_train_German,"svm")
+
+if(German_object$parameters["platform","content"]=="OSC Server"){save_folder<-getwd()}else{ save_folder<-German_object$parameters["root_folder","content"]}
+
+save(svm_eval_German,file=paste(c(save_folder,"/svm_eval_German.RData"),collapse = ""))
+
+
+
+NNET_eval_German<-iso_evluation(German_object,NNET_train_German,"NNET")
+
+if(German_object$parameters["platform","content"]=="OSC Server"){save_folder<-getwd()}else{ save_folder<-German_object$parameters["root_folder","content"]}
+
+save(NNET_eval_German,file=paste(c(save_folder,"/NNET_eval_German.RData"),collapse = ""))
+
+
+tan_eval_German<-iso_evluation(German_object,tan_train_German,"tan")
+
+if(German_object$parameters["platform","content"]=="OSC Server"){save_folder<-getwd()}else{ save_folder<-German_object$parameters["root_folder","content"]}
+
+save(tan_eval_German,file=paste(c(save_folder,"/tan_eval_German.RData"),collapse = ""))
+
+
+```
+
+Now I import heart data and clean it / and take 10 random data samples / then making data as variables
+```{r}
+platform<-"mac"
+platform<-"windows"  
+platform<-"OSC Server"  
+
+if(platform=="mac"){base_folder<-"/Users/hamid"}
+if(platform=="windows"){base_folder<-"C:/Users/hza0020"}
+if(platform=="OSC Server"){base_folder<-getwd()}
+
+input_object_clean<-table_cleaner(app_gui)
+input_object_clean$data_base$id<-row.names(input_object_clean$data_base)
+input_object_clean$file_new_data<-input_object_clean$data_base[sample(nrow(input_object_clean$data_base), 10), ]
+input_object_clean$data_base<-input_object_clean$data_base[which(!input_object_clean$data_base$id %in% input_object_clean$file_new_data$id),]
+input_object_clean$data_base$id<-NULL
+input_object_clean$file_new_data$id<-NULL
+
+
+input_object_clean$data_base$wait_time<-difftime(strptime(input_object_clean$data_base$TX_DATE, format = "%Y-%m-%d"),
+         strptime(input_object_clean$data_base$INIT_DATE, format = "%Y-%m-%d"),units="days")
+
+input_object_clean$file_new_data$wait_time<-difftime(strptime(input_object_clean$file_new_data$TX_DATE, format = "%Y-%m-%d"),
+         strptime(input_object_clean$file_new_data$INIT_DATE, format = "%Y-%m-%d"),units="days")
+
+input_object_clean$data_base$TX_1980<-difftime(strptime(input_object_clean$data_base$TX_DATE, format = "%Y-%m-%d"),
+         strptime("1980-01-01", format = "%Y-%m-%d"),units="days")
+
+input_object_clean$file_new_data$TX_1980<-difftime(strptime(input_object_clean$file_new_data$TX_DATE, format = "%Y-%m-%d"),
+         strptime("1980-01-01", format = "%Y-%m-%d"),units="days")
+
+input_object_clean$data_base$INIT_1980<-difftime(strptime(input_object_clean$data_base$INIT_DATE, format = "%Y-%m-%d"),
+         strptime("1980-01-01", format = "%Y-%m-%d"),units="days")
+
+input_object_clean$file_new_data$INIT_1980<-difftime(strptime(input_object_clean$file_new_data$INIT_DATE, format = "%Y-%m-%d"),
+         strptime("1980-01-01", format = "%Y-%m-%d"),units="days")
+
+
+
+save(input_object_clean,file=paste(c(getwd(),"/input_object_clean.RData"),collapse = ""))
+
+# now run the app and make the app file
+  
+```
+
+working on Thoracic data which comes from the app
+```{r}
+Heart_object<-NULL
+Heart_object_RF<-NULL
+
+Heart_object_init<-initialization(reading(app_gui))
+Heart_object<-ADP(Heart_object_init)
+Heart_object<-initialization(reading(app_gui))
+Heart_object<-ADP(initialization(reading(app_gui)))
+Heart_object<-lremove_conso(remove_conso(ADP_lit(ADP(initialization(reading(app_gui))))))
+save(Heart_object,file=paste(getwd(),"/Heart_object_lremove.RData",sep = ""))
+
+# I did the next step by seperating the file
+{
+Heart_object_RF0<-Random_Forrest(Heart_object)
+save(Heart_object_RF0,file=paste(getwd(),"/Heart_object_RF0.RData",sep = ""))
+
+Heart_object_RF1<-Random_Forrest(Heart_object)
+save(Heart_object_RF1,file=paste(getwd(),"/Heart_object_RF1.RData",sep = ""))
+
+Heart_object_RF2<-Random_Forrest(Heart_object)
+save(Heart_object_RF2,file=paste(getwd(),"/Heart_object_RF2.RData",sep = ""))
+
+Heart_object_RF3<-Random_Forrest(Heart_object)
+save(Heart_object_RF3,file=paste(getwd(),"/Heart_object_RF3.RData",sep = ""))
+
+Heart_object_RF4<-Random_Forrest(Heart_object)
+save(Heart_object_RF4,file=paste(getwd(),"/Heart_object_RF4.RData",sep = ""))
+
+Heart_object_RF5<-Random_Forrest(Heart_object)
+save(Heart_object_RF5,file=paste(getwd(),"/Heart_object_RF5.RData",sep = ""))
+
+Heart_object_RF6<-Random_Forrest(Heart_object)
+save(Heart_object_RF6,file=paste(getwd(),"/Heart_object_RF6.RData",sep = ""))
+
+Heart_object_RF7<-Random_Forrest(Heart_object)
+save(Heart_object_RF7,file=paste(getwd(),"/Heart_object_RF7.RData",sep = ""))
+
+Heart_object_RF8<-Random_Forrest(Heart_object)
+save(Heart_object_RF8,file=paste(getwd(),"/Heart_object_RF8.RData",sep = ""))
+
+Heart_object_RF9<-Random_Forrest(Heart_object)
+save(Heart_object_RF9,file=paste(getwd(),"/Heart_object_RF9.RData",sep = ""))
+
+Heart_object_RF10<-Random_Forrest(Heart_object)
+save(Heart_object_RF10,file=paste(getwd(),"/Heart_object_RF10.RData",sep = ""))
+
+load(paste(getwd(),"/Heart_object_RF0.RData",sep = ""))
+Heart_object<-Heart_object_RF0
+rm(list = "Heart_object_RF0")
+
+load(paste(getwd(),"/Heart_object_RF1.RData",sep = ""))
+Heart_object$bin_features$R_Forrest_year1<-Heart_object_RF1$bin_features$R_Forrest_year1
+rm(list = "Heart_object_RF1")
+
+load(paste(getwd(),"/Heart_object_RF2.RData",sep = ""))
+Heart_object$bin_features$R_Forrest_year2<-Heart_object_RF2$bin_features$R_Forrest_year2
+rm(list = "Heart_object_RF2")
+
+load(paste(getwd(),"/Heart_object_RF3.RData",sep = ""))
+Heart_object$bin_features$R_Forrest_year3<-Heart_object_RF3$bin_features$R_Forrest_year3
+rm(list = "Heart_object_RF3")
+
+load(paste(getwd(),"/Heart_object_RF4.RData",sep = ""))
+Heart_object$bin_features$R_Forrest_year4<-Heart_object_RF4$bin_features$R_Forrest_year4
+rm(list = "Heart_object_RF4")
+
+load(paste(getwd(),"/Heart_object_RF5.RData",sep = ""))
+Heart_object$bin_features$R_Forrest_year5<-Heart_object_RF5$bin_features$R_Forrest_year5
+rm(list = "Heart_object_RF5")
+
+load(paste(getwd(),"/Heart_object_RF6.RData",sep = ""))
+Heart_object$bin_features$R_Forrest_year6<-Heart_object_RF6$bin_features$R_Forrest_year6
+rm(list = "Heart_object_RF6")
+
+load(paste(getwd(),"/Heart_object_RF7.RData",sep = ""))
+Heart_object$bin_features$R_Forrest_year7<-Heart_object_RF7$bin_features$R_Forrest_year7
+rm(list = "Heart_object_RF7")
+
+load(paste(getwd(),"/Heart_object_RF8.RData",sep = ""))
+Heart_object$bin_features$R_Forrest_year8<-Heart_object_RF8$bin_features$R_Forrest_year8
+rm(list = "Heart_object_RF8")
+
+load(paste(getwd(),"/Heart_object_RF9.RData",sep = ""))
+Heart_object$bin_features$R_Forrest_year9<-Heart_object_RF9$bin_features$R_Forrest_year9
+rm(list = "Heart_object_RF9")
+
+load(paste(getwd(),"/Heart_object_RF10.RData",sep = ""))
+Heart_object$bin_features$R_Forrest_year10<-Heart_object_RF10$bin_features$R_Forrest_year10
+rm(list = "Heart_object_RF10")
+}
+# End of seperating the analysis
+
+Heart_object_RF<-Random_Forrest(lremove_conso(remove_conso(ADP_lit(ADP_lit(ADP(initialization(reading(app_gui))))))))
+save(Heart_object,file=paste(getwd(),"/Heart_object_Random-Forest.RData",sep = ""))
+
+# I did not use Lasso because it bring all of the features
+#Heart_object<-FFS(Lasso_Binomial(Heart_object_RF))
+Heart_object<-FFS(Heart_object)
+save(Heart_object,file=paste(getwd(),"/Heart_object_FF.RData",sep = ""))
+Heart_object<-Lasso_Binomial(Heart_object)
+save(Heart_object,file=paste(getwd(),"/Heart_object_LASSO.RData",sep = ""))
+Heart_object<-consolidate(Heart_object)
+save(Heart_object,file=paste(getwd(),"/Heart_object_CONSOLIDATE.RData",sep = ""))
+
+#I performed random forrest feature selection and prediction year by year then merger into 1 file.
+#Heart_object<-isotonic_maker(Heart_object)
+
+
+
+Heart_object<-data_iso_testing(Heart_object)
+
+save(Heart_object,file=paste(getwd(),"/Heart_object_before_monotonicity.RData",sep = ""))
+#making data ready for monotonicity evaluation
+
+# loading all the required functions
+# loading all the required functions
+source("/users/PMIU0138/miu0150/all_functions.R")
+load("/users/PMIU0138/miu0150/1st_paper-isotonic/Heart_object_before_monotonicity.RData")
+Heart_object$parameters["B_alg","content"]<-"RUS"
+lib_cleaner()
+library("DMwR")
+library("caret")
+log_train_Heart<-iso_train(Heart_object,"log")
+if(Heart_object$parameters["platform","content"]=="OSC Server"){save_folder<-getwd()}else{ save_folder<-input_object$parameters["root_folder","content"]}
+save(log_train_Heart,file=paste(c(save_folder,"/log_train_Heart_",Heart_object$parameters["B_alg","content"],".RData"),collapse = ""))
+
+source("/users/PMIU0138/miu0150/all_functions.R")
+load("/users/PMIU0138/miu0150/1st_paper-isotonic/Heart_object_before_monotonicity.RData")
+Heart_object$parameters["B_alg","content"]<-"RUS"
+lib_cleaner()
+library("DMwR")
+library("caret")
+tan_train_Heart<-iso_train(Heart_object,"tan")
+if(Heart_object$parameters["platform","content"]=="OSC Server"){save_folder<-getwd()}else{ save_folder<-input_object$parameters["root_folder","content"]}
+save(tan_train_Heart,file=paste(c(save_folder,"/tan_train_Heart_",Heart_object$parameters["B_alg","content"],".RData"),collapse = ""))
+
+source("/users/PMIU0138/miu0150/all_functions.R")
+load("/users/PMIU0138/miu0150/1st_paper-isotonic/Heart_object_before_monotonicity.RData")
+Heart_object$parameters["B_alg","content"]<-"RUS"
+lib_cleaner()
+library("DMwR")
+library("caret")
+svm_train_Heart<-iso_train(Heart_object,"svm")
+if(Heart_object$parameters["platform","content"]=="OSC Server"){save_folder<-getwd()}else{ save_folder<-input_object$parameters["root_folder","content"]}
+save(svm_train_Heart,file=paste(c(save_folder,"/svm_train_Heart_",Heart_object$parameters["B_alg","content"],".RData"),collapse = ""))
+
+
+source("/users/PMIU0138/miu0150/all_functions.R")
+load("/users/PMIU0138/miu0150/1st_paper-isotonic/Heart_object_before_monotonicity.RData")
+Heart_object$parameters["B_alg","content"]<-"RUS"
+lib_cleaner()
+library("DMwR")
+library("caret")
+CRT_train_Heart<-iso_train(Heart_object,"CRT")
+if(Heart_object$parameters["platform","content"]=="OSC Server"){save_folder<-getwd()}else{ save_folder<-input_object$parameters["root_folder","content"]}
+save(CRT_train_Heart,file=paste(c(save_folder,"/CRT_train_Heart_",Heart_object$parameters["B_alg","content"],".RData"),collapse = ""))
+
+source("/users/PMIU0138/miu0150/all_functions.R")
+load("/users/PMIU0138/miu0150/1st_paper-isotonic/Heart_object_before_monotonicity.RData")
+Heart_object$parameters["B_alg","content"]<-"RUS"
+lib_cleaner()
+library("DMwR")
+library("caret")
+NNET_train_Heart<-iso_train(Heart_object,"NNET")
+if(Heart_object$parameters["platform","content"]=="OSC Server"){save_folder<-getwd()}else{ save_folder<-input_object$parameters["root_folder","content"]}
+save(NNET_train_Heart,file=paste(c(save_folder,"/NNET_train_Heart_",Heart_object$parameters["B_alg","content"],".RData"),collapse = ""))
+
+
+
+
+
+
+```
+
+Now I want to evaluate my trained models
+```{r}
+#upload Heart_object_before_monotonicity.RData before as Heart_object
+
+library(caret)
+library("DMwR")
+log_eval<-iso_evluation(Heart_object,log_train_Heart,"log")
+
+
+if(Heart_object$parameters["platform","content"]=="OSC Server"){save_folder<-getwd()}else{ save_folder<-input_object$parameters["root_folder","content"]}
+save(log_eval,file=paste(c(save_folder,"/Heart_log_monotonic_comparison.RData"),collapse = ""))
+lib_cleaner()
+
+log_eval$log_iso_comparison$regular
+log_eval$log_iso_comparison$monotonic
+
+
+svm_eval<-iso_evluation(Heart_object,svm_train_Heart,"svm")
+
+
+if(Heart_object$parameters["platform","content"]=="OSC Server"){save_folder<-getwd()}else{ save_folder<-input_object$parameters["root_folder","content"]}
+
+save(svm_eval,file=paste(c(save_folder,"/Heart_svm_monotonic_comparison.RData"),collapse = ""))
+
+
+CRT_eval<-iso_evluation(Heart_object,CRT_train_Heart,"CRT")
+
+
+if(Heart_object$parameters["platform","content"]=="OSC Server"){save_folder<-getwd()}else{ save_folder<-input_object$parameters["root_folder","content"]}
+
+save(CRT_eval,file=paste(c(save_folder,"/Heart_CRT_monotonic_comparison.RData"),collapse = ""))
+
+
+tan_eval<-iso_evluation(Heart_object,tan_train_Heart,"tan")
+
+
+if(Heart_object$parameters["platform","content"]=="OSC Server"){save_folder<-getwd()}else{ save_folder<-input_object$parameters["root_folder","content"]}
+
+save(tan_eval,file=paste(c(save_folder,"/Heart_tan_monotonic_comparison.RData"),collapse = ""))
+
+
+NNET_eval<-iso_evluation(Heart_object,NNET_train_Heart,"NNET")
+
+
+if(Heart_object$parameters["platform","content"]=="OSC Server"){save_folder<-getwd()}else{ save_folder<-input_object$parameters["root_folder","content"]}
+
+save(NNET_eval,file=paste(c(save_folder,"/Heart_NNET_monotonic_comparison.RData"),collapse = ""))
+
+
+```
+
+
+
+
+
+
+
+
+
