@@ -1,4 +1,47 @@
 
+
+
+
+#===============================================
+#============remove extra libraries and packages in r
+#===============================================
+#this function is for converting some values that are actually NA but they are specified with the different values
+#dataset: the dataset that has NAs, var_name_vector: vector for variables names
+#var_na_vector: this is a vector that contains NA equivalent values associated var names in var_name_vector
+#each cell in var_na_vector might have multiple values for NAs
+
+dataset<-thoracic_data
+var_name_vector<-as.character(NA_identifier$VARIABLE.NAME)
+var_na_vector<-NA_identifier$nas
+  
+na_maker <- function(dataset,var_name_vector,var_na_vector){
+i<-286
+j<-232
+k<-1
+  for(i in 1:ncol(dataset)){
+    for(j in 1:length(var_name_vector)){
+      if(grepl(names(dataset[i]),var_name_vector[j])){
+        print(i)
+        print(j)
+        if(length(as.character(var_na_vector[j]))>0){
+          str(var_na_vector[j])
+        for(k in 1:length(var_na_vector[j])){
+          dataset[dataset[,i] == var_na_vector[j][k],i] <- NA}
+        
+        }
+    }
+  }
+   
+}
+
+
+
+}
+
+
+
+
+
 #===============================================
 #============remove extra libraries and packages in r
 #===============================================
@@ -63,7 +106,7 @@ col_missing_function <- function(input_data){
 table_cleaner<-function(input_object){
   #_______________________________Required Libraries_______________________________________________________________________________________
   # Install any needed package with the following command: install.packages("Name", dependencies = c("Depends", "Suggests"))
-  
+  #comments
   set.seed(110)
   clean_folder_input<-input_object$clean_folder_input
   if(is.null(clean_folder_input)){clean_folder<-getwd()}else{clean_folder<-clean_folder_input}
