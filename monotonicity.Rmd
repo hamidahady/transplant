@@ -40,7 +40,7 @@ library(pacman)
 p_load(caret,httr, DT)
 
 # I load functions from this source
-source("https://raw.githubusercontent.com/hamidahady/transplant/master/all_functions.R")
+source("july11_functions.R")
  
 ```
 Here we check different values that a variable might have.
@@ -103,10 +103,8 @@ If the levels of variables are more than 100, I assume they are numerical or the
 
 ```{r , message=FALSE, cache=FALSE, error=FALSE}
 
-# I bring the data set who has information about which values mean NA, then convert those to NA in the dataset
+  
 
-NA_identifier<-read.csv("https://raw.githubusercontent.com/hamidahady/transplant/master/data/nas.csv")
- 
 ```
 
 
