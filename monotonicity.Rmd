@@ -105,7 +105,7 @@ If the levels of variables are more than 100, I assume they are numerical or the
 
 # I bring the data set who has information about which values mean NA, then convert those to NA in the dataset
 
-NA_identifier<-read.csv("https://raw.githubusercontent.com/hamidahady/transplant/master/data/nas.csv")
+var_desc<-read.csv("https://raw.githubusercontent.com/hamidahady/transplant/master/data/var_desc.csv")
  
 ```
 
