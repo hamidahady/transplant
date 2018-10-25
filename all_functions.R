@@ -10,6 +10,7 @@
 #var_na_vector: this is a vector that contains NA equivalent values associated var names in var_name_vector
 #each cell in var_na_vector might have multiple values for NAs
 
+
 dataset<-thoracic_data
 var_name_vector<-as.character(NA_identifier$VARIABLE.NAME)
 var_na_vector<-NA_identifier$nas
