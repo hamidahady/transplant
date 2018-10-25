@@ -9,38 +9,44 @@
 #dataset: the dataset that has NAs, var_name_vector: vector for variables names
 #var_na_vector: this is a vector that contains NA equivalent values associated var names in var_name_vector
 #each cell in var_na_vector might have multiple values for NAs
+ 
 
 dataset<-thoracic_data
-var_name_vector<-as.character(NA_identifier$VARIABLE.NAME)
-var_na_vector<-NA_identifier$nas
+var_name_vector<-as.character(var_desc$VARIABLE.NAME)
+var_na_vector<-var_desc$nas
   
 na_maker <- function(dataset,var_name_vector,var_na_vector){
-i<-286
-j<-232
+i<-152
+j<-83
 k<-1
   for(i in 1:ncol(dataset)){
     for(j in 1:length(var_name_vector)){
       if(grepl(names(dataset[i]),var_name_vector[j])){
-        print(i)
-        print(j)
-        if(length(as.character(var_na_vector[j]))>0){
-          str(var_na_vector[j])
-        for(k in 1:length(var_na_vector[j])){
-          dataset[dataset[,i] == var_na_vector[j][k],i] <- NA}
-        
+        print(c("i",i))
+        print(c("j",j))
+        print("done1")
+        if(nchar(as.character(var_na_vector[j]))>0){
+          print("done2")
+          for(k in 1:length(unlist(strsplit(as.character(var_na_vector[j]), "; "))) ){
+            print("done3")
+            temp<-dataset[,i]
+            temp[temp==(unlist(strsplit(as.character(var_na_vector[j]), "; ")))[k]]<-NA
+            print("done4")
+            dataset[,i]<-temp
+         # dataset[dataset[,i] == (unlist(strsplit(as.character(var_na_vector[j]), "; ")))[k],i] <- NA
+          print("done5")
+          }
+          print("done6")
         }
     }
   }
-   
+   }
 }
+names(thoracic_data[152])
+var_name_vector[83]
+table(dataset$ADMISSION_DATE)
 
-
-
-}
-
-
-
-
+which(dataset$ADMISSION_DATE==NA)
 
 #===============================================
 #============remove extra libraries and packages in r
