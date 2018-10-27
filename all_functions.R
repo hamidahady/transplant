@@ -116,10 +116,10 @@ table_cleaner<-function(input_object){
   NA_cells<-input_object$NA_cells
   NA_cells<-unlist(strsplit(NA_cells, split=","))
   
-  for(i in 1:length(NA_cells)){
-    
-    Try_data[Try_data == NA_cells[i]] <- NA
-    gc()}
+  # for(i in 1:length(NA_cells)){
+  #   
+  #   Try_data[Try_data == NA_cells[i]] <- NA
+  #   gc()}
   
   new_data<-input_object$file_new_data
   

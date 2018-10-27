@@ -37,10 +37,13 @@ rm(list = ls()) # clears global environment (functions and variables)
 graphics.off() # clears graphics
 if(!("pacman" %in% rownames(installed.packages()))){install.packages("pacman")}# pacman would be installed if it's not existed
 library(pacman) 
-p_load(caret,httr, DT)
+p_load(caret,httr, DT,stringr)
 
 # I load functions from this source
-source("https://raw.githubusercontent.com/hamidahady/transplant/master/all_functions.R")
+#replace by github
+#source("https://raw.githubusercontent.com/hamidahady/transplant/Hamid/all_functions.R")
+source("C:/Users/hza0020/Box/Transplant/Thesis/github/transplant/transplant/all_functions.R")
+
  
 ```
 Here we check different values that a variable might have.
@@ -52,7 +55,6 @@ file1<-readRDS(url("https://github.com/hamidahady/transplant/blob/master/data/ra
 file2<-readRDS(url("https://github.com/hamidahady/transplant/blob/master/data/raw/thoracic_data_9001_18000L.rds?raw=true"))
 file3<-readRDS(url("https://github.com/hamidahady/transplant/blob/master/data/raw/thoracic_data_18001_27000L.rds?raw=true"))
 file4<-readRDS(url("https://github.com/hamidahady/transplant/blob/master/data/raw/thoracic_data_27001_36000L.rds?raw=true"))
-
 file5<-readRDS(url("https://github.com/hamidahady/transplant/blob/master/data/raw/thoracic_data_36001_45000L.rds?raw=true"))
 file6<-readRDS(url("https://github.com/hamidahady/transplant/blob/master/data/raw/thoracic_data_45001_54000L.rds?raw=true"))
 file7<-readRDS(url("https://github.com/hamidahady/transplant/blob/master/data/raw/thoracic_data_54001_63000L.rds?raw=true"))
@@ -90,7 +92,111 @@ for(i in 1:ncol(thoracic_data)){
   
   
 }
+
+# our dataset has patient data from 1987 to 2016
+#variables changed overtime, some of them are added very late, it means for majority of patiesnts, no values are recorded.
+#Also some variables are taken out of the dataset longtime ago, it means for majority of patiesnts, no values are recorded.
+
+# Step 1: Identifying the variables that did not end & those added before 2000
+
+# first I import a major file about the variables
+
+# in this dataset, the NA values are specified in different formats: NA, "", " ", UNK, ...
+# in this block I convert those values to NA for a better investigation
+{
+var_desc<-read.csv("https://raw.githubusercontent.com/hamidahady/transplant/master/data/var_desc.csv")
+thoracic_data<-na_maker(thoracic_data,var_desc$VARIABLE.NAME,var_desc$nas) 
+  }
+###
+
+#trimming out their space from date
+var.end.dates <- trimws(var_desc$VAR.END.DATE) %>% stringr::str_trim()
+if.var.did.not.end <- which(var.end.dates=="")
+
+names.of.var.did.not.end <- var_desc[if.var.did.not.end, "VARIABLE.NAME"] 
   
+vars.added.dates <- var_desc$VAR.START.DATE %>% as.character.Date()
+
+#changing variable adding date from "01-Oct-87, 01-Oct-90") to "01-Oct-90"
+vars.added.dates[which(vars.added.dates=="01-Oct-87, 01-Oct-90")] <- "01-Oct-90"
+vars.added.years<- sapply(vars.added.dates, function(x) str_extract_all(x,"[0-9]{1,2}")[[1]][2]) %>% as.integer()
+var_desc$YR_ADDED <- vars.added.years
+vars.added.df <- subset(var_desc,(YR_ADDED>=87 | is.na(YR_ADDED)) ,
+                                select = c(1))  # available variables added before 2000 or has unkown adding date
+
+#making variables as a vector
+vars.added.all <- vars.added.df[["VARIABLE.NAME"]] %>% 
+                  as.character()
+
+# we excluded patients who just had heart transplant, and did it after year 2000
+heart.df.cleaned <- subset(thoracic_data,WL_ORG=="HR") %>% 
+ # the next line is excluded since they might live more than 12 years but the status is NA
+ # subset(is.na(GSTATUS)==FALSE)  %>% 
+  subset(TX_YEAR>=2000)  %>%
+  subset(select=intersect(names.of.var.did.not.end,vars.added.all))
+
+
+# end of identifying NAs
+
+# Step 2: Identifying the variables that are post transplant
+# Based on observations from the Form and Form Section Descriptors
+vars.post.trans.index1 <-  sapply(var_desc$FORM.SECTION,
+                                  function(x) str_detect(x,
+                                                        "POST TRANSPLANT CLINICAL INFORMATION"))
+vars.post.trans.index2 <-  sapply(var_desc$FORM,
+                                  function(x) str_detect(x,
+                                                         "TRF/TRR|TRR/TRF-CALCULATED|TRR/TRF|TRF"))
+
+vars.post.trans <- var_desc[as.logical(vars.post.trans.index1+vars.post.trans.index2),][,1] %>%
+  as.character()
+
+vars.post.trans <- intersect(colnames(heart.df.cleaned),
+                             vars.post.trans)
+
+heart.df.cleaned<-heart.df.cleaned[which(!colnames(heart.df.cleaned) %in% vars.post.trans)]
+
+
+#assigning the actual type of the variables
+{
+  
+}
+########################
+
+# change NA equivalents to NA
+
+
+
+
+
+{
+
+
+  NA_cells<-c(""," ","U")
+  for(i in 1:length(NA_cells)){
+    
+    heart.df.cleaned[heart.df.cleaned == NA_cells[i]] <- NA
+    gc()}
+  }
+heart.df.cleaned[1:54] == ""
+str(heart.df.cleaned[54:55,120])
+str(heart.df.cleaned[181:180])
+
+
+heart.df.cleaned[heart.df.cleaned == ""] <- NA
+gc()
+heart.df.cleaned[heart.df.cleaned == " "] <- NA
+gc()
+heart.df.cleaned[heart.df.cleaned == "U"] <- NA
+gc()
+
+
+
+
+
+
+
+thoracic_data[82]
+
 
 
 ```
@@ -105,7 +211,7 @@ If the levels of variables are more than 100, I assume they are numerical or the
 
 # I bring the data set who has information about which values mean NA, then convert those to NA in the dataset
 
-var_desc<-read.csv("https://raw.githubusercontent.com/hamidahady/transplant/master/data/var_desc.csv")
+
  
 ```
 
