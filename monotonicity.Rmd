@@ -104,7 +104,7 @@ for(i in 1:ncol(thoracic_data)){
 # in this dataset, the NA values are specified in different formats: NA, "", " ", UNK, ...
 # in this block I convert those values to NA for a better investigation
 {
-var_desc<-read.csv("https://raw.githubusercontent.com/hamidahady/transplant/master/data/var_desc.csv")
+var_desc<-read.csv("https://raw.githubusercontent.com/hamidahady/transplant/Hamid/data/var_desc.csv")
 thoracic_data<-na_maker(thoracic_data,var_desc$VARIABLE.NAME,var_desc$nas) 
   }
 ###
@@ -164,7 +164,16 @@ heart.df.cleaned<-heart.df.cleaned[which(!colnames(heart.df.cleaned) %in% vars.p
 
 # change NA equivalents to NA
 
-
+for(i in 1:ncol(heart.df.cleaned)){
+  for (j in 1:nrow(var_desc)) {
+    if(names(heart.df.cleaned)[i]==var_desc$VARIABLE.NAME[j]){
+      if(var_desc$Hamid_TYPE[j]=="CHAR"){heart.df.cleaned[i]<-as.character(heart.df.cleaned[i])}
+      if(var_desc$Hamid_TYPE[j]=="NUM"){heart.df.cleaned[i]<-as.numeric(heart.df.cleaned[i])}
+      if(var_desc$Hamid_TYPE[j]=="D"){heart.df.cleaned[i]<-NA}
+    }
+      
+  }
+}
 
 
 

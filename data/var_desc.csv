@@ -467,7 +467,7 @@ DAYS_STAT1,DAYS IN STATUS 1,CALCULATED,Y,,,situation in waiting list,NUM,NUM,,,D
 DAYS_STAT1A,DAYS IN STATUS 1A,CALCULATED,Y,,,situation in waiting list,NUM,NUM,,,DAYS IN STATUS 1A,
 DAYS_STAT1B,DAYS IN STATUS 1B,CALCULATED,Y,,,situation in waiting list,NUM,NUM,,,DAYS IN STATUS 1B,
 DAYS_STAT2,DAYS IN STATUS 2,CALCULATED,Y,,,situation in waiting list,NUM,NUM,,,DAYS IN STATUS 2,
-AMIS,A LOCUS MISMATCH LEVEL,CALCULATED,Y,,,,NUM,NUM,,,A LOCUS MISMATCH LEVEL,
+AMIS,A LOCUS MISMATCH LEVEL,CALCULATED,Y,,,,NUM,CHAR,,,A LOCUS MISMATCH LEVEL,
 BMI_CALC,Calculated Recipient BMI,CALCULATED,Y,,,,NUM,NUM,,,Calculated Recipient BMI,
 BMI_DON_CALC,Donor BMI - Pre/At Donation Calculated,CALCULATED,Y,,,,NUM,NUM,,,Calculated Donor BMI,
 CALC_LAS_LISTDATE,Candidate Final Calculated Lung Allocation Score on Date of Listing,CALCULATED,Y,,,,NUM,NUM,,,Last Calculated Lung Allocation Score at Listing,"Candidates are sometimes registered on Waitlist with some information used to calculate LAS missing or not reported to begin accruing waiting time and being able to receive offers, and then the missing information is reported over the next few hours. Because of this, we created this field to hold the final LAS value calculated for the candidate on the date of listing, after the listing center has had time to report all of the candidate’s medical factors."
