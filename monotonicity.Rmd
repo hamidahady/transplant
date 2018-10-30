@@ -130,25 +130,39 @@ vars.added.all <- vars.added.df[["VARIABLE.NAME"]] %>%
 
 # we excluded patients who just had heart transplant, and did it after year 2000
 # we excluded patients who had heart transplant before 2007, so we have at least 10 years of data
+# table(thoracic_data$PRAMR)
+# temp<-thoracic_data[which(thoracic_data$TX_YEAR>2007),]
+# table(temp$PRAMR)
+thoracic_data$ID<-rownames(thoracic_data)
 heart.df.cleaned <- subset(thoracic_data,WL_ORG=="HR") %>% 
- # the next line is excluded since they might live more than 12 years but the status is NA
+ # the next line is excluded since they might live more than 12 years but the status is NA, also same for less than 2007
+ # some of them might lived for 5 years and died but excluded from here
+ # also I did not excluded age since it might be just an important variable, however I excluded excluded too short and too light people
+ # since it might be just wrong data or extreme peopl
  # subset(is.na(GTIME)==FALSE)  %>% 
   #subset(TX_YEAR>=2000)  %>%
-  subset(TX_YEAR<=2007)  %>%
+  # subset(TX_YEAR<=2007)  %>%
   subset(WGT_KG_DON_CALC>=25)  %>% #excluding too light people,
   subset(WGT_KG_TCR>=25)  %>% #excluding too light people,
   subset(INIT_WGT_KG_CALC>=25)  %>%  #excluding too light people,
 
-  subset(AGE_DON>=18)  %>%  #excluding kids,
-  subset(INIT_AGE>=18)  %>% #excluding kids,
+  # subset(AGE_DON>=18)  %>%  #excluding kids,
+  # subset(AGE>=18)  %>% #excluding kids,
   
   subset(HGT_CM_DON_CALC>=18)  %>%  #excluding too sohrt,
   subset(HGT_CM_TCR>=18)  %>% #excluding too short,
   
   subset(select=intersect(names.of.var.did.not.end,vars.added.all))
 
-heart.df.cleaned$PRIOR_CARD_SURG_TCR
-heart.df.cleaned$PRIOR_CARD_SURG_TRR
+# I added below because it was used in the literature Nature or others
+heart.df.cleaned$PRAMR<-thoracic_data$PRAMR[which(thoracic_data$ID %in% heart.df.cleaned$ID)]
+
+# table(heart.df.cleaned$PRAMR)
+# table(heart.df.cleaned$PRIOR_CARD_SURG_TRR)
+# 
+# table(thoracic_data$PRIOR_CARD_SURG_TCR)
+# table(thoracic_data$PRIOR_CARD_SURG_TRR)
+nrow(as.data.frame(table(thoracic_data$ID)))
 
 # end of identifying NAs
 
@@ -309,12 +323,40 @@ table(thoracic_data$PRIOR_CARD_SURG_TCR)
 
 # previous cardiac surgery /merge of (PRIOR_CARD_SURG_TCR, PRIOR_CARD_SURG_TRR)
 
+heart.df.cleaned$CARD_SURG<-NA
+for(i in 1:nrow(heart.df.cleaned)){
+  if(!is.na(heart.df.cleaned$PRIOR_CARD_SURG_TCR[i])){
+  if(heart.df.cleaned$PRIOR_CARD_SURG_TCR[i]=="Y"){heart.df.cleaned$CARD_SURG[i]<-"Y"}
+    
+  if(heart.df.cleaned$PRIOR_CARD_SURG_TCR[i]=="N"){
+    
+    if(!is.na(heart.df.cleaned$PRIOR_CARD_SURG_TRR[i])){
+    
+      if(heart.df.cleaned$PRIOR_CARD_SURG_TRR[i]=="N"){heart.df.cleaned$CARD_SURG[i]<-"N"}
+    
+    }
+    
+    
+    }
+    
+    
+    
+    }
+  
+  if(!is.na(heart.df.cleaned$PRIOR_CARD_SURG_TRR[i])){
+  if(heart.df.cleaned$PRIOR_CARD_SURG_TRR[i]=="Y"){heart.df.cleaned$CARD_SURG[i]<-"Y"}}
+  
+  
+  
+
+}
+
+
+
 # which is: TCR PRIOR CARDIAC SURGERY AT LISTING, TRR CARDIAC SURGERY BETWEEN LISTING AND TRANSPLANT
 # Intensive care unit / ICU
 # ventiricular assist device / VAS
-
-# Mechanical ventilation / merge of (VENT_SUPPORT_AFTER_LIST, VENT_SUPPORT_TRR, VENTILATOR_TCR, VENTILATOR_TRR, ONVENT)
-# all of UNOS data has Y and N however in "VENTILATOR_TCR" Y=1 and N=0
+# Mechanical ventilation / VENTILATOR_TRR
 # ECMO / merge of (ECMO_TCR, ECMO_TRR)
 # SPP (mmHG), systolic pulmonary pressure  / HEMO_SYS_TRR
 
@@ -325,16 +367,34 @@ table(thoracic_data$PRIOR_CARD_SURG_TCR)
 # PVR= (Mean Pulmonary Arterial Pressure (mmHg) - Pulmonary Capillary Wedge Pressure (mmHg)) * 79.72 / Cardiac Output (L/min)
 # PVR = (HEMO_PA_MN_TRR - HEMO_PCW_TRR)* 79.72 / HEMO_CO_TRR
 
+
+heart.df.cleaned$PVR<-NA
+for(i in 1:nrow(heart.df.cleaned)){
+  if(!is.na(heart.df.cleaned$HEMO_PA_MN_TRR[i])){
+  if(!is.na(heart.df.cleaned$HEMO_PCW_TRR[i])){
+  if(!is.na(heart.df.cleaned$HEMO_CO_TRR[i])){
+           heart.df.cleaned$PVR[i]<- 79.72*(heart.df.cleaned$HEMO_PA_MN_TRR[i]-heart.df.cleaned$HEMO_PCW_TRR[i])/heart.df.cleaned$HEMO_CO_TRR[i]
+}}}}
+
 # Duration of ischemia (min) / ISCHTIME * 60
-  
+
+for(i in 1:nrow(heart.df.cleaned)){
+  if(!is.na(heart.df.cleaned$ISCHTIME[i])){ heart.df.cleaned$ISCHTIME[i]<-heart.df.cleaned$ISCHTIME[i]*60}}
+    
+ 
 # Creatinine / CREAT_TRR
 
+
+
 # Serum bilirubin (μmol/l) / TBILI
+
 # Use (mg/dl) instead of (μmol/l) / TBILI
 # we used mg/dl
 
 # PRA > 10 % / PRAMR
 # if PRAMR> 10 Y, otherwise: N
+
+sum(as.data.frame(table(heart.df.cleaned$PRAMR))[2])
 
 # HLA-DR 2 mismatch / RDR2:
 # any values: Y, otherwise: 0
