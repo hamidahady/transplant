@@ -129,11 +129,24 @@ vars.added.all <- vars.added.df[["VARIABLE.NAME"]] %>%
                   as.character()
 
 # we excluded patients who just had heart transplant, and did it after year 2000
+# we excluded patients who had heart transplant before 2007, so we have at least 10 years of data
 heart.df.cleaned <- subset(thoracic_data,WL_ORG=="HR") %>% 
  # the next line is excluded since they might live more than 12 years but the status is NA
- # subset(is.na(GSTATUS)==FALSE)  %>% 
-  subset(TX_YEAR>=2000)  %>%
+  subset(is.na(GTIME)==FALSE)  %>% 
+  #subset(TX_YEAR>=2000)  %>%
+  subset(TX_YEAR<=2007)  %>%
+  subset(WGT_KG_DON_CALC>=25)  %>% #excluding too light people, 
+  subset(WGT_KG_TCR>=25)  %>% #excluding too light people, 
+  subset(INIT_WGT_KG_CALC>=25)  %>%  #excluding too light people, 
+
+  subset(AGE_DON>=18)  %>%  #excluding kids, 
+  subset(INIT_AGE>=18)  %>% #excluding kids, 
+  
+  subset(HGT_CM_DON_CALC>=18)  %>%  #excluding too sohrt, 
+  subset(HGT_CM_TCR>=18)  %>% #excluding too short, 
+  
   subset(select=intersect(names.of.var.did.not.end,vars.added.all))
+
 
 
 # end of identifying NAs
@@ -156,55 +169,208 @@ vars.post.trans <- intersect(colnames(heart.df.cleaned),
 heart.df.cleaned<-heart.df.cleaned[which(!colnames(heart.df.cleaned) %in% vars.post.trans)]
 
 
-#assigning the actual type of the variables
-{
-  
-}
 ########################
 
-# change NA equivalents to NA
-
+#excluding some irrelevant variables
 for(i in 1:ncol(heart.df.cleaned)){
   for (j in 1:nrow(var_desc)) {
     if(names(heart.df.cleaned)[i]==var_desc$VARIABLE.NAME[j]){
-      if(var_desc$Hamid_TYPE[j]=="CHAR"){heart.df.cleaned[i]<-as.character(heart.df.cleaned[i])}
-      if(var_desc$Hamid_TYPE[j]=="NUM"){heart.df.cleaned[i]<-as.numeric(heart.df.cleaned[i])}
-      if(var_desc$Hamid_TYPE[j]=="D"){heart.df.cleaned[i]<-NA}
+      if(var_desc$Hamid_TYPE[j]=="D"){heart.df.cleaned[i]<-NA
+      }
     }
-      
   }
 }
 
+# droppping columns that are completely NAs
+heart.df.cleaned <- heart.df.cleaned[,colSums(is.na(heart.df.cleaned))<nrow(heart.df.cleaned)]
+heart.df.cleaned$TX_DATE<-as.character(heart.df.cleaned$TX_DATE)
+heart.df.cleaned$INIT_DATE<-as.character(heart.df.cleaned$INIT_DATE)
 
-
+# change NA equivalents to NA
 {
-
-
   NA_cells<-c(""," ","U")
   for(i in 1:length(NA_cells)){
     
     heart.df.cleaned[heart.df.cleaned == NA_cells[i]] <- NA
     gc()}
+}
+
+# refer to a tool provided in the: http://ihtsa.cs.lth.se/ , which is product of this paper:
+# https://www.nature.com/articles/s41598-018-21417-7.pdf
+
+# # in this paper they used these variables for recipients:
+# Diagnosis, Age, Gender, Height, Weight, insulin treated diabetes, infection within two weeks, Blood group, previous blood transfusion,
+# previously transplanted, previous cardiac surgery, intensive care unit, mechanical ventilation,
+# ECMO, ventiricular assist device, transplant era, SPP, PVR, creatinine, serum bilirubin,
+# use (mg/dl) instead of (mio mol/l), PRA>10%, HLA-DR 2 mismatch
+# # in this paper they used these variables for donor:
+# Age, Gender, Height, Weight, Duration of ischemia, Blood group, cause of death
+
+# Age / AGE, AGE_DON
+# Height / HGT_CM_CALC, HGT_CM_DON_CALC
+# Gender / GENDER, GENDER_DON
+# Weight / WGT_KG_DON_CALC, WGT_KG_TCR
+
+
+# we regroup the Diagnosis as below:
+
+# Diagnosis / DIAG, TCR_DGN, THORACIC_DGN:
+# Non-ischemic cardiomyopathy: 1201
+# Ischemic: 1007
+# Valv heart disease: 1202
+# Congenital: 1203 1205 1206 1207
+# Other : The rest
+
+heart.df.cleaned$temp<-heart.df.cleaned$DIAG
+for(i in 1:nrow(heart.df.cleaned)){
+  if(!is.na(heart.df.cleaned$DIAG[i])){
+    heart.df.cleaned$DIAG[i]<-"other"
+    if(heart.df.cleaned$temp[i]==1201){heart.df.cleaned$DIAG[i]<-"nonisch"}
+    if(heart.df.cleaned$temp[i]==1007){heart.df.cleaned$DIAG[i]<-"isch"}
+    if(heart.df.cleaned$temp[i]==1202){heart.df.cleaned$DIAG[i]<-"valv"}
+    if(heart.df.cleaned$temp[i]==1203){heart.df.cleaned$DIAG[i]<-"cong"}
+    if(heart.df.cleaned$temp[i]==1205){heart.df.cleaned$DIAG[i]<-"cong"}
+    if(heart.df.cleaned$temp[i]==1206){heart.df.cleaned$DIAG[i]<-"cong"}
+    if(heart.df.cleaned$temp[i]==1207){heart.df.cleaned$DIAG[i]<-"cong"}
+    
   }
-heart.df.cleaned[1:54] == ""
-str(heart.df.cleaned[54:55,120])
-str(heart.df.cleaned[181:180])
+}
+
+# cause of death / COD_CAD_DON:
+# Head trauma: 3
+# cerebrovascular event: 2
+# other: the rest
+
+heart.df.cleaned$temp<-heart.df.cleaned$COD_CAD_DON
+for(i in 1:nrow(heart.df.cleaned)){
+  if(!is.na(heart.df.cleaned$COD_CAD_DON[i])){
+    heart.df.cleaned$COD_CAD_DON[i]<-"rest"
+    if(heart.df.cleaned$temp[i]==3){heart.df.cleaned$COD_CAD_DON[i]<-"head"}
+    if(heart.df.cleaned$temp[i]==2){heart.df.cleaned$COD_CAD_DON[i]<-"cereb"}
+  }
+}
+table(heart.df.cleaned$COD_CAD_DON)
+
+# Blood group / ABO, ABO_DON: 
+# A: A1, A2, A
+# B: B
+# AB: A1B, A2B, AB
+# O: O
+
+heart.df.cleaned$temp<-heart.df.cleaned$ABO
+for(i in 1:nrow(heart.df.cleaned)){
+  if(!is.na(heart.df.cleaned$ABO[i])){
+    heart.df.cleaned$ABO[i]<-"AB"
+    if(heart.df.cleaned$temp[i]=="A1"){heart.df.cleaned$ABO[i]<-"A"}
+    if(heart.df.cleaned$temp[i]=="A2"){heart.df.cleaned$ABO[i]<-"A"}
+    if(heart.df.cleaned$temp[i]=="A"){heart.df.cleaned$ABO[i]<-"A"}
+    if(heart.df.cleaned$temp[i]=="B"){heart.df.cleaned$ABO[i]<-"B"}
+    if(heart.df.cleaned$temp[i]=="O"){heart.df.cleaned$ABO[i]<-"O"}
+  }
+}
+
+heart.df.cleaned$temp<-heart.df.cleaned$ABO_DON
+for(i in 1:nrow(heart.df.cleaned)){
+  if(!is.na(heart.df.cleaned$ABO_DON[i])){
+    heart.df.cleaned$ABO_DON[i]<-"AB"
+    if(heart.df.cleaned$temp[i]=="A1"){heart.df.cleaned$ABO_DON[i]<-"A"}
+    if(heart.df.cleaned$temp[i]=="A2"){heart.df.cleaned$ABO_DON[i]<-"A"}
+    if(heart.df.cleaned$temp[i]=="A"){heart.df.cleaned$ABO_DON[i]<-"A"}
+    if(heart.df.cleaned$temp[i]=="B"){heart.df.cleaned$ABO_DON[i]<-"B"}
+    if(heart.df.cleaned$temp[i]=="O"){heart.df.cleaned$ABO_DON[i]<-"O"}
+  }
+}
+
+# insulin treated diabetes / DIAB:
+# Yes: 2
+# No: 1,3,4
+
+heart.df.cleaned$temp<-heart.df.cleaned$DIAB
+for(i in 1:nrow(heart.df.cleaned)){
+  if(!is.na(heart.df.cleaned$DIAB[i])){
+    heart.df.cleaned$ABO_DON[i]<-"N"
+    if(heart.df.cleaned$temp[i]==2){heart.df.cleaned$DIAB[i]<-"Y"}
+  }
+}
+
+table(heart.df.cleaned$DIAB)
+
+# infection within two weeks / INFECT_IV_DRUG_TRR:
+# previous blood transfusion / TRANSFUSIONS
+# Previously transplanted / PREV_TX
+# previous cardiac surgery /merge of (PRIOR_CARD_SURG_TCR, PRIOR_CARD_SURG_TRR)
+# which is: TCR PRIOR CARDIAC SURGERY AT LISTING, TRR CARDIAC SURGERY BETWEEN LISTING AND TRANSPLANT
+# Intensive care unit / ICU
+# ventiricular assist device / VAS
+
+# Mechanical ventilation / merge of (VENT_SUPPORT_AFTER_LIST, VENT_SUPPORT_TRR, VENTILATOR_TCR, VENTILATOR_TRR, ONVENT)
+# all of UNOS data has Y and N however in "VENTILATOR_TCR" Y=1 and N=0
+# ECMO / merge of (ECMO_TCR, ECMO_TRR)
+# SPP (mmHG), systolic pulmonary pressure  / HEMO_SYS_TRR
+
+# PVR, pulmonary vascular resistance / its calculation is based on the below mentioned links:
+# https://en.wikipedia.org/wiki/Vascular_resistance
+# http://www.scymed.com/en/smnxph/phkhr013.htm
+# https://radiopaedia.org/articles/mean-pulmonary-arterial-pressure  (calculation of Mean Pulmonary Arterial Pressure)
+# PVR= (Mean Pulmonary Arterial Pressure (mmHg) - Pulmonary Capillary Wedge Pressure (mmHg)) * 79.72 / Cardiac Output (L/min)
+# PVR = (HEMO_PA_MN_TRR - HEMO_PCW_TRR)* 79.72 / HEMO_CO_TRR
+
+# Duration of ischemia (min) / ISCHTIME * 60
+  
+# Creatinine / CREAT_TRR
+
+# Serum bilirubin (μmol/l) / TBILI
+# Use (mg/dl) instead of (μmol/l) / TBILI
+# we used mg/dl
+
+# PRA > 10 % / PRAMR
+# if PRAMR> 10 Y, otherwise: N
+
+# HLA-DR 2 mismatch / RDR2:
+# any values: Y, otherwise: 0
 
 
-heart.df.cleaned[heart.df.cleaned == ""] <- NA
-gc()
-heart.df.cleaned[heart.df.cleaned == " "] <- NA
-gc()
-heart.df.cleaned[heart.df.cleaned == "U"] <- NA
-gc()
+# Transplant era / TX_YEAR:
+# I focused on after 2000. however, I can do for the rest, together or 4 different modeling
+# -1995
+# 1996-2000
+# 2001-2005
+# 2006-
+
+
+## find categorical variables with SAS.ANALYSIS.FORMAT: TH_DGN
+## Group1: 1000-1049; Group2: 1050-1099; Group3: 1100-1199; Group4: 1200- ; Group5: 999
+TH_DGN.index <- which(new.form$SAS.ANALYSIS.FORMAT=="TH_DGN")
+for (i in 1:length(TH_DGN.index)){
+  one.vector <- as.numeric(as.character(heart.df.cleaned[,TH_DGN.index[i]]))
+  new.vector <- rep(NA, length(one.vector))
+  for (j in 1:length(one.vector)){
+    if (one.vector[j]>=1000 & one.vector[j]<=1049) new.vector[j] <- "G1"
+    if (one.vector[j]>=1050 & one.vector[j]<=1099) new.vector[j] <- "G2"
+    if (one.vector[j]>=1100 & one.vector[j]<=1199) new.vector[j] <- "G3"
+    if (one.vector[j]>=1200) new.vector[j] <- "G4"
+    if (one.vector[j]==999) new.vector[j] <- "G5"
+  }
+  heart.df.cleaned[,TH_DGN.index[i]] <- factor(new.vector)
+}
 
 
 
 
+# Find identifiers
+find.uniqueness <- apply(heart.df.cleaned, 2, function(x) length(unique(x)))
+ID.cols <- as.vector(colnames(heart.df.cleaned)[which(find.uniqueness==nrow(heart.df.cleaned))])
 
+#excluding some irrelevant variables
+for(i in 1:ncol(heart.df.cleaned)){
+  for (j in 1:nrow(var_desc)) {
+    if(names(heart.df.cleaned)[i]==var_desc$VARIABLE.NAME[j]){
+      if(var_desc$Hamid_TYPE[j]=="CHAR"){heart.df.cleaned[i]<-as.character(heart.df.cleaned[i])
+      }
+    }
+  }
+}
 
-
-thoracic_data[82]
 
 
 
