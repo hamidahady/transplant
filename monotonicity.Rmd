@@ -132,22 +132,23 @@ vars.added.all <- vars.added.df[["VARIABLE.NAME"]] %>%
 # we excluded patients who had heart transplant before 2007, so we have at least 10 years of data
 heart.df.cleaned <- subset(thoracic_data,WL_ORG=="HR") %>% 
  # the next line is excluded since they might live more than 12 years but the status is NA
-  subset(is.na(GTIME)==FALSE)  %>% 
+ # subset(is.na(GTIME)==FALSE)  %>% 
   #subset(TX_YEAR>=2000)  %>%
   subset(TX_YEAR<=2007)  %>%
-  subset(WGT_KG_DON_CALC>=25)  %>% #excluding too light people, 
-  subset(WGT_KG_TCR>=25)  %>% #excluding too light people, 
-  subset(INIT_WGT_KG_CALC>=25)  %>%  #excluding too light people, 
+  subset(WGT_KG_DON_CALC>=25)  %>% #excluding too light people,
+  subset(WGT_KG_TCR>=25)  %>% #excluding too light people,
+  subset(INIT_WGT_KG_CALC>=25)  %>%  #excluding too light people,
 
-  subset(AGE_DON>=18)  %>%  #excluding kids, 
-  subset(INIT_AGE>=18)  %>% #excluding kids, 
+  subset(AGE_DON>=18)  %>%  #excluding kids,
+  subset(INIT_AGE>=18)  %>% #excluding kids,
   
-  subset(HGT_CM_DON_CALC>=18)  %>%  #excluding too sohrt, 
-  subset(HGT_CM_TCR>=18)  %>% #excluding too short, 
+  subset(HGT_CM_DON_CALC>=18)  %>%  #excluding too sohrt,
+  subset(HGT_CM_TCR>=18)  %>% #excluding too short,
   
   subset(select=intersect(names.of.var.did.not.end,vars.added.all))
 
-
+heart.df.cleaned$PRIOR_CARD_SURG_TCR
+heart.df.cleaned$PRIOR_CARD_SURG_TRR
 
 # end of identifying NAs
 
@@ -293,15 +294,21 @@ for(i in 1:nrow(heart.df.cleaned)){
   if(!is.na(heart.df.cleaned$DIAB[i])){
     heart.df.cleaned$DIAB[i]<-"N"
     if(heart.df.cleaned$temp[i]==2){heart.df.cleaned$DIAB[i]<-"Y"}
+    if(heart.df.cleaned$temp[i]==3){heart.df.cleaned$DIAB[i]<-"Y"}
   }
 }
 
-table(heart.df.cleaned$temp)
+str(heart.df.cleaned$temp)
+table(thoracic_data$PRIOR_CARD_SURG_TCR)
 
 # infection within two weeks / INFECT_IV_DRUG_TRR:
+
 # previous blood transfusion / TRANSFUSIONS
+
 # Previously transplanted / PREV_TX
+
 # previous cardiac surgery /merge of (PRIOR_CARD_SURG_TCR, PRIOR_CARD_SURG_TRR)
+
 # which is: TCR PRIOR CARDIAC SURGERY AT LISTING, TRR CARDIAC SURGERY BETWEEN LISTING AND TRANSPLANT
 # Intensive care unit / ICU
 # ventiricular assist device / VAS
