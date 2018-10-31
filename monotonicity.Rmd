@@ -396,6 +396,13 @@ for(i in 1:nrow(heart.df.cleaned)){
 
 sum(as.data.frame(table(heart.df.cleaned$PRAMR))[2])
 
+for(i in 1:nrow(heart.df.cleaned)){
+  if(!is.na(heart.df.cleaned$PRAMR[i])){ 
+    if(heart.df.cleaned$PRAMR[i]>10){heart.df.cleaned$PRAMR[i]<-"Y"}
+    if(heart.df.cleaned$PRAMR[i]<=10){heart.df.cleaned$PRAMR[i]<-"N"}
+        }
+  }
+
 # HLA-DR 2 mismatch / RDR2:
 # any values: Y, otherwise: 0
 
