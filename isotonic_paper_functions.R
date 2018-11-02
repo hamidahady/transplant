@@ -126,7 +126,7 @@ table_cleaner<-function(input_object){
   return(input_object)
 }
 
-# input_object<-heart_df
+# input_object<-heart_df 
 table_cleaner_simple<-function(Try_data,col2row_emp,ID){
   #_______________________________Required Libraries_______________________________________________________________________________________
   # Install any needed package with the following command: install.packages("Name", dependencies = c("Depends", "Suggests"))
