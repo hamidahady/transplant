@@ -161,12 +161,8 @@ heart.df.cleaned$FUNC_STAT_TCR<-thoracic_data$FUNC_STAT_TCR[which(thoracic_data$
 heart.df.cleaned$FUNC_STAT_TRR<-thoracic_data$FUNC_STAT_TRR[which(thoracic_data$ID %in% heart.df.cleaned$ID)]
 
 
-# table(heart.df.cleaned$PRAMR)
-# table(heart.df.cleaned$PRIOR_CARD_SURG_TRR)
-# 
 # table(thoracic_data$PRIOR_CARD_SURG_TCR)
 # table(thoracic_data$PRIOR_CARD_SURG_TRR)
-nrow(as.data.frame(table(thoracic_data$ID)))
 
 # end of identifying NAs
 
@@ -186,7 +182,6 @@ vars.post.trans <- intersect(colnames(heart.df.cleaned),
                              vars.post.trans)
 
 heart.df.cleaned<-heart.df.cleaned[which(!colnames(heart.df.cleaned) %in% vars.post.trans)]
-
 
 ########################
 
@@ -387,7 +382,7 @@ for(i in 1:nrow(heart.df.cleaned)){
            heart.df.cleaned$PVR[i]<- 79.72*(heart.df.cleaned$HEMO_PA_MN_TRR[i]-heart.df.cleaned$HEMO_PCW_TRR[i])/heart.df.cleaned$HEMO_CO_TRR[i]
   }}}}
 
-table(heart.df.cleaned$PVR)
+
 # Duration of ischemia (min) / ISCHTIME * 60
 
 for(i in 1:nrow(heart.df.cleaned)){
@@ -406,7 +401,7 @@ for(i in 1:nrow(heart.df.cleaned)){
 # PRA > 10 % / PRAMR
 # if PRAMR> 10 Y, otherwise: N
 
-sum(as.data.frame(table(heart.df.cleaned$PRAMR))[2])
+
 
 for(i in 1:nrow(heart.df.cleaned)){
   if(!is.na(heart.df.cleaned$PRAMR[i])){ 
@@ -495,10 +490,26 @@ for(i in 1:nrow(heart.df.cleaned)){
 vars<-c("AGE","AGE_DON","HGT_CM_CALC","HGT_CM_DON_CALC","GENDER","GENDER_DON","WGT_KG_DON_CALC","WGT_KG_TCR","DIAG","COD_CAD_DON", 
         "ABO","ABO_DON","DIAB","INFECT_IV_DRUG_TRR","TRANSFUSIONS","PREV_TX","CARD_SURG","ICU","VAS","VENTILATOR_TRR",
         "ECMO","HEMO_SYS_TRR","PVR","ISCHTIME","CREAT_TRR","TBILI","PRAMR","RDR2","TX_YEAR",
-        "FUNC_STAT_TRR","FUNC_STAT_TCR"
+        "FUNC_STAT_TRR","FUNC_STAT_TCR",
         "GSTATUS","GTIME")  
 
-table(heart.df.cleaned$FUNC_STAT_TCR)
+heart_df<-heart.df.cleaned[vars[1:4]]
+
+
+
+heart.df.cleaned$age
+
+
+
+
+
+
+
+
+
+
+
+
 
 #excluding some irrelevant variables
 for(i in 1:ncol(heart.df.cleaned)){
