@@ -108,7 +108,7 @@ var_desc<-read.csv("https://raw.githubusercontent.com/hamidahady/transplant/Hami
 thoracic_data<-na_maker(thoracic_data,var_desc$VARIABLE.NAME,var_desc$nas) 
   }
 ###
-
+#save here
 #trimming out their space from date
 var.end.dates <- trimws(var_desc$VAR.END.DATE) %>% stringr::str_trim()
 if.var.did.not.end <- which(var.end.dates=="")
@@ -156,6 +156,10 @@ heart.df.cleaned <- subset(thoracic_data,WL_ORG=="HR") %>%
 
 # I added below because it was used in the literature Nature or others
 heart.df.cleaned$PRAMR<-thoracic_data$PRAMR[which(thoracic_data$ID %in% heart.df.cleaned$ID)]
+# the below variables are selected from literature (Ali dag)
+heart.df.cleaned$FUNC_STAT_TCR<-thoracic_data$FUNC_STAT_TCR[which(thoracic_data$ID %in% heart.df.cleaned$ID)]
+heart.df.cleaned$FUNC_STAT_TRR<-thoracic_data$FUNC_STAT_TRR[which(thoracic_data$ID %in% heart.df.cleaned$ID)]
+
 
 # table(heart.df.cleaned$PRAMR)
 # table(heart.df.cleaned$PRIOR_CARD_SURG_TRR)
@@ -250,7 +254,7 @@ for(i in 1:nrow(heart.df.cleaned)){
     
   }
 }
-
+table(heart.df.cleaned$DIAG)
 # cause of death / COD_CAD_DON:
 # Head trauma: 3
 # cerebrovascular event: 2
@@ -266,6 +270,7 @@ for(i in 1:nrow(heart.df.cleaned)){
 }
 table(heart.df.cleaned$COD_CAD_DON)
 
+#here save2
 # Blood group / ABO, ABO_DON: 
 # A: A1, A2, A
 # B: B
@@ -283,7 +288,7 @@ for(i in 1:nrow(heart.df.cleaned)){
     if(heart.df.cleaned$temp[i]=="O"){heart.df.cleaned$ABO[i]<-"O"}
   }
 }
-
+table(heart.df.cleaned$ABO)
 heart.df.cleaned$temp<-heart.df.cleaned$ABO_DON
 for(i in 1:nrow(heart.df.cleaned)){
   if(!is.na(heart.df.cleaned$ABO_DON[i])){
@@ -295,14 +300,14 @@ for(i in 1:nrow(heart.df.cleaned)){
     if(heart.df.cleaned$temp[i]=="O"){heart.df.cleaned$ABO_DON[i]<-"O"}
   }
 }
-
+table(heart.df.cleaned$ABO_DON)
 # insulin treated diabetes / DIAB: Refer to this paper, type 1 and type 2 are considered as insulin dependent patient
 # Kaufman, D. B., & Sutherland, D. E. (2011). Simultaneous pancreas-kidney transplants are appropriate in insulin-treated candidates 
 # with uremia regardless of diabetes type. Clinical Journal of the American Society of Nephrology, 6(5), 957-959.
 
 # Yes: 2,3
 # No: 1,4
-
+ 
 heart.df.cleaned$temp<-heart.df.cleaned$DIAB
 for(i in 1:nrow(heart.df.cleaned)){
   if(!is.na(heart.df.cleaned$DIAB[i])){
@@ -312,8 +317,7 @@ for(i in 1:nrow(heart.df.cleaned)){
   }
 }
 
-str(heart.df.cleaned$temp)
-table(thoracic_data$PRIOR_CARD_SURG_TCR)
+table(heart.df.cleaned$DIAB)
 
 # infection within two weeks / INFECT_IV_DRUG_TRR:
 
@@ -351,13 +355,20 @@ for(i in 1:nrow(heart.df.cleaned)){
 
 }
 
-
-
+table(heart.df.cleaned$CARD_SURG)
 # which is: TCR PRIOR CARDIAC SURGERY AT LISTING, TRR CARDIAC SURGERY BETWEEN LISTING AND TRANSPLANT
 # Intensive care unit / ICU
 # ventiricular assist device / VAS
 # Mechanical ventilation / VENTILATOR_TRR
 # ECMO / merge of (ECMO_TCR, ECMO_TRR)
+heart.df.cleaned$ECMO<-NA
+for(i in 1:nrow(heart.df.cleaned)){
+  if(!is.na(heart.df.cleaned$ECMO_TCR[i]) && !is.na(heart.df.cleaned$ECMO_TRR[i])){
+  if(heart.df.cleaned$ECMO_TCR[i] + heart.df.cleaned$ECMO_TRR[i] ==1){heart.df.cleaned$ECMO[i]<-"Y"}
+  if(heart.df.cleaned$ECMO_TCR[i] + heart.df.cleaned$ECMO_TRR[i] ==0){heart.df.cleaned$ECMO[i]<-"N"}  
+  }}
+
+
 # SPP (mmHG), systolic pulmonary pressure  / HEMO_SYS_TRR
 
 # PVR, pulmonary vascular resistance / its calculation is based on the below mentioned links:
@@ -374,8 +385,9 @@ for(i in 1:nrow(heart.df.cleaned)){
   if(!is.na(heart.df.cleaned$HEMO_PCW_TRR[i])){
   if(!is.na(heart.df.cleaned$HEMO_CO_TRR[i])){
            heart.df.cleaned$PVR[i]<- 79.72*(heart.df.cleaned$HEMO_PA_MN_TRR[i]-heart.df.cleaned$HEMO_PCW_TRR[i])/heart.df.cleaned$HEMO_CO_TRR[i]
-}}}}
+  }}}}
 
+table(heart.df.cleaned$PVR)
 # Duration of ischemia (min) / ISCHTIME * 60
 
 for(i in 1:nrow(heart.df.cleaned)){
@@ -402,41 +414,91 @@ for(i in 1:nrow(heart.df.cleaned)){
     if(heart.df.cleaned$PRAMR[i]<=10){heart.df.cleaned$PRAMR[i]<-"N"}
         }
   }
-
+table(heart.df.cleaned$PRAMR)
+# Here save3
 # HLA-DR 2 mismatch / RDR2:
 # any values: Y, otherwise: 0
 
+for(i in 1:nrow(heart.df.cleaned)){
+  if(!is.na(heart.df.cleaned$RDR2[i])){ 
+           heart.df.cleaned$RDR2[i]<-"Y"
+        }else{heart.df.cleaned$RDR2[i]<-"N"}
+}
 
+
+sum(as.data.frame(table(heart.df.cleaned$RDR2))[2])
+#here save4
 # Transplant era / TX_YEAR:
 # I focused on after 2000. however, I can do for the rest, together or 4 different modeling
 # -1995
 # 1996-2000
 # 2001-2005
 # 2006-
+temp<-heart.df.cleaned$TX_YEAR
+heart.df.cleaned$TX_YEAR<-temp
 
+# categoirizing the transplantation date
+for(i in 1:nrow(heart.df.cleaned)){
+  if(!is.na(heart.df.cleaned$TX_YEAR[i])){ 
+    if(heart.df.cleaned$TX_YEAR[i]<=1995){heart.df.cleaned$TX_YEAR[i]<-"A"}
+    else if(heart.df.cleaned$TX_YEAR[i]>1995 && heart.df.cleaned$TX_YEAR[i]<=2000){heart.df.cleaned$TX_YEAR[i]<-"B"}
+    else if(heart.df.cleaned$TX_YEAR[i]>2000 && heart.df.cleaned$TX_YEAR[i]<=2005){heart.df.cleaned$TX_YEAR[i]<-"C"}
+    else if(heart.df.cleaned$TX_YEAR[i]>2005){heart.df.cleaned$TX_YEAR[i]<-"D"}
+        }
+}
+ 
+table(heart.df.cleaned$TX_YEAR)
+str(heart.df.cleaned$TX_YEAR)
+#Here save4
 
-## find categorical variables with SAS.ANALYSIS.FORMAT: TH_DGN
-## Group1: 1000-1049; Group2: 1050-1099; Group3: 1100-1199; Group4: 1200- ; Group5: 999
-TH_DGN.index <- which(new.form$SAS.ANALYSIS.FORMAT=="TH_DGN")
-for (i in 1:length(TH_DGN.index)){
-  one.vector <- as.numeric(as.character(heart.df.cleaned[,TH_DGN.index[i]]))
-  new.vector <- rep(NA, length(one.vector))
-  for (j in 1:length(one.vector)){
-    if (one.vector[j]>=1000 & one.vector[j]<=1049) new.vector[j] <- "G1"
-    if (one.vector[j]>=1050 & one.vector[j]<=1099) new.vector[j] <- "G2"
-    if (one.vector[j]>=1100 & one.vector[j]<=1199) new.vector[j] <- "G3"
-    if (one.vector[j]>=1200) new.vector[j] <- "G4"
-    if (one.vector[j]==999) new.vector[j] <- "G5"
-  }
-  heart.df.cleaned[,TH_DGN.index[i]] <- factor(new.vector)
+# finding duration of waiting time for the operation 
+
+for(i in 1:nrow(heart.df.cleaned)){
+
+  if(!is.na(heart.df.cleaned$INIT_DATE[i]) && !is.na(heart.df.cleaned$TX_DATE[i])){ 
+    heart.df.cleaned$WAITING_TIME[i]<-as.numeric(as.Date(heart.df.cleaned$TX_DATE[i])-as.Date(heart.df.cleaned$INIT_DATE[i]))
 }
 
 
+}
 
+#in this block I just use literature based variables, from the below papers:
+# 1- Medved, Dennis, et al. "Improving prediction of heart transplantation outcome using deep learning techniques." Scientific reports 8.1 (2018): 3613.
+# 2- Dag, Ali, et al. "A probabilistic data-driven framework for scoring the preoperative recipient-donor heart transplant survival." Decision Support Systems 86 (2016): 1-12
+# I used all the variables from the first paper and FUNC_STAT_TRR, and FUNC_STAT_TCR from the second one.
 
-# Find identifiers
-find.uniqueness <- apply(heart.df.cleaned, 2, function(x) length(unique(x)))
-ID.cols <- as.vector(colnames(heart.df.cleaned)[which(find.uniqueness==nrow(heart.df.cleaned))])
+# Age / AGE, AGE_DON
+# Height / HGT_CM_CALC, HGT_CM_DON_CALC
+# Gender / GENDER, GENDER_DON
+# Weight / WGT_KG_DON_CALC, WGT_KG_TCR
+# Diagnosis / DIAG
+# cause of death / COD_CAD_DON
+# Blood group / ABO, ABO_DON
+# insulin treated diabetes / DIAB
+# infection within two weeks / INFECT_IV_DRUG_TRR
+# previous blood transfusion / TRANSFUSIONS
+# Previously transplanted / PREV_TX
+# previous cardiac surgery / CARD_SURG
+# Intensive care unit / ICU
+# ventiricular assist device / VAS
+# Mechanical ventilation / VENTILATOR_TRR
+# ECMO / ECMO
+# SPP (mmHG), systolic pulmonary pressure  / HEMO_SYS_TRR
+# PVR
+# Duration of ischemia / ISCHTIME 
+# Creatinine / CREAT_TRR
+# Serum bilirubin (μmol/l) / TBILI
+# PRA > 10 % / PRAMR
+# HLA-DR 2 mismatch / RDR2
+# Transplant era / TX_YEAR
+
+vars<-c("AGE","AGE_DON","HGT_CM_CALC","HGT_CM_DON_CALC","GENDER","GENDER_DON","WGT_KG_DON_CALC","WGT_KG_TCR","DIAG","COD_CAD_DON", 
+        "ABO","ABO_DON","DIAB","INFECT_IV_DRUG_TRR","TRANSFUSIONS","PREV_TX","CARD_SURG","ICU","VAS","VENTILATOR_TRR",
+        "ECMO","HEMO_SYS_TRR","PVR","ISCHTIME","CREAT_TRR","TBILI","PRAMR","RDR2","TX_YEAR",
+        "FUNC_STAT_TRR","FUNC_STAT_TCR"
+        "GSTATUS","GTIME")  
+
+table(heart.df.cleaned$FUNC_STAT_TCR)
 
 #excluding some irrelevant variables
 for(i in 1:ncol(heart.df.cleaned)){
