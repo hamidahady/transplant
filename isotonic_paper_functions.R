@@ -126,6 +126,89 @@ table_cleaner<-function(input_object){
   return(input_object)
 }
 
+# input_object<-heart_df
+table_cleaner_simple<-function(Try_data,col2row_emp,ID){
+  #_______________________________Required Libraries_______________________________________________________________________________________
+  # Install any needed package with the following command: install.packages("Name", dependencies = c("Depends", "Suggests"))
+  
+  paper<-matrix(0, ncol = 4, nrow = 100000)
+  paper<-as.data.frame(paper)
+  
+  names(paper)<- c("remained_col", "column_max","remained_row","row_max")
+  
+  max_col<-0
+  max_row<-0
+  Try_data_temp <<- Try_data
+  
+  for(i in 1:100000){
+    Try_data<-Try_data_temp
+    gc()
+    count_col <- col_missing_function(Try_data)
+    gc()
+    count_row <- row_missing_function(Try_data)
+    max_col<-max(count_col)
+    max_row<-max(count_row)
+    max_emp<- max(max_col,max_row)
+    
+    if(max_col==0){break()}
+    if(max_row==0){break()}
+    
+    if (max_emp==max_row)
+    {
+      if((nrow(Try_data))>3){
+        a<-which(count_row$na_count_row==max_row)
+        
+        Try_data_temp <<- Try_data[-a,]
+        print(c("nrow",nrow(Try_data_temp)))
+      }
+    }
+    if(max_col>max_row*col2row_emp){
+    if (max_emp==max_col)
+    {
+      if((ncol(Try_data))>2){
+        f<-which(count_col$na_count_col==max_col)
+        i<-length(f)
+
+        if(length(f)>0){
+          Try_data_temp<<- Try_data[, -f]}else{
+            
+            if((nrow(Try_data))>3){
+              a<-which(count_row$na_count_row==max_row)
+              Try_data_temp <<- Try_data[-a,]
+            }
+          }
+        
+      }
+    }
+      print(c("ncol",ncol(Try_data_temp)))
+    }else{
+      if((nrow(Try_data))>3){
+        a<-which(count_row$na_count_row==max_row)
+        
+        Try_data_temp <<- Try_data[-a,]
+        
+      }
+      print(c("nrow",nrow(Try_data_temp)))
+    }
+
+    
+    if(i<100000){
+      paper$remained_col[i]<-ncol(Try_data)
+      paper$column_max[i]<-max_col
+      paper$row_max[i]<-max_row
+      paper$remained_row[i]<-nrow(Try_data)}
+    
+  }
+  input_object<-list()
+
+  print("Data Cleaning is Done! Exit the tool. Run the tool again, load the cleaned file for Data Analysis")
+  out_object<-list()
+  out_object$col_names<-names(Try_data_temp)
+  out_object$row_ID<-Try_data_temp[ID]
+  
+  return(out_object)
+}
+
 #this function yield ID columns and change variable with high numbers of categories to 5 levels
 leveler<-function(data,cat_vars){
   
@@ -1724,16 +1807,23 @@ conso_bin<-function(data_lit,Random_Forrest,Lasso,FFS,itself_svm,itself_log,itse
 
 #_________________________
 # TARGET generator for Bionomial
+gstatus<-heart_df$GSTATUS[3]
+gtime<- heart_df$GTIME[3]
+p_unit<- p_unit[2]
+predict_length<- predict_length
+class_generator_bino(gstatus, gtime, p_unit,predict_length)
+
 class_generator_bino <- function(gstatus, gtime, p_unit,predict_length){
   p_unit<-as.numeric(p_unit)
   predict_length<-as.numeric(predict_length)
   
   if(gtime < p_unit*predict_length){
-    if(gstatus == 0){
-      return(NA)
-    }else {
-      return(1)
+    if(is.na(gstatus)){return(NA)}else{
+      if(gstatus==0){return(NA)}
+      if(gstatus==1){return(1)}
     }
+      
+    
   }else{
     return(0)
   }

@@ -429,21 +429,19 @@ sum(as.data.frame(table(heart.df.cleaned$RDR2))[2])
 # 1996-2000
 # 2001-2005
 # 2006-
-temp<-heart.df.cleaned$TX_YEAR
-heart.df.cleaned$TX_YEAR<-temp
+heart.df.cleaned$TX_YEAR_CAT<-heart.df.cleaned$TX_YEAR
 
 # categoirizing the transplantation date
 for(i in 1:nrow(heart.df.cleaned)){
   if(!is.na(heart.df.cleaned$TX_YEAR[i])){ 
-    if(heart.df.cleaned$TX_YEAR[i]<=1995){heart.df.cleaned$TX_YEAR[i]<-"A"}
-    else if(heart.df.cleaned$TX_YEAR[i]>1995 && heart.df.cleaned$TX_YEAR[i]<=2000){heart.df.cleaned$TX_YEAR[i]<-"B"}
-    else if(heart.df.cleaned$TX_YEAR[i]>2000 && heart.df.cleaned$TX_YEAR[i]<=2005){heart.df.cleaned$TX_YEAR[i]<-"C"}
-    else if(heart.df.cleaned$TX_YEAR[i]>2005){heart.df.cleaned$TX_YEAR[i]<-"D"}
+    if(heart.df.cleaned$TX_YEAR[i]<=1995){heart.df.cleaned$TX_YEAR_CAT[i]<-"A"}
+    else if(heart.df.cleaned$TX_YEAR[i]>1995 && heart.df.cleaned$TX_YEAR[i]<=2000){heart.df.cleaned$TX_YEAR_CAT[i]<-"B"}
+    else if(heart.df.cleaned$TX_YEAR[i]>2000 && heart.df.cleaned$TX_YEAR[i]<=2005){heart.df.cleaned$TX_YEAR_CAT[i]<-"C"}
+    else if(heart.df.cleaned$TX_YEAR[i]>2005){heart.df.cleaned$TX_YEAR_CAT[i]<-"D"}
         }
 }
- 
-table(heart.df.cleaned$TX_YEAR)
-str(heart.df.cleaned$TX_YEAR)
+
+
 #Here save4
 
 # finding duration of waiting time for the operation 
@@ -487,28 +485,80 @@ for(i in 1:nrow(heart.df.cleaned)){
 # HLA-DR 2 mismatch / RDR2
 # Transplant era / TX_YEAR
 
-vars<-c("AGE","AGE_DON","HGT_CM_CALC","HGT_CM_DON_CALC","GENDER","GENDER_DON","WGT_KG_DON_CALC","WGT_KG_TCR","DIAG","COD_CAD_DON", 
+vars<-c("AGE","AGE_DON","HGT_CM_TCR","HGT_CM_DON_CALC","GENDER","GENDER_DON","WGT_KG_DON_CALC","WGT_KG_TCR","DIAG","COD_CAD_DON", 
         "ABO","ABO_DON","DIAB","INFECT_IV_DRUG_TRR","TRANSFUSIONS","PREV_TX","CARD_SURG","ICU","VAS","VENTILATOR_TRR",
-        "ECMO","HEMO_SYS_TRR","PVR","ISCHTIME","CREAT_TRR","TBILI","PRAMR","RDR2","TX_YEAR",
+        "ECMO","HEMO_SYS_TRR","PVR","ISCHTIME","CREAT_TRR","TBILI","PRAMR","RDR2","TX_YEAR_CAT",
         "FUNC_STAT_TRR","FUNC_STAT_TCR",
-        "GSTATUS","GTIME")  
-
-heart_df<-heart.df.cleaned[vars[1:4]]
+        "GSTATUS","GTIME","ID")  
 
 
+# I did feature selection just based on literature
+heart_df<-heart.df.cleaned[vars]
 
-heart.df.cleaned$age
+# here I made 11 consecutive dependent variables, month1, year1, year2, year3, ..., year10
+
+  p_unit<-c(1/12,1,2,3,4,5,6,7,8,9,10)
+  predict_length<-365
+  
+    heart_df$year0<-NA
+    heart_df$year1<-NA
+    heart_df$year2<-NA
+    heart_df$year3<-NA
+    heart_df$year4<-NA
+    heart_df$year5<-NA
+    heart_df$year6<-NA
+    heart_df$year7<-NA
+    heart_df$year8<-NA
+    heart_df$year9<-NA
+    heart_df$year10<-NA
+  
+    heart_df$GSTATUS<-as.character(heart_df$GSTATUS)
+    
+    heart_df<-heart_df[complete.cases(heart_df$GTIME),]
+  
+    for(i in 1:nrow(heart_df)){
+      
+    heart_df$year0[i]<-class_generator_bino(heart_df$GSTATUS[i], heart_df$GTIME[i] ,p_unit[1],predict_length)
+    heart_df$year1[i]<-class_generator_bino(heart_df$GSTATUS[i], heart_df$GTIME[i] ,p_unit[2],predict_length)
+    heart_df$year2[i]<-class_generator_bino(heart_df$GSTATUS[i], heart_df$GTIME[i] ,p_unit[3],predict_length)
+    heart_df$year3[i]<-class_generator_bino(heart_df$GSTATUS[i], heart_df$GTIME[i] ,p_unit[4],predict_length)
+    heart_df$year4[i]<-class_generator_bino(heart_df$GSTATUS[i], heart_df$GTIME[i] ,p_unit[5],predict_length)
+    heart_df$year5[i]<-class_generator_bino(heart_df$GSTATUS[i], heart_df$GTIME[i] ,p_unit[6],predict_length)
+    heart_df$year6[i]<-class_generator_bino(heart_df$GSTATUS[i], heart_df$GTIME[i] ,p_unit[7],predict_length)
+    heart_df$year7[i]<-class_generator_bino(heart_df$GSTATUS[i], heart_df$GTIME[i] ,p_unit[8],predict_length)
+    heart_df$year8[i]<-class_generator_bino(heart_df$GSTATUS[i], heart_df$GTIME[i] ,p_unit[9],predict_length)
+    heart_df$year9[i]<-class_generator_bino(heart_df$GSTATUS[i], heart_df$GTIME[i] ,p_unit[10],predict_length)
+    heart_df$year10[i]<-class_generator_bino(heart_df$GSTATUS[i], heart_df$GTIME[i] ,p_unit[11],predict_length)
+  }
+
+    heart_df<-heart_df[complete.cases(heart_df$year10),]
+    heart_df$GSTATUS<-NULL
+    heart_df$GTIME<-NULL
+
+    # in table_cleaner_simple(Try_data,col2row_emp, ID), "Try_data" is the data we use and "col2row_emp" represent our preference of 
+    # keeping columns in compare with rows, higher means more interest to keep columns than rows, ID is the ID column
+
+    heart_max2<-table_cleaner_simple(heart_df,2,"ID")
+    heart_max3<-table_cleaner_simple(heart_df,3,"ID")
+    heart_max4<-table_cleaner_simple(heart_df,4,"ID")
+    heart_max5<-table_cleaner_simple(heart_df,5,"ID")
+    heart_max10<-table_cleaner_simple(heart_df,10,"ID")
+    
+# I work with heart_max10, to keep almost all the variables except for "CARD_SURG" that refers if someone had surgery, it just hass too many NAs
+    heart_max<-heart_df[which(heart_df$ID %in% heart_max10$row_ID[,]),heart_max10$col_names]
+    
+#here save0
 
 
 
+# INFECT_IV_DRUG_TRR 7000
+# TRANSFUSIONS 2000
+# PREV_TX 
+# CARD_SURG 27000
 
 
 
-
-
-
-
-
+table(heart.df.cleaned$PREV_TX)
 
 
 #excluding some irrelevant variables
