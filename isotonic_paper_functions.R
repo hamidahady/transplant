@@ -2012,10 +2012,11 @@ pre_process<-function(x){
   if(!is.null(comboInfo$remove)){x<-x[, -comboInfo$remove]}
   return(x)}
 
-RUS_func <- function(input_data){
+
+RUS_func <- function(input_data,TARGET){
   
-  Train_Two <- input_data[ which(input_data$TARGET=="Two"), ]
-  Train_One <- input_data[ which(input_data$TARGET=="One"), ]
+  Train_Two <- input_data[ which(input_data[TARGET]=="Two"), ]
+  Train_One <- input_data[ which(input_data[TARGET]=="One"), ]
   if(nrow(Train_Two)<=nrow(Train_One)){
     sample_size<-nrow(Train_Two)
     Train_One<-Train_One[sample(nrow(Train_One), sample_size), ]

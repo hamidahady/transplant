@@ -37,7 +37,7 @@ rm(list = ls()) # clears global environment (functions and variables)
 graphics.off() # clears graphics
 if(!("pacman" %in% rownames(installed.packages()))){install.packages("pacman")}# pacman would be installed if it's not existed
 library(pacman) 
-p_load(caret,httr, DT,stringr)
+p_load(caret,httr, DT,stringr,mlr,AUC)
 
 # I load functions from this source
 #replace by github
@@ -555,21 +555,22 @@ heart_df<-heart.df.cleaned[vars]
     heart_max5<-table_cleaner_simple(heart_df,5,"ID")
     heart_max10<-table_cleaner_simple(heart_df,10,"ID")
     
-# I work with heart_max10, to keep almost all the variables except for "CARD_SURG" that refers if someone had surgery, it just hass too many NAs
+# I work with heart_max5, to keep almost all the variables except for "CARD_SURG", "ICU", "VAS", "PRAMR_CAT10"
+# that refers if someone had surgery, it just hass too many NAs
     heart_max<-heart_df[which(heart_df$ID %in% heart_max5$row_ID[,]),heart_max5$col_names]
     
 #here save0
-    table(heart_max$year0)
-    table(heart_max$year1)
-    table(heart_max$year2)
-    table(heart_max$year3)
-    table(heart_max$year4)
-    table(heart_max$year5)
-    table(heart_max$year6)
-    table(heart_max$year7)   
-    table(heart_max$year8)
-    table(heart_max$year9)
-    table(heart_max$year10)  
+    # table(heart_max$year0)
+    # table(heart_max$year1)
+    # table(heart_max$year2)
+    # table(heart_max$year3)
+    # table(heart_max$year4)
+    # table(heart_max$year5)
+    # table(heart_max$year6)
+    # table(heart_max$year7)   
+    # table(heart_max$year8)
+    # table(heart_max$year9)
+    # table(heart_max$year10)  
 
 
 # INFECT_IV_DRUG_TRR 7000
@@ -579,22 +580,134 @@ heart_df<-heart.df.cleaned[vars]
 
 
 
-table(heart.df.cleaned$PREV_TX)
+#table(heart.df.cleaned$PREV_TX)
 
 
 #excluding some irrelevant variables
 for(i in 1:ncol(heart_max)){
   for (j in 1:nrow(var_desc)) {
     if(names(heart_max)[i]==var_desc$VARIABLE.NAME[j]){
-      if(var_desc$Hamid_TYPE[j]=="NUM"){heart_max[i]<-as.numeric(heart_max[i])
-      }
+      if(var_desc$Hamid_TYPE[j]=="NUM"){heart_max[i]<-as.numeric(heart_max[,i])}
+      if(var_desc$Hamid_TYPE[j]=="CHAR"){heart_max[i]<-as.character(heart_max[,i])}
     }
   }
 }
 
 
+    heart_max$year0<-as.factor(heart_max$year0)
+    heart_max$year1<-as.factor(heart_max$year1)
+    heart_max$year2<-as.factor(heart_max$year2)
+    heart_max$year3<-as.factor(heart_max$year3)
+    heart_max$year4<-as.factor(heart_max$year4)
+    heart_max$year5<-as.factor(heart_max$year5)
+    heart_max$year6<-as.factor(heart_max$year6)
+    heart_max$year7<-as.factor(heart_max$year7)   
+    heart_max$year8<-as.factor(heart_max$year8)
+    heart_max$year9<-as.factor(heart_max$year9)
+    heart_max$year10<-as.factor(heart_max$year10)  
+    
+    #t<-2
+    #str(heart_max)
+  non_numeric <- sapply(heart_max, is.character)
+  factor_chars<-names(heart_max[,non_numeric])
+  factor_chars<-factor_chars[!factor_chars %in% "ID"]
+  
+  # in the next part I merge all the categories that just resemble less than 5% of my data into other "oth" category
+  # however in the dummy maker section, that level is shooted out because of in the general rule of dummy making one level should
+  # taken away
+
+   for (i in factor_chars){
+     temp<-as.data.frame(table(heart_max[,i]))
+     temp$per<-temp$Freq/nrow(heart_max)
+     temp$cat<-NA
+     for(k in 1:nrow(temp)){
+       if(temp$per[k]<.05){temp$cat[k]<-"oth"}else{temp$cat[k]<-as.character(temp$Var1[k])}
+     }
+     for(t in 1:nrow(heart_max)){
+       if(!(heart_max[t,i] %in% temp$cat)){heart_max[t,i]<-"oth"}
+     }
+     
+            temp<-mlr::createDummyFeatures(heart_max[,i])
+            names(temp)<-paste(names(heart_max[i]),levels(as.factor(heart_max[,i])),sep="_")
+            for(j in 1:ncol(temp)){temp[j]<-as.factor(temp[,j])}
+            heart_max<-cbind(heart_max,temp)
+            heart_max[,ncol(heart_max)]<-NULL
+   }
+  
+heart_max<-heart_max[-which(names(heart_max) %in% factor_chars)]
+
+# I then randomly pick 30% as the hold out then , I picked it randomly
+#making the format of the dependent variable ready for prediction
+
+  start<-which(colnames(heart_max)== "year0")
+  end<-which(colnames(heart_max)== "year10")
+
+  for(i in start:end){
+  levels(heart_max[,i])[1] <- "One"
+  levels(heart_max[,i])[2] <- "Two"
+  }
+
+hold_out<-heart_max[sample(nrow(heart_max), nrow(heart_max)*.3), ]
+train<-heart_max[-which(heart_max$ID %in% hold_out$ID),]
+#here save1
 
 
+#str(heart_max)
+
+  vars<-names(heart_max)
+  vars<-vars[!vars %in% c("year0","year1","year2","year3","year4","year5","year6","year7","year8","year9","year10","ID")]
+  
+  for(i in 0:10){
+  assign("formula_format",paste("year",i," ~ ",paste(vars, collapse="+"),sep = ""))
+  assign(paste("year",i,sep=""),as.formula(formula_format))
+  
+  }
+
+
+ # I used 5 fold cross validation with 3 repeats
+  control_<- trainControl(method = "repeatedcv",  savePredictions = TRUE, number=5, repeats = 3,
+                          verboseIter = FALSE,returnResamp = "all",classProbs = TRUE, summaryFunction = twoClassSummary)
+  
+  svm_cost<-.5
+  svm_sigma<-.0001
+  i<-5
+  
+ train<-RUS_func(train,paste("year",i,sep=""))
+    
+mod_log <-caret::train(eval(parse(text = paste("year",i,sep = ""))),  data=train, method="glm", family="binomial",
+                           trControl = control_, tuneLength = 10, metric="ROC")
+ 
+mod_svm<-caret::train(eval(parse(text = paste("year",i,sep = ""))),  data=train, method="svmRadial", family="binomial",
+                          trControl = control_,  tuneGrid=expand.grid(C=svm_cost, sigma=svm_sigma),
+                          tuneLength = 10)
+
+mod_nnet<-caret::train(eval(parse(text = paste("year",i,sep = ""))),  data=train, method="nnet", family="binomial",
+                           trControl = control_,  tuneGrid=expand.grid(size=5, decay=0.1), MaxNWts=20000,
+                           tuneLength = 10)
+
+mod_rf<-caret::train(eval(parse(text = paste("year",i,sep = ""))),  data=train, method="rf",
+                        trControl = control_, tuneGrid=expand.grid(mtry = ncol(train)-4),
+                        tuneLength = 10)
+
+
+ 
+ resul_log_raw<-predict(mod_log, newdata=hold_out, type="raw")
+ resul_log_prob<-predict(mod_log, newdata=hold_out, type="prob")[,2]
+ 
+ resul_log_raw<-predict(mod_svm, newdata=hold_out, type="raw")
+ resul_log_prob<-predict(mod_svm, newdata=hold_out, type="prob")[,2]
+ 
+ resul_log_raw<-predict(mod_nnet, newdata=hold_out, type="raw")
+ resul_log_prob<-predict(mod_nnet, newdata=hold_out, type="prob")[,2]
+ 
+ resul_log_raw<-predict(mod_rf, newdata=hold_out, type="raw")
+ resul_log_prob<-predict(mod_rf, newdata=hold_out, type="prob")[,2]
+
+ auc_temp<-AUC:: auc(roc(resul_log_prob,hold_out$year0))
+ sen_temp<-caret:: sensitivity(resul_log_raw,hold_out$year0)
+ spe_temp<-caret:: specificity(resul_log_raw,hold_out$year0)
+ acu_temp<-(as.data.frame(confusionMatrix(resul_log_raw,hold_out$year0)$overall))[1,]
+ 
 ```
 <br />
 <br />
