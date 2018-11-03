@@ -493,9 +493,9 @@ WLPI,WAS CANDIDATE LISTED FOR SIMULTANEOUS PANCREAS ISLET?,,1,$1.00 ,CALCULATED,
 WORK_INCOME_TCR,WORK FOR INCOME AT REGISTRATION?,,1,$1.00 ,TCR,Y,30-Jun-04,,CANDIDATE INFORMATION,CHAR,CHAR,,,TCR WORKING FOR INCOME,
 WORK_INCOME_TRR,RECIPIENT WORK FOR INCOME AT TRANSPLANT?,,1,$1.00 ,TRR,N,30-Jun-04,,PATIENT STATUS,CHAR,CHAR,U,U,TRR WORKING FOR INCOME,
 YR_ENTRY_US_TCR,YEAR OF ENTRY TO THE U.S.,,8,DATETIME22.3,TCR,Y,30-Jun-04,,CANDIDATE INFORMATION,CHAR,CHAR,,,TCR YEAR OF ENTRY TO THE U.S.,
-ID,,,,,,,,,,,CHAR,,,,I made by myself
-CARD_SURG,"previous cardiac surgery /merge of (PRIOR_CARD_SURG_TCR, PRIOR_CARD_SURG_TRR)",,,,,,,,,,CHAR,,,,I made by myself
-ECMO,"merge of (ECMO_TCR, ECMO_TRR)",,,,,,,,,,CHAR,,,,I made by myself
-PVR,,,,,,,,,,,NUM,,,,I made by myself
-PRAMR_CAT10,"if PRAMR> 10 Y, otherwise: N",,,,,,,,,,CHAR,,,,I made by myself
-WAITING_TIME,TX_DATE-INIT_DATE,,,,,,,,,,NUM,,,,I made by myself
+ID,,,,,,,,,30-Jun-18,,CHAR,,,,I made by myself
+CARD_SURG,"previous cardiac surgery /merge of (PRIOR_CARD_SURG_TCR, PRIOR_CARD_SURG_TRR)",,,,,,,,1-Jul-18,,CHAR,,,,I made by myself
+ECMO,"merge of (ECMO_TCR, ECMO_TRR)",,,,,,,,2-Jul-18,,CHAR,,,,I made by myself
+PVR,,,,,,,,,3-Jul-18,,NUM,,,,I made by myself
+PRAMR_CAT10,"if PRAMR> 10 Y, otherwise: N",,,,,,,,4-Jul-18,,CHAR,,,,I made by myself
+WAITING_TIME,TX_DATE-INIT_DATE,,,,,,,,5-Jul-18,,NUM,,,,I made by myself
