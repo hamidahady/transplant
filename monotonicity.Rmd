@@ -133,7 +133,18 @@ vars.added.all <- vars.added.df[["VARIABLE.NAME"]] %>%
 # table(thoracic_data$PRAMR)
 # temp<-thoracic_data[which(thoracic_data$TX_YEAR>2007),]
 # table(temp$PRAMR)
+
+#adding new columns
+thoracic_data$ID<-NA
+thoracic_data$CARD_SURG<-NA
+thoracic_data$ECMO<-NA
+thoracic_data$PVR<-NA
+thoracic_data$PRAMR_CAT10<-NA
+thoracic_data$WAITING_TIME<-NA
+
+
 thoracic_data$ID<-rownames(thoracic_data)
+
 heart.df.cleaned <- subset(thoracic_data,WL_ORG=="HR") %>% 
  # the next line is excluded since they might live more than 12 years but the status is NA, also same for less than 2007
  # some of them might lived for 5 years and died but excluded from here
