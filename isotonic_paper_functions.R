@@ -2,6 +2,58 @@
 #===============================================
 #============remove extra libraries and packages in r
 #===============================================
+#this function is for converting some values that are actually NA but they are specified with the different values
+#dataset: the dataset that has NAs, var_name_vector: vector for variables names
+#var_na_vector: this is a vector that contains NA equivalent values associated var names in var_name_vector
+#each cell in var_na_vector might have multiple values for NAs
+
+
+na_maker <- function(dataset,var_name_vector,var_na_vector){
+  
+  for(i in 1:ncol(dataset)){
+    for(j in 1:length(var_name_vector)){
+      if(grepl(names(dataset[i]),var_name_vector[j])){
+        if(nchar(as.character(var_na_vector[j]))>0){
+          for(k in 1:length(unlist(strsplit(as.character(var_na_vector[j]), "; "))) ){
+            temp<-dataset[,i]
+            # next if checks if the NA value we think is really inside our data or not, otherwise we might get an error
+            if((unlist(strsplit(as.character(var_na_vector[j]), "; ")))[k] %in% as.data.frame(table(dataset[,i]))[,1] ){
+              
+              temp[temp==(unlist(strsplit(as.character(var_na_vector[j]), "; ")))[k]]<-NA
+            }
+            dataset[,i]<-temp
+          }
+        }
+      }
+    }
+  }
+  
+  return(dataset)
+}
+
+#===============================================
+#============remove extra libraries and packages in r
+#===============================================
+get_os <- function(){
+  sysinf <- Sys.info()
+  if (!is.null(sysinf)){
+    os <- sysinf['sysname']
+    if (os == 'Darwin')
+      os <- "MAC"
+  } else { ## mystery machine
+    os <- .Platform$OS.type
+    if (grepl("^darwin", R.version$os))
+      os <- "MAC"
+    if (grepl("linux-gnu", R.version$os))
+      os <- "LINUX"
+  }
+  toupper(os)
+}
+
+#===============================================
+#===============================================
+#============remove extra libraries and packages in r
+#===============================================
 lib_cleaner<-function(){
   if(!is.null(sessionInfo()$otherPkgs)){
     lapply(paste('package:',names(sessionInfo()$otherPkgs),sep=""),detach,character.only=TRUE,unload=TRUE)}
