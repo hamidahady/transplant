@@ -1807,11 +1807,6 @@ conso_bin<-function(data_lit,Random_Forrest,Lasso,FFS,itself_svm,itself_log,itse
 
 #_________________________
 # TARGET generator for Bionomial
-gstatus<-heart_df$GSTATUS[3]
-gtime<- heart_df$GTIME[3]
-p_unit<- p_unit[2]
-predict_length<- predict_length
-class_generator_bino(gstatus, gtime, p_unit,predict_length)
 
 class_generator_bino <- function(gstatus, gtime, p_unit,predict_length){
   p_unit<-as.numeric(p_unit)

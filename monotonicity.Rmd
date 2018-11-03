@@ -42,7 +42,7 @@ p_load(caret,httr, DT,stringr)
 # I load functions from this source
 #replace by github
 #source("https://raw.githubusercontent.com/hamidahady/transplant/Hamid/all_functions.R")
-source("C:/Users/hza0020/Box/Transplant/Thesis/github/transplant/transplant/all_functions.R")
+source("C:/Users/hza0020/Box/Transplant/Thesis/github/transplant/transplant/isotonic_paper_functions.R")
 
  
 ```
@@ -402,14 +402,14 @@ for(i in 1:nrow(heart.df.cleaned)){
 # if PRAMR> 10 Y, otherwise: N
 
 
-
+heart.df.cleaned$PRAMR_CAT10<-NA
 for(i in 1:nrow(heart.df.cleaned)){
   if(!is.na(heart.df.cleaned$PRAMR[i])){ 
-    if(heart.df.cleaned$PRAMR[i]>10){heart.df.cleaned$PRAMR[i]<-"Y"}
-    if(heart.df.cleaned$PRAMR[i]<=10){heart.df.cleaned$PRAMR[i]<-"N"}
+    if(heart.df.cleaned$PRAMR[i]>10){heart.df.cleaned$PRAMR_CAT10[i]<-"Y"}
+    if(heart.df.cleaned$PRAMR[i]<=10){heart.df.cleaned$PRAMR_CAT10[i]<-"N"}
         }
   }
-table(heart.df.cleaned$PRAMR)
+table(heart.df.cleaned$PRAMR_CAT10)
 # Here save3
 # HLA-DR 2 mismatch / RDR2:
 # any values: Y, otherwise: 0
@@ -487,7 +487,7 @@ for(i in 1:nrow(heart.df.cleaned)){
 
 vars<-c("AGE","AGE_DON","HGT_CM_TCR","HGT_CM_DON_CALC","GENDER","GENDER_DON","WGT_KG_DON_CALC","WGT_KG_TCR","DIAG","COD_CAD_DON", 
         "ABO","ABO_DON","DIAB","INFECT_IV_DRUG_TRR","TRANSFUSIONS","PREV_TX","CARD_SURG","ICU","VAS","VENTILATOR_TRR",
-        "ECMO","HEMO_SYS_TRR","PVR","ISCHTIME","CREAT_TRR","TBILI","PRAMR","RDR2","TX_YEAR_CAT",
+        "ECMO","HEMO_SYS_TRR","PVR","ISCHTIME","CREAT_TRR","TBILI","PRAMR_CAT10","RDR2","TX_YEAR_CAT",
         "FUNC_STAT_TRR","FUNC_STAT_TCR",
         "GSTATUS","GTIME","ID")  
 
@@ -545,10 +545,20 @@ heart_df<-heart.df.cleaned[vars]
     heart_max10<-table_cleaner_simple(heart_df,10,"ID")
     
 # I work with heart_max10, to keep almost all the variables except for "CARD_SURG" that refers if someone had surgery, it just hass too many NAs
-    heart_max<-heart_df[which(heart_df$ID %in% heart_max10$row_ID[,]),heart_max10$col_names]
+    heart_max<-heart_df[which(heart_df$ID %in% heart_max5$row_ID[,]),heart_max5$col_names]
     
 #here save0
-
+    table(heart_max$year0)
+    table(heart_max$year1)
+    table(heart_max$year2)
+    table(heart_max$year3)
+    table(heart_max$year4)
+    table(heart_max$year5)
+    table(heart_max$year6)
+    table(heart_max$year7)   
+    table(heart_max$year8)
+    table(heart_max$year9)
+    table(heart_max$year10)  
 
 
 # INFECT_IV_DRUG_TRR 7000
@@ -562,10 +572,10 @@ table(heart.df.cleaned$PREV_TX)
 
 
 #excluding some irrelevant variables
-for(i in 1:ncol(heart.df.cleaned)){
+for(i in 1:ncol(heart_max)){
   for (j in 1:nrow(var_desc)) {
-    if(names(heart.df.cleaned)[i]==var_desc$VARIABLE.NAME[j]){
-      if(var_desc$Hamid_TYPE[j]=="CHAR"){heart.df.cleaned[i]<-as.character(heart.df.cleaned[i])
+    if(names(heart_max)[i]==var_desc$VARIABLE.NAME[j]){
+      if(var_desc$Hamid_TYPE[j]=="NUM"){heart_max[i]<-as.numeric(heart_max[i])
       }
     }
   }
