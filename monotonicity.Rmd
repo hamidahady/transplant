@@ -662,51 +662,80 @@ train<-heart_max[-which(heart_max$ID %in% hold_out$ID),]
   assign(paste("year",i,sep=""),as.formula(formula_format))
   
   }
-
-
+temp<-train
+method_sam<-"RUS"
+formul<-year0
+pred_type<-"regular"
+hold_out<-hold_out
+train<-train
+TARGET<-"year0"
+  
  # I used 5 fold cross validation with 3 repeats
   control_<- trainControl(method = "repeatedcv",  savePredictions = TRUE, number=5, repeats = 3,
                           verboseIter = FALSE,returnResamp = "all",classProbs = TRUE, summaryFunction = twoClassSummary)
   
   svm_cost<-.5
   svm_sigma<-.0001
-  i<-5
+   
+  if(method_sam=="RUS"){
+     train<-RUS_func(train,TARGET)
+  }
   
- train<-RUS_func(train,paste("year",i,sep=""))
-    
-mod_log <-caret::train(eval(parse(text = paste("year",i,sep = ""))),  data=train, method="glm", family="binomial",
+  resul_raw<-as.data.frame(matrix(NA, ncol = 4, nrow = nrow(hold_out)))
+  names(resul_raw)<-c("log","svm","nnet","rf")
+  resul_prob<-resul_raw
+  
+  resul_perf<-as.data.frame(matrix(NA, ncol = 4, nrow = 4))
+  names(resul_perf)<-c("log","svm","nnet","rf")
+  rownames(resul_perf)<-c("auc","sen","spec","accu")
+  
+
+    if(pred_type=="regular"){
+      mod_log <-caret::train(formul,  data=train, method="glm", family="binomial",
                            trControl = control_, tuneLength = 10, metric="ROC")
  
-mod_svm<-caret::train(eval(parse(text = paste("year",i,sep = ""))),  data=train, method="svmRadial", family="binomial",
+      mod_svm<-caret::train(formul,  data=train, method="svmRadial", family="binomial",
                           trControl = control_,  tuneGrid=expand.grid(C=svm_cost, sigma=svm_sigma),
                           tuneLength = 10)
 
-mod_nnet<-caret::train(eval(parse(text = paste("year",i,sep = ""))),  data=train, method="nnet", family="binomial",
+      mod_nnet<-caret::train(formul,  data=train, method="nnet", family="binomial",
                            trControl = control_,  tuneGrid=expand.grid(size=5, decay=0.1), MaxNWts=20000,
                            tuneLength = 10)
+      
+      
+      resul_raw$log<-predict(mod_log, newdata=hold_out, type="raw")
+      resul_prob$log<-predict(mod_log, newdata=hold_out, type="prob")[,2]
 
-mod_rf<-caret::train(eval(parse(text = paste("year",i,sep = ""))),  data=train, method="rf",
+      resul_raw$svm<-predict(mod_svm, newdata=hold_out, type="raw")
+      resul_prob$svm<-predict(mod_svm, newdata=hold_out, type="prob")[,2]
+ 
+      resul_raw$nnet<-predict(mod_nnet, newdata=hold_out, type="raw")
+      resul_prob$nnet<-predict(mod_nnet, newdata=hold_out, type="prob")[,2]
+      
+      }
+  
+  
+     if(pred_type=="regular" | pred_type=="stacking"){
+      mod_rf<-caret::train(formul,  data=train, method="rf",
                         trControl = control_, tuneGrid=expand.grid(mtry = ncol(train)-4),
                         tuneLength = 10)
+       
+      resul_raw$rf<-predict(mod_rf, newdata=hold_out, type="raw")
+      resul_prob$rf<-predict(mod_rf, newdata=hold_out, type="prob")[,2]
+      
+       
+     }
+  
+
+    resul_perf["auc","log"]<-AUC:: auc(roc(resul_prob["log"],hold_out[TARGET]))
+    resul_perf["sen","log"]<-caret:: sensitivity(resul_raw["log"],hold_out[TARGET])
+    resul_perf["spec","log"]<-caret:: specificity(resul_raw["log"],hold_out[TARGET])
+    resul_perf["sccu","log"]<-(as.data.frame(confusionMatrix(resul_raw["log"],hold_out[TARGET])$overall))[1,]
 
 
- 
- resul_log_raw<-predict(mod_log, newdata=hold_out, type="raw")
- resul_log_prob<-predict(mod_log, newdata=hold_out, type="prob")[,2]
- 
- resul_log_raw<-predict(mod_svm, newdata=hold_out, type="raw")
- resul_log_prob<-predict(mod_svm, newdata=hold_out, type="prob")[,2]
- 
- resul_log_raw<-predict(mod_nnet, newdata=hold_out, type="raw")
- resul_log_prob<-predict(mod_nnet, newdata=hold_out, type="prob")[,2]
- 
- resul_log_raw<-predict(mod_rf, newdata=hold_out, type="raw")
- resul_log_prob<-predict(mod_rf, newdata=hold_out, type="prob")[,2]
+       
 
- auc_temp<-AUC:: auc(roc(resul_log_prob,hold_out$year0))
- sen_temp<-caret:: sensitivity(resul_log_raw,hold_out$year0)
- spe_temp<-caret:: specificity(resul_log_raw,hold_out$year0)
- acu_temp<-(as.data.frame(confusionMatrix(resul_log_raw,hold_out$year0)$overall))[1,]
+
  
 ```
 <br />
