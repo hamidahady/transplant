@@ -1,4 +1,145 @@
+# method_sam<-under sampling is "RUS" otherwise put "NONE"
+# formul<-formula for training
+# hold_out<-hold_out set
+# repeat_no<- how many time we repeat the cross validation
 
+pred_func<-function(train,hold_out,formul,method_sam, repeat_no){
+  # identifying the dependent variable or TARGET
+  TARGET<-as.character(formul)[2]
+  
+  # I used 5 fold cross validation with 3 repeats
+  control_<- trainControl(method = "repeatedcv",  savePredictions = TRUE, number=5, 
+                          repeats = repeat_no,
+                          verboseIter = FALSE,returnResamp = "all",classProbs = TRUE, summaryFunction = twoClassSummary)
+  
+  svm_cost<-.5
+  svm_sigma<-.0001
+  
+  if(method_sam=="RUS"){
+    train<-RUS_func(train,TARGET)
+  }
+  
+  
+  resul_raw<-as.data.frame(matrix(NA, ncol = 6, nrow = nrow(hold_out)))
+  names(resul_raw)<-c("log","svm","nnet","rf","rf_stack","TARGET")
+  resul_raw$TARGET<-hold_out[,TARGET]
+  resul_prob<-resul_raw
+  
+  
+  resul_perf<-as.data.frame(matrix(NA, ncol = 5, nrow = 4))
+  names(resul_perf)<-c("log","svm","nnet","rf","rf_stack")
+  rownames(resul_perf)<-c("auc","sen","spec","accu")
+  
+  
+  # i did parallel processing fo this part
+  tasks <- list(
+    mod_log = function() caret::train(formul,  data=train, method="glm", family="binomial",
+                                      trControl = control_, tuneLength = 10, metric="ROC"),
+    
+    mod_nnet = function() caret::train(formul,  data=train, method="nnet", family="binomial",
+                                       trControl = control_,  tuneGrid=expand.grid(size=5, decay=0.1), MaxNWts=20000,
+                                       tuneLength = 10),
+    
+    mod_svm = function() caret::train(formul,  data=train, method="svmRadial", family="binomial",
+                                      trControl = control_,  tuneGrid=expand.grid(C=svm_cost, sigma=svm_sigma),
+                                      tuneLength = 10),
+    
+    mod_rf =  function() caret::train(formul,  data=train, method="rf",
+                                      trControl = control_, tuneGrid=expand.grid(mtry = ncol(train)-4),
+                                      tuneLength = ncol(train)-1)
+  )
+  out <- parallel::mclapply( 
+    tasks, 
+    function(f) f())
+  
+  resul_raw$log<-predict(out$mod_log, newdata=hold_out, type="raw")
+  resul_prob$log<-predict(out$mod_log, newdata=hold_out, type="prob")[,2]
+  
+  resul_raw$svm<-predict(out$mod_svm, newdata=hold_out, type="raw")
+  resul_prob$svm<-predict(out$mod_svm, newdata=hold_out, type="prob")[,2]
+  
+  resul_raw$nnet<-predict(out$mod_nnet, newdata=hold_out, type="raw")
+  resul_prob$nnet<-predict(out$mod_nnet, newdata=hold_out, type="prob")[,2]
+  
+  resul_raw$rf<-predict(out$mod_rf, newdata=hold_out, type="raw")
+  resul_prob$rf<-predict(out$mod_rf, newdata=hold_out, type="prob")[,2]
+  
+  resul_perf["auc","log"]<-AUC:: auc(roc(resul_prob[,"log"],hold_out[,TARGET]))
+  resul_perf["sen","log"]<-caret:: sensitivity(resul_raw[,"log"],hold_out[,TARGET])
+  resul_perf["spec","log"]<-caret:: specificity(resul_raw[,"log"],hold_out[,TARGET])
+  resul_perf["accu","log"]<-(as.data.frame(confusionMatrix(resul_raw[,"log"],hold_out[,TARGET])$overall))[1,]
+  
+  resul_perf["auc","svm"]<-AUC:: auc(roc(resul_prob[,"svm"],hold_out[,TARGET]))
+  resul_perf["sen","svm"]<-caret:: sensitivity(resul_raw[,"svm"],hold_out[,TARGET])
+  resul_perf["spec","svm"]<-caret:: specificity(resul_raw[,"svm"],hold_out[,TARGET])
+  resul_perf["accu","svm"]<-(as.data.frame(confusionMatrix(resul_raw[,"svm"],hold_out[,TARGET])$overall))[1,]
+  
+  resul_perf["auc","nnet"]<-AUC:: auc(roc(resul_prob[,"nnet"],hold_out[,TARGET]))
+  resul_perf["sen","nnet"]<-caret:: sensitivity(resul_raw[,"nnet"],hold_out[,TARGET])
+  resul_perf["spec","nnet"]<-caret:: specificity(resul_raw[,"nnet"],hold_out[,TARGET])
+  resul_perf["accu","nnet"]<-(as.data.frame(confusionMatrix(resul_raw[,"nnet"],hold_out[,TARGET])$overall))[1,]
+  
+  resul_perf["auc","rf"]<-AUC:: auc(roc(resul_prob[,"rf"],hold_out[,TARGET]))
+  resul_perf["sen","rf"]<-caret:: sensitivity(resul_raw[,"rf"],hold_out[,TARGET])
+  resul_perf["spec","rf"]<-caret:: specificity(resul_raw[,"rf"],hold_out[,TARGET])
+  resul_perf["accu","rf"]<-(as.data.frame(confusionMatrix(resul_raw[,"rf"],hold_out[,TARGET])$overall))[1,]
+  
+  
+  df_log<-as.data.frame(cbind(out$mod_log$pred$obs,out$mod_log$pred$Two,out$mod_log$pred$Resample,out$mod_log$pred$rowIndex))
+  names(df_log)<-c("obs_log","log","fold_rep_log","index_log")
+  df_log<-df_log[order(df_log$index),]
+  
+  df_nnet<-as.data.frame(cbind(out$mod_nnet$pred$obs,out$mod_nnet$pred$Two,out$mod_nnet$pred$Resample,out$mod_nnet$pred$rowIndex))
+  names(df_nnet)<-c("obs_nnet","nnet","fold_rep_nnet","index_nnet")
+  df_nnet<-df_nnet[order(df_nnet$index),]
+  
+  df_svm<-as.data.frame(cbind(out$mod_svm$pred$obs,out$mod_svm$pred$Two,out$mod_svm$pred$Resample,out$mod_svm$pred$rowIndex))
+  names(df_svm)<-c("obs_svm","svm","fold_rep_svm","index_svm")
+  df_svm<-df_svm[order(df_svm$index),]
+  
+  stack_data<-cbind(df_log,df_nnet,df_svm)
+  stack_data$TARGET<-stack_data$obs_log
+  
+  levels(stack_data[,"TARGET"])[1] <- "One"
+  levels(stack_data[,"TARGET"])[2] <- "Two"
+  
+  
+  stack_formula<-as.formula(paste("TARGET"," ~ ",paste(c("log","nnet","svm"), collapse="+"),sep = ""))
+  str(stack_data)
+  
+  stack_data$log<-as.double(as.character((stack_data$log)))
+  stack_data$nnet<-as.double(as.character((stack_data$nnet)))
+  stack_data$svm<-as.double(as.character((stack_data$svm)))
+  
+  
+  mod_rf_stack<-caret::train(stack_formula,  data=stack_data, method="rf",
+                             trControl = control_, tuneGrid=expand.grid(mtry = ncol(train)-4),
+                             tuneLength = 7)
+  
+  
+  
+  resul_raw$rf_stack<-predict(mod_rf_stack, newdata=resul_prob, type="raw")
+  resul_prob$rf_stack<-predict(mod_rf_stack, newdata=resul_prob, type="prob")[,2]
+  
+  
+  resul_perf["auc","rf_stack"]<-AUC:: auc(roc(resul_prob[,"rf_stack"],hold_out[,TARGET]))
+  resul_perf["sen","rf_stack"]<-caret:: sensitivity(resul_raw[,"rf_stack"],hold_out[,TARGET])
+  resul_perf["spec","rf_stack"]<-caret:: specificity(resul_raw[,"rf_stack"],hold_out[,TARGET])
+  resul_perf["accu","rf_stack"]<-(as.data.frame(confusionMatrix(resul_raw[,"rf_stack"],hold_out[,TARGET])$overall))[1,]
+  
+  
+  
+  out_object<-list()
+  out_object$resul_raw<-resul_raw
+  out_object$resul_prob<-resul_prob
+  out_object$resul_perf<-resul_perf
+  out_object$stack_data<-stack_data
+  
+  return(out_object)
+  
+  
+}
+#============================================================================
 #===============================================
 #============remove extra libraries and packages in r
 #===============================================
