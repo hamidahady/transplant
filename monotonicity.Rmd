@@ -667,11 +667,18 @@ train<-heart_max[-which(heart_max$ID %in% hold_out$ID),]
 
 
 resul_year0_RUS<-pred_func(train,hold_out,formul_year0,"RUS",1)
+resul_year1_RUS<-pred_func(train,hold_out,formul_year1,"RUS",1)
+resul_year2_RUS<-pred_func(train,hold_out,formul_year2,"RUS",1)
+resul_year3_RUS<-pred_func(train,hold_out,formul_year3,"RUS",1)
+resul_year4_RUS<-pred_func(train,hold_out,formul_year4,"RUS",1)
 
-formul<-as.formula(paste("rf"," ~ ",paste(c("log","svm","nnet"), collapse="+"),sep = ""))
-resul_year0_RUS<-pred_func(train,hold_out,formul,"stacking","NONE")
+resul_year5_RUS<-pred_func(train,hold_out,formul_year5,"RUS",1)
+resul_year6_RUS<-pred_func(train,hold_out,formul_year6,"RUS",1)
+resul_year7_RUS<-pred_func(train,hold_out,formul_year7,"RUS",1)
+resul_year8_RUS<-pred_func(train,hold_out,formul_year8,"RUS",1)
+resul_year9_RUS<-pred_func(train,hold_out,formul_year9,"RUS",1)
+resul_year10_RUS<-pred_func(train,hold_out,formul_year10,"RUS",1)
 
-resul_year0$resul_perf
 
 
  
