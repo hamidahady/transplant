@@ -1,4 +1,39 @@
 
+
+
+
+#===============================================
+#============remove extra libraries and packages in r
+#===============================================
+#this function is for converting some values that are actually NA but they are specified with the different values
+#dataset: the dataset that has NAs, var_name_vector: vector for variables names
+#var_na_vector: this is a vector that contains NA equivalent values associated var names in var_name_vector
+#each cell in var_na_vector might have multiple values for NAs
+ 
+
+na_maker <- function(dataset,var_name_vector,var_na_vector){
+
+  for(i in 1:ncol(dataset)){
+    for(j in 1:length(var_name_vector)){
+      if(grepl(names(dataset[i]),var_name_vector[j])){
+        if(nchar(as.character(var_na_vector[j]))>0){
+          for(k in 1:length(unlist(strsplit(as.character(var_na_vector[j]), "; "))) ){
+            temp<-dataset[,i]
+  # next if checks if the NA value we think is really inside our data or not, otherwise we might get an error
+            if((unlist(strsplit(as.character(var_na_vector[j]), "; ")))[k] %in% as.data.frame(table(dataset[,i]))[,1] ){
+         
+            temp[temp==(unlist(strsplit(as.character(var_na_vector[j]), "; ")))[k]]<-NA
+            }
+            dataset[,i]<-temp
+          }
+        }
+    }
+  }
+  }
+
+return(dataset)
+}
+
 #===============================================
 #============remove extra libraries and packages in r
 #===============================================
@@ -63,7 +98,7 @@ col_missing_function <- function(input_data){
 table_cleaner<-function(input_object){
   #_______________________________Required Libraries_______________________________________________________________________________________
   # Install any needed package with the following command: install.packages("Name", dependencies = c("Depends", "Suggests"))
-  
+  #comments
   set.seed(110)
   clean_folder_input<-input_object$clean_folder_input
   if(is.null(clean_folder_input)){clean_folder<-getwd()}else{clean_folder<-clean_folder_input}
@@ -81,10 +116,10 @@ table_cleaner<-function(input_object){
   NA_cells<-input_object$NA_cells
   NA_cells<-unlist(strsplit(NA_cells, split=","))
   
-  for(i in 1:length(NA_cells)){
-    
-    Try_data[Try_data == NA_cells[i]] <- NA
-    gc()}
+  # for(i in 1:length(NA_cells)){
+  #   
+  #   Try_data[Try_data == NA_cells[i]] <- NA
+  #   gc()}
   
   new_data<-input_object$file_new_data
   
