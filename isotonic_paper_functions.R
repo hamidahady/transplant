@@ -2,8 +2,15 @@
 # formul<-formula for training
 # hold_out<-hold_out set
 # repeat_no<- how many time we repeat the cross validation
+# vars_all<- a refrence to all the variables we used for showing their importance
+temp<-train
+train<-temp
+formul<-formul_year7
+method_sam<-"RUS"
+repeat_no<-1
+vars_all<-var_desc$VARIABLE.NAME
 
-pred_func<-function(train,hold_out,formul,method_sam, repeat_no){
+pred_func<-function(train,hold_out,formul,method_sam, repeat_no,vars_all){
   # identifying the dependent variable or TARGET
   TARGET<-as.character(formul)[2]
   
@@ -51,6 +58,40 @@ pred_func<-function(train,hold_out,formul,method_sam, repeat_no){
   out <- parallel::mclapply( 
     tasks, 
     function(f) f())
+  
+  print(paste("regular prediction of ", TARGET," is done",sep=""))
+  
+  importance<-list()
+  
+  
+  if(class(try(varImp(out$mod_log),silent = TRUE))!="try-error"){
+    temp0<-as.data.frame(varImp(out$mod_log)[1])
+    names(temp0)<-c("importance")
+    temp0$variables<-rownames(temp0)
+    importance$log<-temp0
+    }
+  
+  if(class(try(varImp(out$mod_svm),silent = TRUE))!="try-error"){
+    temp0<-as.data.frame(varImp(out$mod_svm)[1])
+    names(temp0)<-c("importance")
+    temp0$variables<-rownames(temp0)
+    importance$svm<-temp0
+  }
+  
+  if(class(try(varImp(out$mod_nnet),silent = TRUE))!="try-error"){
+    temp0<-as.data.frame(varImp(out$mod_nnet)[1])
+    names(temp0)<-c("importance")
+    temp0$variables<-rownames(temp0)
+    importance$nnet<-temp0
+  }
+  
+  if(class(try(varImp(out$mod_rf),silent = TRUE))!="try-error"){
+    temp0<-as.data.frame(varImp(out$mod_rf)[1])
+    names(temp0)<-c("importance")
+    temp0$variables<-rownames(temp0)
+    importance$rf<-temp0
+  }
+  
   
   resul_raw$log<-predict(out$mod_log, newdata=hold_out, type="raw")
   resul_prob$log<-predict(out$mod_log, newdata=hold_out, type="prob")[,2]
@@ -105,7 +146,7 @@ pred_func<-function(train,hold_out,formul,method_sam, repeat_no){
   
   
   stack_formula<-as.formula(paste("TARGET"," ~ ",paste(c("log","nnet","svm"), collapse="+"),sep = ""))
-  str(stack_data)
+  
   
   stack_data$log<-as.double(as.character((stack_data$log)))
   stack_data$nnet<-as.double(as.character((stack_data$nnet)))
@@ -2047,7 +2088,8 @@ var_finder <- function(input1,input2){
 }
 
 #finding importance of variables from a model
-
+#vars_org<-VarsData_Phase
+# input_object<-out$mod_log
 model_imp_exc <- function(input_object,vars_org){
   imp_model<-varImp(input_object)
   imp_model<-as.data.frame(imp_model$importance)
