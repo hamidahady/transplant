@@ -37,7 +37,7 @@ rm(list = ls()) # clears global environment (functions and variables)
 graphics.off() # clears graphics
 if(!("pacman" %in% rownames(installed.packages()))){install.packages("pacman")}# pacman would be installed if it's not existed
 library(pacman) 
-p_load(caret,httr, DT,stringr,mlr,AUC)
+p_load(caret,httr, DT,stringr,mlr,AUC,parallel)
 
 # I load functions from this source
 #replace by github
@@ -653,60 +653,34 @@ train<-heart_max[-which(heart_max$ID %in% hold_out$ID),]
 
 
 #str(heart_max)
-
+#here is make formula for different years
   vars<-names(heart_max)
   vars<-vars[!vars %in% c("year0","year1","year2","year3","year4","year5","year6","year7","year8","year9","year10","ID")]
   
   for(i in 0:10){
   assign("formula_format",paste("year",i," ~ ",paste(vars, collapse="+"),sep = ""))
-  assign(paste("year",i,sep=""),as.formula(formula_format))
+  assign(paste("formul_year",i,sep=""),as.formula(formula_format))
   
   }
-
-
- # I used 5 fold cross validation with 3 repeats
-  control_<- trainControl(method = "repeatedcv",  savePredictions = TRUE, number=5, repeats = 3,
-                          verboseIter = FALSE,returnResamp = "all",classProbs = TRUE, summaryFunction = twoClassSummary)
-  
-  svm_cost<-.5
-  svm_sigma<-.0001
-  i<-5
-  
- train<-RUS_func(train,paste("year",i,sep=""))
-    
-mod_log <-caret::train(eval(parse(text = paste("year",i,sep = ""))),  data=train, method="glm", family="binomial",
-                           trControl = control_, tuneLength = 10, metric="ROC")
  
-mod_svm<-caret::train(eval(parse(text = paste("year",i,sep = ""))),  data=train, method="svmRadial", family="binomial",
-                          trControl = control_,  tuneGrid=expand.grid(C=svm_cost, sigma=svm_sigma),
-                          tuneLength = 10)
-
-mod_nnet<-caret::train(eval(parse(text = paste("year",i,sep = ""))),  data=train, method="nnet", family="binomial",
-                           trControl = control_,  tuneGrid=expand.grid(size=5, decay=0.1), MaxNWts=20000,
-                           tuneLength = 10)
-
-mod_rf<-caret::train(eval(parse(text = paste("year",i,sep = ""))),  data=train, method="rf",
-                        trControl = control_, tuneGrid=expand.grid(mtry = ncol(train)-4),
-                        tuneLength = 10)
+# train<-train set
 
 
- 
- resul_log_raw<-predict(mod_log, newdata=hold_out, type="raw")
- resul_log_prob<-predict(mod_log, newdata=hold_out, type="prob")[,2]
- 
- resul_log_raw<-predict(mod_svm, newdata=hold_out, type="raw")
- resul_log_prob<-predict(mod_svm, newdata=hold_out, type="prob")[,2]
- 
- resul_log_raw<-predict(mod_nnet, newdata=hold_out, type="raw")
- resul_log_prob<-predict(mod_nnet, newdata=hold_out, type="prob")[,2]
- 
- resul_log_raw<-predict(mod_rf, newdata=hold_out, type="raw")
- resul_log_prob<-predict(mod_rf, newdata=hold_out, type="prob")[,2]
+resul_year0_RUS<-pred_func(train,hold_out,formul_year0,"RUS",1)
+resul_year1_RUS<-pred_func(train,hold_out,formul_year1,"RUS",1)
+resul_year2_RUS<-pred_func(train,hold_out,formul_year2,"RUS",1)
+resul_year3_RUS<-pred_func(train,hold_out,formul_year3,"RUS",1)
+resul_year4_RUS<-pred_func(train,hold_out,formul_year4,"RUS",1)
 
- auc_temp<-AUC:: auc(roc(resul_log_prob,hold_out$year0))
- sen_temp<-caret:: sensitivity(resul_log_raw,hold_out$year0)
- spe_temp<-caret:: specificity(resul_log_raw,hold_out$year0)
- acu_temp<-(as.data.frame(confusionMatrix(resul_log_raw,hold_out$year0)$overall))[1,]
+resul_year5_RUS<-pred_func(train,hold_out,formul_year5,"RUS",1)
+resul_year6_RUS<-pred_func(train,hold_out,formul_year6,"RUS",1)
+resul_year7_RUS<-pred_func(train,hold_out,formul_year7,"RUS",1)
+resul_year8_RUS<-pred_func(train,hold_out,formul_year8,"RUS",1)
+resul_year9_RUS<-pred_func(train,hold_out,formul_year9,"RUS",1)
+resul_year10_RUS<-pred_func(train,hold_out,formul_year10,"RUS",1)
+
+
+
  
 ```
 <br />
