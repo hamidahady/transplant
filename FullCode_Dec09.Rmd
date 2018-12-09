@@ -1,0 +1,540 @@
+---
+title: "Untitled"
+output: html_document
+---
+---
+title: "Transplant Project"
+author: "Hamid"
+date: "Dec 09, 2018"
+output: html_document
+---
+
+defining functions and loading the required libraries
+```{r}
+
+}
+##################
+
+```
+
+bringing the data
+```{r}
+# os<-"mac"
+# os<-"OS SERVER"
+os<-"windows"
+# os<-"mac"
+if(os=="windows"){
+save_folder<-"C:/Users/hza0020/OneDrive - Auburn University/IOT/data"}
+if(os=="mac"){
+save_folder<-"/Users/hamid/OneDrive - Auburn University/IOT/data"}
+
+#importing the data of subject and merge into a list variable
+subjects<-list()
+data_obj<-list()
+for(i in 1:15){
+  temp_table<-import(paste(save_folder, "/Subject ",i,".xlsx",sep=""))[,2:86]
+  rownames(temp_table)<-c("ID2","ID3","ID4","ID5","ID6","ID7","ID8","ID9","ID10","ID11","ID12","ID13","ID14","ID15","ID16",
+            "ID17","ID18","ID19","ID20","ID21","ID22","ID23","ID24","ID25","ID26","ID27","ID28")
+  subjects[[paste("subject",i,sep = "")]]<-temp_table
+  
+}
+data_obj$subjects<-subjects
+  
+  table_ID11<-list()
+  table_ID13<-list()
+  table_ID19<-list()
+  table_ID20<-list()
+  table_ID7<-list()
+  
+  event_length1<-ncol(data_obj$subjects$subject1)
+  event_length2<-ncol(data_obj$subjects$subject1)
+  event_length3<-ncol(data_obj$subjects$subject1)
+  event_length4<-ncol(data_obj$subjects$subject1)
+  event_length5<-ncol(data_obj$subjects$subject1)
+  
+  for(i in 1:15){
+        table_ID11[[i]]<-as.numeric(data_obj[["subjects"]][[paste("subject",i,sep="")]]["ID11",])
+        if(sum(complete.cases(table_ID11[[i]]))<event_length1){event_length1<-sum(complete.cases(table_ID11[[i]]))}
+
+        table_ID13[[i]]<-as.numeric(data_obj[["subjects"]][[paste("subject",i,sep="")]]["ID13",])
+        if(sum(complete.cases(table_ID13[[i]]))<event_length2){event_length2<-sum(complete.cases(table_ID13[[i]]))}
+
+        table_ID19[[i]]<-as.numeric(data_obj[["subjects"]][[paste("subject",i,sep="")]]["ID19",])
+        if(sum(complete.cases(table_ID19[[i]]))<event_length3){event_length3<-sum(complete.cases(table_ID19[[i]]))}
+
+        table_ID20[[i]]<-as.numeric(data_obj[["subjects"]][[paste("subject",i,sep="")]]["ID20",])
+        if(sum(complete.cases(table_ID20[[i]]))<event_length4){event_length4<-sum(complete.cases(table_ID20[[i]]))}
+
+        table_ID7[[i]]<-as.numeric(data_obj[["subjects"]][[paste("subject",i,sep="")]]["ID7",])
+        if(sum(complete.cases(table_ID7[[i]]))<event_length5){event_length5<-sum(complete.cases(table_ID7[[i]]))}
+  }
+  
+  min_all<-min(event_length1,event_length2,event_length3,event_length4,event_length5)
+  start_t<-4
+  
+  time_series<-list()
+  for(i in c(7,11,13,19,20)){
+    time_series[[paste("table_ID",i,sep="")]]<-eval(parse(text=paste("table_ID",i,sep="")))
+  }
+  data_obj$time_series<-time_series
+
+  rm(list = c("subjects","time_series","table_ID11","table_ID13","table_ID19","table_ID20","table_ID7","event_length1","event_length2",
+              "event_length3","event_length4","event_length5","temp_table"))
+  
+
+  
+```
+
+binomial clustering
+```{r}
+#partitional clustering
+# centroid should be one of "mean", "median", "shape", "dba", "pam"
+
+set.seed(31)
+#set.seed(101)
+start_t<-1
+data<-prepar(data_obj,start_t,min_all)
+obj_1<-compare_clus(data)
+t1_perf<-obj_1[["resul_cluss"]]
+rm(list=c("data"))
+
+set.seed(31)
+#set.seed(101)
+start_t<-2
+data<-prepar(data_obj,start_t,min_all)
+obj_2<-compare_clus(data)
+t2_perf<-obj_2[["resul_cluss"]]
+rm(list=c("data"))
+
+set.seed(31)
+#set.seed(101)
+start_t<-3
+data<-prepar(data_obj,start_t,min_all)
+obj_3<-compare_clus(data)
+t3_perf<-obj_3[["resul_cluss"]]
+rm(list=c("data"))
+
+set.seed(31)
+#set.seed(101)
+start_t<-4
+data<-prepar(data_obj,start_t,min_all)
+obj_4<-compare_clus(data)
+t4_perf<-obj_4[["resul_cluss"]]
+rm(list=c("data"))
+
+set.seed(31)
+#set.seed(101)
+start_t<-5
+data<-prepar(data_obj,start_t,min_all)
+obj_5<-compare_clus(data)
+t5_perf<-obj_5[["resul_cluss"]]
+rm(list=c("data"))
+
+set.seed(31)
+#set.seed(101)
+start_t<-6
+data<-prepar(data_obj,start_t,min_all)
+obj_6<-compare_clus(data)
+t6_perf<-obj_6[["resul_cluss"]]
+rm(list=c("data"))
+
+set.seed(31)
+#set.seed(101)
+start_t<-7
+data<-prepar(data_obj,start_t,min_all)
+obj_7<-compare_clus(data)
+t7_perf<-obj_7[["resul_cluss"]]
+rm(list=c("data"))
+
+set.seed(31)
+#set.seed(101)
+start_t<-8
+data<-prepar(data_obj,start_t,min_all)
+obj_8<-compare_clus(data)
+t8_perf<-obj_8[["resul_cluss"]]
+rm(list=c("data"))
+
+set.seed(31)
+#set.seed(101)
+start_t<-9
+data<-prepar(data_obj,start_t,min_all)
+obj_9<-compare_clus(data)
+t9_perf<-obj_9[["resul_cluss"]]
+rm(list=c("data"))
+
+
+
+
+
+#distance types:
+# "dtw": DTW, optionally with a Sakoe-Chiba/Slanted-band constraint. Done with dtw::dtw().
+# "dtw2": DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint. See dtw2().
+# "dtw_basic": A custom version of DTW with less functionality, but faster. See dtw_basic().
+# "dtw_lb": DTW with L1 or L2 norm and optionally a Sakoe-Chiba constraint. Some computations
+# are avoided by first estimating the distance matrix with Lemire's lower bound and then
+# iteratively refining with DTW. See dtw_lb(). Not suitable for pam.precompute = TRUE nor
+# hierarchical clustering.
+# "lbk": Keogh's lower bound for DTW with either L1 or L2 norm for the Sakoe-Chiba constraint. See lb_keogh().
+# "lbi": Lemire's lower bound for DTW with either L1 or L2 norm for the Sakoe-Chiba constraint. See lb_improved().
+# "sbd": Shape-based distance. See SBD().
+# "gak": Global alignment kernels. See GAK().
+# "sdtw": Soft-DTW. See sdtw().
+
+#tadpole did not merge so I disregarded, here is the code:
+
+# for(i in c(9,11,17,18)){
+# assign(paste("clust_tadpole_ID",i,sep="") ,tsclust(eval(parse(text= paste("table_ID",i,sep=""))), type = "tadpole", k = 2L,
+#                                             trace = TRUE,
+#   control = tadpole_control(dc = 55, window.size = 15L)))}
+# data_table_ID9$tadpole<-clust_tadpole_ID9@cluster
+# data_table_ID11$tadpole<-clust_tadpole_ID11@cluster
+# data_table_ID17$tadpole<-clust_tadpole_ID17@cluster
+# data_table_ID18$tadpole<-clust_tadpole_ID18@cluster
+# 
+# table(data_table_ID9$tadpole)
+# table(data_table_ID11$tadpole)
+# table(data_table_ID17$tadpole)
+# table(data_table_ID18$tadpole)
+
+#####
+
+
+          
+```
+
+Visualization
+```{r}
+  print("step_time_SD")
+  data_plot(data_table_ID9,"ts1","ts50",
+                  "partitional","ts","step_time_SD","Time Span","NO")
+  
+  print("step_distance_SD")
+  data_plot(data_table_ID11,"ts1","ts50",
+                  "partitional","ts","step_distance_SD","Time Span","NO")
+  
+  
+  print("step_peak_jrk_average")
+  data_plot(data_table_ID17,"ts1","ts50",
+                  "partitional","ts","step_peak_jrk_average","Time Span","NO")
+  
+  print("overall_average_angle_back_bent")
+  data_plot(data_table_ID18,"ts1","ts50",
+                  "partitional","ts","overall_average_angle_back_bent","Time Span","NO")
+  
+
+```
+
+
+multiple clustering with PDC algorithm
+```{r}
+  num.ts <- 15 # number of time series
+  num.dim <- 3 # number of dimensions
+  len.ts <- 50 # length of time series
+      
+  # generate Gaussian white noise
+  data_ts_multi <- array(dim = c(len.ts, num.ts, num.dim),data = NA)
+  
+  s_one<-which(colnames(data_table_ID11)=="ts1")
+  e_one<-which(colnames(data_table_ID11)=="ts50")
+  
+        
+      for(i in 1:nrow(data_table_ID11)){
+        t1<-as.data.frame(t(data_table_ID11[i,s_one:e_one]))
+        colnames(t1)<-"one"
+        t2<-as.data.frame(t(data_table_ID17[i,s_one:e_one]))
+        colnames(t2)<-"two"
+        
+        t3<-as.data.frame(t(data_table_ID18[i,s_one:e_one]))
+        colnames(t3)<-"three"
+
+
+        t_tic<-t1
+        colnames(t_tic)<-"subjects"
+        t_tic$TIC<-data_table_ID11[i,1]
+   
+        ts<-cbind(t1,t2,t3)
+        
+        #ts<-cbind(t1,t2,tRDREV)
+         
+        for(j in 1:ncol(ts)){
+          data_ts_multi[ ,i,j]<-as.numeric(ts[,j])
+        }
+        
+      }
+      #
+    pdc_three<- pdclust(X = data_ts_multi, m=3,t=24)
+    clustering_three<-cutree(pdc_three, k = 3)
+    table(clustering_three)
+    
+    pdc_two<- pdclust(X = data_ts_multi, m=3,t=15)
+    clustering_two<-cutree(pdc_two, k = 2)
+    table(clustering_two)
+    
+```
+
+getting descriptive information
+```{r}
+data_table_ID3.4.5.6$clusterID11<-data_table_ID11$partitional
+data_table_ID3.4.5.6$clusterID17<-data_table_ID17$partitional
+data_table_ID3.4.5.6$clusterID18<-data_table_ID18$partitional
+data_table_ID3.4.5.6$multi2<-clustering_two
+data_table_ID3.4.5.6$multi3<-clustering_three
+
+#Gender Distribution
+{
+table(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$clusterID11==1),"ID3"])
+table(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$clusterID11==2),"ID3"])
+
+table(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$clusterID17==1),"ID3"])
+table(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$clusterID17==2),"ID3"])
+
+table(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$clusterID18==1),"ID3"])
+table(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$clusterID18==2),"ID3"])
+
+table(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$multi2==1),"ID3"])
+table(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$multi2==2),"ID3"])
+
+table(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$multi3==1),"ID3"])
+table(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$multi3==2),"ID3"])
+table(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$multi3==3),"ID3"])
+}
+
+#weight Distribution
+{
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$clusterID11==1),"ID4"])
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$clusterID11==2),"ID4"])
+
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$clusterID17==1),"ID4"])
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$clusterID17==2),"ID4"])
+
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$clusterID18==1),"ID4"])
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$clusterID18==2),"ID4"])
+
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$multi2==1),"ID4"])
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$multi2==2),"ID4"])
+
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$multi3==1),"ID4"])
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$multi3==2),"ID4"])
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$multi3==3),"ID4"])
+}
+
+#Weight Distribution
+{
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$clusterID11==1),"ID5"])
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$clusterID11==2),"ID5"])
+
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$clusterID17==1),"ID5"])
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$clusterID17==2),"ID5"])
+
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$clusterID18==1),"ID5"])
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$clusterID18==2),"ID5"])
+
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$multi2==1),"ID5"])
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$multi2==2),"ID5"])
+
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$multi3==1),"ID5"])
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$multi3==2),"ID5"])
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$multi3==3),"ID5"])
+}
+
+#Height Distribution
+{
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$clusterID11==1),"ID6"])
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$clusterID11==2),"ID6"])
+
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$clusterID17==1),"ID6"])
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$clusterID17==2),"ID6"])
+
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$clusterID18==1),"ID6"])
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$clusterID18==2),"ID6"])
+
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$multi2==1),"ID6"])
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$multi2==2),"ID6"])
+
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$multi3==1),"ID6"])
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$multi3==2),"ID6"])
+mean(data_table_ID3.4.5.6[which(data_table_ID3.4.5.6$multi3==3),"ID6"])
+}
+```
+
+
+preparing the BoardEx data for predicting the clusters
+preparing data for predicting 2007 - 2016 comp
+```{r}
+  start_year<-2007
+  end_year<-2016
+  dif_year<-as.numeric(end_year)-as.numeric(start_year)
+  
+  if(start_year-1000>1001){years<-c(1002,1003,1004,1005,1006,1007,1008,1009,1010,1011,1012,1013,1014,1015,1016)}
+  if(start_year-1000>1006){years<-c(1007,1008,1009,1010,1011,1012,1013,1014,1015,1016)}
+  if(start_year-1000>1011){years<-c(1012,1013,1014,1015,1016)}
+  years<-years+1000
+  
+  ts_GR<-BX_together$data$data_table_GR_all_2007_2016
+  ts_GR_s<-BX_together$data$data_table_GR_all_2007_2016
+  ts_netsize<-BX_together$data$data_table_netsize_all_2007_2016
+  ts_netsize_s<-BX_together$data$data_table_netsize_all_2007_2016
+  ts_noquals<-BX_together$data$data_table_noquals_all_2007_2016
+  ts_noquals_s<-BX_together$data$data_table_noquals_all_2007_2016
+  ts_timeboard<-BX_together$data$data_table_timeboard_all_2007_2016
+  ts_timeboard_s<-BX_together$data$data_table_timeboard_all_2007_2016
+  ts_timeretire<-BX_together$data$data_table_timeretire_all_2007_2016
+  ts_timeretire_s<-BX_together$data$data_table_timeretire_all_2007_2016
+  
+  ts_GR$GR_mean<-rowMeans(ts_GR[,c((ncol(ts_GR)-dif_year):ncol(ts_GR))])
+  ts_netsize$NS_mean<-rowMeans(ts_netsize[,c((ncol(ts_netsize)-dif_year):ncol(ts_netsize))])
+  ts_noquals$NQ_mean<-rowMeans(ts_noquals[,c((ncol(ts_noquals)-dif_year):ncol(ts_noquals))])
+  ts_timeboard$TB_mean<-rowMeans(ts_timeboard[,c((ncol(ts_timeboard)-dif_year):ncol(ts_timeboard))])
+  ts_timeretire$TR_mean<-rowMeans(ts_timeretire[,c((ncol(ts_timeretire)-dif_year):ncol(ts_timeretire))])
+  
+  for(i in 1:nrow(ts_GR_s)){
+    GR_model<-lm(as.numeric((ts_GR_s[,c((ncol(ts_GR_s)-dif_year):ncol(ts_GR_s))])[i,])~ years)
+    ts_GR_s[i,"GR_slope"]<-GR_model$coefficients[2]}
+  
+  for(i in 1:nrow(ts_netsize_s)){
+    NS_model<-lm(as.numeric((ts_netsize_s[,c((ncol(ts_netsize_s)-dif_year):ncol(ts_netsize_s))])[i,])~ years)
+    ts_netsize_s[i,"NS_slope"]<-NS_model$coefficients[2]}
+  
+  for(i in 1:nrow(ts_noquals_s)){
+    NQ_model<-lm(as.numeric((ts_noquals_s[,c((ncol(ts_noquals_s)-dif_year):ncol(ts_noquals_s))])[i,])~ years)
+    ts_noquals_s[i,"NQ_slope"]<-NQ_model$coefficients[2]}
+  
+  for(i in 1:nrow(ts_timeboard_s)){
+    TB_model<-lm(as.numeric((ts_timeboard_s[,c((ncol(ts_timeboard_s)-dif_year):ncol(ts_timeboard_s))])[i,])~ years)
+    ts_timeboard_s[i,"TB_slope"]<-TB_model$coefficients[2]}
+  
+  for(i in 1:nrow(ts_timeretire_s)){
+    TR_model<-lm(as.numeric((ts_timeretire_s[,c((ncol(ts_timeretire_s)-dif_year):ncol(ts_timeretire_s))])[i,])~ years)
+    ts_timeretire_s[i,"TR_slope"]<-TR_model$coefficients[2]}
+  
+  
+  together$mult_cluster$ts_all_comp_2007_2016<-merge(x = together$mult_cluster$ts_all_comp_2007_2016 , y = ts_GR[ , c("TIC", "GR_mean")], by = "TIC"   , all.x=TRUE)
+  together$mult_cluster$ts_all_comp_2007_2016<-merge(x = together$mult_cluster$ts_all_comp_2007_2016 , y = ts_GR_s[ , c("TIC", "GR_slope")], by = "TIC"   , all.x=TRUE)
+  
+  together$mult_cluster$ts_all_comp_2007_2016<-merge(x = together$mult_cluster$ts_all_comp_2007_2016 , y = ts_netsize[ , c("TIC", "NS_mean")], by = "TIC"   , all.x=TRUE)
+  together$mult_cluster$ts_all_comp_2007_2016<-merge(x = together$mult_cluster$ts_all_comp_2007_2016 , y = ts_netsize_s[ , c("TIC", "NS_slope")], by = "TIC"   , all.x=TRUE)
+  
+  together$mult_cluster$ts_all_comp_2007_2016<-merge(x = together$mult_cluster$ts_all_comp_2007_2016 , y = ts_noquals[ , c("TIC", "NQ_mean")], by = "TIC"   , all.x=TRUE)
+  together$mult_cluster$ts_all_comp_2007_2016<-merge(x = together$mult_cluster$ts_all_comp_2007_2016 , y = ts_noquals_s[ , c("TIC", "NQ_slope")], by = "TIC"   , all.x=TRUE)
+  
+  together$mult_cluster$ts_all_comp_2007_2016<-merge(x = together$mult_cluster$ts_all_comp_2007_2016 , y = ts_timeboard[ , c("TIC", "TB_mean")], by = "TIC"   , all.x=TRUE)
+  together$mult_cluster$ts_all_comp_2007_2016<-merge(x = together$mult_cluster$ts_all_comp_2007_2016 , y = ts_timeboard_s[ , c("TIC", "TB_slope")], by = "TIC"   , all.x=TRUE)
+  
+  together$mult_cluster$ts_all_comp_2007_2016<-merge(x = together$mult_cluster$ts_all_comp_2007_2016 , y = ts_timeretire[ , c("TIC", "TR_mean")], by = "TIC"   , all.x=TRUE)
+  together$mult_cluster$ts_all_comp_2007_2016<-merge(x = together$mult_cluster$ts_all_comp_2007_2016 , y = ts_timeretire_s[ , c("TIC", "TR_slope")], by = "TIC"   , all.x=TRUE)
+  
+```
+
+prediction
+```{r}
+
+set.seed(123)
+
+os<-"windows"
+
+if(os=="windows"){
+save_folder<-"C:/Users/hza0020/OneDrive - Auburn University/IOT/data"}
+if(os=="mac"){
+save_folder<-"/Users/hamid/OneDrive - Auburn University/IOT/data"}
+
+#this package is for importing excel files into R
+library(rio)
+
+
+data_pred11<-import(paste(save_folder,"/predict_clust_ID11.csv",sep=""))
+names(data_pred11)<-c( "ID","ID3", "ID4" ,"ID5" ,"ID6","TARGET") 
+data_pred11$TARGET<-data_pred11$TARGET-1
+
+regular_pred11<-leave_out(data<-data_pred11,TARGET<-"TARGET",vars<-c( "ID3", "ID4" ,"ID5" ,"ID6") ,ensembler<-"none",
+                 B_alg<-"none",cntr_type<-"simple",method_pred<-"regular")
+  
+ensemble_svm11<-leave_out(regular_pred11$resul_prob,"TARGET",c("log", "rf" ,"nnet","tan") ,"svm_ens","none","simple","ensemble")
+ensemble_log11<-leave_out(regular_pred11$resul_prob,"TARGET",c("svm", "rf" ,"nnet","tan") ,"log_ens","none","simple","ensemble")
+ensemble_rf11<-leave_out(regular_pred11$resul_prob,"TARGET",c("log", "svm" ,"nnet","tan") ,"rf_ens","none","simple","ensemble")
+ensemble_nnet11<-leave_out(regular_pred11$resul_prob,"TARGET",c("log", "svm" ,"rf","tan") ,"nnet_ens","none","simple","ensemble")  
+
+
+
+
+data_pred13<-import(paste(save_folder,"/predict_clust_ID13.csv",sep=""))
+names(data_pred13)<-c( "ID","ID3", "ID4" ,"ID5" ,"ID6","TARGET") 
+data_pred13$TARGET<-data_pred13$TARGET-1
+
+regular_pred13<-leave_out(data<-data_pred13,TARGET<-"TARGET",vars<-c( "ID3", "ID4" ,"ID5" ,"ID6") ,ensembler<-"none",
+                          B_alg<-"none",cntr_type<-"simple",method_pred<-"regular")
+
+ensemble_svm13<-leave_out(regular_pred13$resul_prob,"TARGET",c("log", "rf" ,"nnet","tan") ,"svm_ens","none","simple","ensemble")
+ensemble_log13<-leave_out(regular_pred13$resul_prob,"TARGET",c("svm", "rf" ,"nnet","tan") ,"log_ens","none","simple","ensemble")
+ensemble_rf13<-leave_out(regular_pred13$resul_prob,"TARGET",c("log", "svm" ,"nnet","tan") ,"rf_ens","none","simple","ensemble")
+ensemble_nnet13<-leave_out(regular_pred13$resul_prob,"TARGET",c("log", "svm" ,"rf","tan") ,"nnet_ens","none","simple","ensemble")     
+   
+
+  
+data_pred19<-import(paste(save_folder,"/predict_clust_ID19.csv",sep=""))
+names(data_pred19)<-c( "ID","ID3", "ID4" ,"ID5" ,"ID6","TARGET") 
+data_pred19$TARGET<-data_pred19$TARGET-1
+
+regular_pred19<-leave_out(data<-data_pred19,TARGET<-"TARGET",vars<-c( "ID3", "ID4" ,"ID5" ,"ID6") ,ensembler<-"none",
+                          B_alg<-"none",cntr_type<-"simple",method_pred<-"regular")
+
+ensemble_svm19<-leave_out(regular_pred19$resul_prob,"TARGET",c("log", "rf" ,"nnet","tan") ,"svm_ens","none","simple","ensemble")
+ensemble_log19<-leave_out(regular_pred19$resul_prob,"TARGET",c("svm", "rf" ,"nnet","tan") ,"log_ens","none","simple","ensemble")
+ensemble_rf19<-leave_out(regular_pred19$resul_prob,"TARGET",c("log", "svm" ,"nnet","tan") ,"rf_ens","none","simple","ensemble")
+ensemble_nnet19<-leave_out(regular_pred19$resul_prob,"TARGET",c("log", "svm" ,"rf","tan") ,"nnet_ens","none","simple","ensemble")  
+
+
+ 
+
+data_pred20<-import(paste(save_folder,"/predict_clust_ID20.csv",sep=""))
+names(data_pred20)<-c( "ID","ID3", "ID4" ,"ID5" ,"ID6","TARGET") 
+data_pred20$TARGET<-data_pred20$TARGET-1
+
+regular_pred20<-leave_out(data<-data_pred20,TARGET<-"TARGET",vars<-c( "ID3", "ID4" ,"ID5" ,"ID6") ,ensembler<-"none",
+                          B_alg<-"none",cntr_type<-"simple",method_pred<-"regular")
+
+ensemble_svm20<-leave_out(regular_pred20$resul_prob,"TARGET",c("log", "rf" ,"nnet","tan") ,"svm_ens","none","simple","ensemble")
+ensemble_log20<-leave_out(regular_pred20$resul_prob,"TARGET",c("svm", "rf" ,"nnet","tan") ,"log_ens","none","simple","ensemble")
+ensemble_rf20<-leave_out(regular_pred20$resul_prob,"TARGET",c("log", "svm" ,"nnet","tan") ,"rf_ens","none","simple","ensemble")
+ensemble_nnet20<-leave_out(regular_pred20$resul_prob,"TARGET",c("log", "svm" ,"rf","tan") ,"nnet_ens","none","simple","ensemble")
+
+
+regular_pred11$performance
+regular_pred13$performance
+regular_pred19$performance
+regular_pred20$performance
+
+
+ensemble_rf11$performance
+ensemble_rf13$performance
+ensemble_rf19$performance
+ensemble_rf20$performance
+
+
+```
+
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

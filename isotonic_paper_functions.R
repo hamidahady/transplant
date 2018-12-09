@@ -10,36 +10,157 @@ method_sam<-"RUS"
 repeat_no<-1
 vars_all<-var_desc$VARIABLE.NAME
 
+<<<<<<< HEAD
 pred_func<-function(train,hold_out,formul,method_sam, repeat_no,vars_all){
+=======
+
+# It does RUS function based on a coefficient for balancing levels of the trainset
+# I usually develop the coefficient based on the distribution of the holdout set
+RUS_func_dist<- function(input_data,TARGET,coef){
+  
+  Train_Two <- input_data[ which(input_data[TARGET]=="Two"), ]
+  Train_One <- input_data[ which(input_data[TARGET]=="One"), ]
+  if(nrow(Train_Two)<=nrow(Train_One)){
+    sample_size<-min(nrow(Train_Two)*coef,nrow(Train_One))
+    Train_One<-Train_One[sample(nrow(Train_One), sample_size), ]
+  }else{
+    sample_size<-min(nrow(Train_One)*coef,nrow(Train_Two))
+    Train_Two<-Train_Two[sample(nrow(Train_Two), sample_size), ]
+  }
+  input_data<-rbind(Train_One,Train_Two)
+  
+  return(input_data)
+}
+
+#=========================================================================================================
+type_fixer<-function(input_data,num_var,char_var,dep_var,fac_var){
+  for(i in names(input_data)){
+    if(i %in% num_var){input_data[i]<-as.numeric(input_data[[i]])}
+    if(i %in% char_var){input_data[i]<-as.character(input_data[[i]])}
+    if(i %in% fac_var){input_data[i]<-as.factor(input_data[[i]])}
+    levels(input_data[,which(colnames(input_data) %in% dep_var)])[1]<- "One"
+    levels(input_data[,which(colnames(input_data) %in% dep_var)])[2]<- "Two"}
+  
+  return(input_data)
+}
+
+#============================================================================
+
+createDummyvars<-function(data0){
+  dd<-as.data.frame(table(data0))
+  dum_data<-as.data.frame(matrix(0, ncol = nrow(dd), nrow = nrow(data0)))
+  names(dum_data) <- dd[,1]
+  for(i in 1:ncol(dum_data)){
+    dum_data[which(data0==names(dum_data)[i]),i]<-1
+    dum_data[i]<-as.factor(dum_data[,i])
+  }
+  return(dum_data)
+}
+#============================================================================
+dummy_maker<-function(input_data,char_var){
+  for (i in 1:ncol(input_data)){
+    if(is.character(input_data[,i])){
+      temp<-createDummyvars(input_data[i])
+      names(temp)<-paste(names(input_data[i]),levels(as.factor(input_data[,i])),sep="_")
+      
+      input_data<-cbind(input_data,temp)
+      input_data[,ncol(input_data)]<-NULL}
+  }
+  input_data<-input_data[-which(names(input_data) %in% char_var)]
+  return(input_data)
+}
+#============================================================================
+#in this version of dummy making, I do not drop one of the levels, because correlation
+#in not a major issue in machine learning
+dummy_maker2<-function(input_data,char_var){
+  for (i in 1:ncol(input_data)){
+    if(is.character(input_data[,i])){
+      temp<-createDummyvars(input_data[i])
+      names(temp)<-paste(names(input_data[i]),levels(as.factor(input_data[,i])),sep="_")
+      
+      input_data<-cbind(input_data,temp)
+      #input_data[,ncol(input_data)]<-NULL
+    }
+  }
+  input_data<-input_data[-which(names(input_data) %in% char_var)]
+  return(input_data)
+}
+#============================================================================
+
+# method_sam<-under sampling is "RUS" otherwise put "NONE"
+# formul<-formula for training
+# hold_out<-hold_out set
+# repeat_no<- how many time we repeat the cross validation
+# vars_all<- a refrence to all the variables we used for showing their importance
+# temp<-train
+# train<-temp
+# formul<-formul_year8
+# method_sam<-"RUS"
+# repeat_no<-1
+# vars_all<-var_desc$VARIABLE.NAME
+
+pred_func<-function(train,hold_out,formul,method_sam,log=1,svm=1,nnet=1,rf_bag=1,
+                    rf_bag_stack=1,c5_boost=1, gbm_boost=1,cart_bag=1,repeat_no, fold_no){
+>>>>>>> master
   # identifying the dependent variable or TARGET
   TARGET<-as.character(formul)[2]
   
   # I used 5 fold cross validation with 3 repeats
+<<<<<<< HEAD
   control_<- trainControl(method = "repeatedcv",  savePredictions = TRUE, number=5, 
                           repeats = repeat_no,
                           verboseIter = FALSE,returnResamp = "all",classProbs = TRUE, summaryFunction = twoClassSummary)
+=======
+  control_<- trainControl(method = "repeatedcv",  savePredictions = TRUE, number=fold_no, 
+                          repeats = repeat_no,
+                          verboseIter = FALSE,returnResamp = "all",classProbs = TRUE, 
+                          summaryFunction = twoClassSummary)
+>>>>>>> master
   
   svm_cost<-.5
   svm_sigma<-.0001
   
+<<<<<<< HEAD
+=======
+  coef<-as.data.frame(table(hold_out[TARGET]))
+  coef<-max(coef[2])/min(coef[2])
+  
+>>>>>>> master
   if(method_sam=="RUS"){
     train<-RUS_func(train,TARGET)
   }
   
+<<<<<<< HEAD
   
   resul_raw<-as.data.frame(matrix(NA, ncol = 6, nrow = nrow(hold_out)))
   names(resul_raw)<-c("log","svm","nnet","rf","rf_stack","TARGET")
+=======
+  if(method_sam=="RUS_dist"){
+    train<-RUS_func_dist(train,TARGET,coef)
+  }
+  
+  
+  resul_raw<-as.data.frame(matrix(NA, ncol = 9, nrow = nrow(hold_out)))
+  names(resul_raw)<-c("log","svm","nnet","rf_bag","rf_bag_stack",
+                      "c5_boost", "gbm_boost","cart_bag","TARGET")
+>>>>>>> master
   resul_raw$TARGET<-hold_out[,TARGET]
   resul_prob<-resul_raw
   
   
+<<<<<<< HEAD
   resul_perf<-as.data.frame(matrix(NA, ncol = 5, nrow = 4))
   names(resul_perf)<-c("log","svm","nnet","rf","rf_stack")
+=======
+  resul_perf<-as.data.frame(matrix(NA, ncol = 8, nrow = 4))
+  names(resul_perf)<-c("log","svm","nnet","rf_bag","rf_bag_stack","c5_boost", "gbm_boost","cart_bag")
+>>>>>>> master
   rownames(resul_perf)<-c("auc","sen","spec","accu")
   
   
   # i did parallel processing fo this part
   tasks <- list(
+<<<<<<< HEAD
     mod_log = function() caret::train(formul,  data=train, method="glm", family="binomial",
                                       trControl = control_, tuneLength = 10, metric="ROC"),
     
@@ -54,6 +175,33 @@ pred_func<-function(train,hold_out,formul,method_sam, repeat_no,vars_all){
     mod_rf =  function() caret::train(formul,  data=train, method="rf",
                                       trControl = control_, tuneGrid=expand.grid(mtry = ncol(train)-4),
                                       tuneLength = ncol(train)-1)
+=======
+    
+    mod_log = function() if(log!=0){caret::train(formul,  data=train, method="glm", family="binomial",
+                                                 trControl = control_, tuneLength = 10, metric="ROC")},
+    
+    mod_nnet = function() if(nnet!=0){caret::train(formul,  data=train, method="nnet", family="binomial",
+                                                   trControl = control_,  tuneGrid=expand.grid(size=5, decay=0.1), MaxNWts=20000,
+                                                   tuneLength = 10)},
+    
+    mod_svm = function() if(svm!=0){caret::train(formul,  data=train, method="svmRadial", family="binomial",
+                                                 trControl = control_,  tuneGrid=expand.grid(C=svm_cost, sigma=svm_sigma),
+                                                 tuneLength = 10)},
+    
+    mod_rf_bag =  function() if(rf_bag!=0){caret::train(formul,  data=train, method="rf",
+                                                        trControl = control_, tuneGrid=expand.grid(mtry = ncol(train)-4),
+                                                        tuneLength = ncol(train)-1)},
+    
+    mod_c5_boost = function() if(c5_boost!=0){caret::train(formul,  data=train, method="C5.0", family="binomial",
+                                                           trControl = control_, tuneLength = 10, metric="ROC")},
+    
+    mod_gbm_boost = function() if(gbm_boost!=0){caret::train(formul,  data=train, method="gbm",
+                                                             trControl = control_, tuneLength = 10, metric="ROC")},
+    
+    mod_cart_bag = function() if(cart_bag!=0){caret::train(formul,  data=train, method="treebag", family="binomial",
+                                                           trControl = control_, tuneLength = 10, metric="ROC")}
+    
+>>>>>>> master
   )
   out <- parallel::mclapply( 
     tasks, 
@@ -62,6 +210,7 @@ pred_func<-function(train,hold_out,formul,method_sam, repeat_no,vars_all){
   print(paste("regular prediction of ", TARGET," is done",sep=""))
   
   importance<-list()
+<<<<<<< HEAD
   
   
   if(class(try(varImp(out$mod_log),silent = TRUE))!="try-error"){
@@ -140,10 +289,188 @@ pred_func<-function(train,hold_out,formul,method_sam, repeat_no,vars_all){
   
   stack_data<-cbind(df_log,df_nnet,df_svm)
   stack_data$TARGET<-stack_data$obs_log
+=======
+  stack_data<-NA
+  formuler<-c()
+  
+  # investigation of the logistic regression model
+  # ==============================================
+  if(log!=0){if(class(try(varImp(out$mod_log),silent = TRUE))!="try-error"){
+    temp0<-as.data.frame(varImp(out$mod_log)[1])
+    names(temp0)<-c("importance")
+    temp0$variables<-rownames(temp0)
+    importance$log<-temp0}
+    resul_raw$log<-predict(out$mod_log, newdata=hold_out, type="raw")
+    resul_prob$log<-predict(out$mod_log, newdata=hold_out, type="prob")[,2]
+    
+    resul_perf["auc","log"]<-AUC:: auc(roc(resul_prob[,"log"],hold_out[,TARGET]))
+    resul_perf["sen","log"]<-caret:: sensitivity(resul_raw[,"log"],hold_out[,TARGET])
+    resul_perf["spec","log"]<-caret:: specificity(resul_raw[,"log"],hold_out[,TARGET])
+    resul_perf["accu","log"]<-(as.data.frame(confusionMatrix(resul_raw[,"log"],hold_out[,TARGET])$overall))[1,]
+    
+    df_log<-as.data.frame(cbind(out$mod_log$pred$obs,out$mod_log$pred$Two,
+                                out$mod_log$pred$Resample,
+                                out$mod_log$pred$rowIndex))
+    names(df_log)<-c("obs_log","log","fold_rep_log","index_log")
+    df_log<-df_log[order(df_log$index),]
+    
+    stack_data<- cbind(stack_data,df_log)
+    stack_data$TARGET<-stack_data$obs_log
+    stack_data$stack_data<-NULL
+    stack_data$log<-as.double(as.character((stack_data$log)))
+    formuler<-c(formuler,"log")}
+  #************************************************
+  #************************************************
+  
+  
+  # investigation of the svm model, it is a really difficul model to work with
+  # few times it does not merge
+  # ==============================================
+  if(svm!=0){if(class(try(varImp(out$mod_svm),silent = TRUE))!="try-error"){
+    temp0<-as.data.frame(varImp(out$mod_svm)[1])
+    names(temp0)<-c("importance")
+    temp0$variables<-rownames(temp0)
+    importance$svm<-temp0}
+    #I sould taking care of SVM, because sometime it does not merge
+    if((class(try(predict(out$mod_svm, newdata=hold_out, type="raw"),silent = TRUE))!="try-error")
+       & (has_error(predict(out$mod_svm, newdata=hold_out, type="raw"))==FALSE)
+       & (has_warning(predict(out$mod_svm, newdata=hold_out, type="raw"))==FALSE)
+    ){
+      resul_raw$svm<-predict(out$mod_svm, newdata=hold_out, type="raw")
+      resul_prob$svm<-predict(out$mod_svm, newdata=hold_out, type="prob")[,2]
+      resul_perf["auc","svm"]<-AUC:: auc(roc(resul_prob[,"svm"],hold_out[,TARGET]))
+      resul_perf["sen","svm"]<-caret:: sensitivity(resul_raw[,"svm"],hold_out[,TARGET])
+      resul_perf["spec","svm"]<-caret:: specificity(resul_raw[,"svm"],hold_out[,TARGET])
+      resul_perf["accu","svm"]<-(as.data.frame(confusionMatrix(resul_raw[,"svm"],hold_out[,TARGET])$overall))[1,]
+      
+      df_svm<-as.data.frame(cbind(out$mod_svm$pred$obs,out$mod_svm$pred$Two,
+                                  out$mod_svm$pred$Resample,
+                                  out$mod_svm$pred$rowIndex))
+      names(df_svm)<-c("obs_svm","svm","fold_rep_svm","index_svm")
+      df_svm<-df_svm[order(df_svm$index),]
+      
+      stack_data<- cbind(stack_data,df_svm)
+      stack_data$TARGET<-stack_data$obs_svm
+      stack_data$stack_data<-NULL
+      stack_data$svm<-as.double(as.character((stack_data$svm)))
+      formuler<-c(formuler,"svm")}}
+  #************************************************
+  #************************************************
+  
+  
+  # investigation of the neural network model
+  # ==============================================
+  if(nnet!=0){if(class(try(varImp(out$mod_nnet),silent = TRUE))!="try-error"){
+    temp0<-as.data.frame(varImp(out$mod_nnet)[1])
+    names(temp0)<-c("importance")
+    temp0$variables<-rownames(temp0)
+    importance$nnet<-temp0}
+    resul_raw$nnet<-predict(out$mod_nnet, newdata=hold_out, type="raw")
+    resul_prob$nnet<-predict(out$mod_nnet, newdata=hold_out, type="prob")[,2]
+    resul_perf["auc","nnet"]<-AUC:: auc(roc(resul_prob[,"nnet"],hold_out[,TARGET]))
+    resul_perf["sen","nnet"]<-caret:: sensitivity(resul_raw[,"nnet"],hold_out[,TARGET])
+    resul_perf["spec","nnet"]<-caret:: specificity(resul_raw[,"nnet"],hold_out[,TARGET])
+    resul_perf["accu","nnet"]<-(as.data.frame(confusionMatrix(resul_raw[,"nnet"],hold_out[,TARGET])$overall))[1,]
+    
+    df_nnet<-as.data.frame(cbind(out$mod_nnet$pred$obs,out$mod_nnet$pred$Two,
+                                 out$mod_nnet$pred$Resample,
+                                 out$mod_nnet$pred$rowIndex))
+    names(df_nnet)<-c("obs_nnet","nnet","fold_rep_nnet","index_nnet")
+    df_nnet<-df_nnet[order(df_nnet$index),]
+    
+    stack_data<- cbind(stack_data,df_nnet)
+    stack_data$TARGET<-stack_data$obs_nnet
+    stack_data$stack_data<-NULL
+    stack_data$nnet<-as.double(as.character((stack_data$nnet)))
+    formuler<-c(formuler,"nnet")}
+  #************************************************
+  #************************************************
+  
+  
+  # investigation of the random forest bagging model
+  # ==============================================
+  if(rf_bag!=0){if(class(try(varImp(out$mod_rf_bag),silent = TRUE))!="try-error"){
+    temp0<-as.data.frame(varImp(out$mod_rf_bag)[1])
+    names(temp0)<-c("importance")
+    temp0$variables<-rownames(temp0)
+    importance$rf_bag<-temp0}
+    resul_raw$rf_bag<-predict(out$mod_rf_bag, newdata=hold_out, type="raw")
+    resul_prob$rf_bag<-predict(out$mod_rf_bag, newdata=hold_out, type="prob")[,2]
+    resul_perf["auc","rf_bag"]<-AUC:: auc(roc(resul_prob[,"rf_bag"],hold_out[,TARGET]))
+    resul_perf["sen","rf_bag"]<-caret:: sensitivity(resul_raw[,"rf_bag"],hold_out[,TARGET])
+    resul_perf["spec","rf_bag"]<-caret:: specificity(resul_raw[,"rf_bag"],hold_out[,TARGET])
+    resul_perf["accu","rf_bag"]<-(as.data.frame(confusionMatrix(resul_raw[,"rf_bag"],hold_out[,TARGET])$overall))[1,]}
+  #************************************************
+  #************************************************
+  
+  
+  # investigation of the c5 boosting model
+  # ==============================================
+  if(c5_boost!=0){if(class(try(varImp(out$mod_c5_boost),silent = TRUE))!="try-error"){
+    temp0<-as.data.frame(varImp(out$mod_c5_boost)[1])
+    names(temp0)<-c("importance")
+    temp0$variables<-rownames(temp0)
+    importance$c5_boost<-temp0}
+    resul_raw$c5_boost<-predict(out$mod_c5_boost, newdata=hold_out, type="raw")
+    resul_prob$c5_boost<-predict(out$mod_c5_boost, newdata=hold_out, type="prob")[,2]
+    resul_perf["auc","c5_boost"]<-AUC:: auc(roc(resul_prob[,"c5_boost"],hold_out[,TARGET]))
+    resul_perf["sen","c5_boost"]<-caret:: sensitivity(resul_raw[,"c5_boost"],hold_out[,TARGET])
+    resul_perf["spec","c5_boost"]<-caret:: specificity(resul_raw[,"c5_boost"],hold_out[,TARGET])
+    resul_perf["accu","c5_boost"]<-(as.data.frame(confusionMatrix(resul_raw[,"c5_boost"],hold_out[,TARGET])$overall))[1,]}
+  #************************************************
+  #************************************************
+  
+  
+  # investigation of the stochastic gradient boosting model
+  # ==============================================
+  if(gbm_boost!=0){if(class(try(varImp(out$mod_gbm_boost),silent = TRUE))!="try-error"){
+    temp0<-as.data.frame(varImp(out$mod_gbm_boost)[1])
+    names(temp0)<-c("importance")
+    temp0$variables<-rownames(temp0)
+    importance$gbm_boost<-temp0}
+    resul_raw$gbm_boost<-predict(out$mod_gbm_boost, newdata=hold_out, type="raw")
+    resul_prob$gbm_boost<-predict(out$mod_gbm_boost, newdata=hold_out, type="prob")[,2]
+    resul_perf["auc","gbm_boost"]<-AUC:: auc(roc(resul_prob[,"gbm_boost"],hold_out[,TARGET]))
+    resul_perf["sen","gbm_boost"]<-caret:: sensitivity(resul_raw[,"gbm_boost"],hold_out[,TARGET])
+    resul_perf["spec","gbm_boost"]<-caret:: specificity(resul_raw[,"gbm_boost"],hold_out[,TARGET])
+    resul_perf["accu","gbm_boost"]<-(as.data.frame(confusionMatrix(resul_raw[,"gbm_boost"],hold_out[,TARGET])$overall))[1,]}
+  #************************************************
+  #************************************************
+  
+  
+  # investigation of the cart bagging model
+  # ==============================================
+  if(cart_bag!=0){if(class(try(varImp(out$mod_cart_bag),silent = TRUE))!="try-error"){
+    temp0<-as.data.frame(varImp(out$mod_cart_bag)[1])
+    names(temp0)<-c("importance")
+    temp0$variables<-rownames(temp0)
+    importance$cart_bag<-temp0}
+    resul_raw$cart_bag<-predict(out$mod_cart_bag, newdata=hold_out, type="raw")
+    resul_prob$cart_bag<-predict(out$mod_cart_bag, newdata=hold_out, type="prob")[,2]
+    resul_perf["auc","cart_bag"]<-AUC:: auc(roc(resul_prob[,"cart_bag"],hold_out[,TARGET]))
+    resul_perf["sen","cart_bag"]<-caret:: sensitivity(resul_raw[,"cart_bag"],hold_out[,TARGET])
+    resul_perf["spec","cart_bag"]<-caret:: specificity(resul_raw[,"cart_bag"],hold_out[,TARGET])
+    resul_perf["accu","cart_bag"]<-(as.data.frame(confusionMatrix(resul_raw[,"cart_bag"],hold_out[,TARGET])$overall))[1,]
+    
+    df_cart_bag<-as.data.frame(cbind(out$mod_cart_bag$pred$obs,out$mod_cart_bag$pred$Two,
+                                     out$mod_cart_bag$pred$Resample,
+                                     out$mod_cart_bag$pred$rowIndex))
+    names(df_cart_bag)<-c("obs_cart_bag","cart_bag","fold_rep_cart_bag","index_cart_bag")
+    df_cart_bag<-df_cart_bag[order(df_cart_bag$index),]
+    
+    stack_data<- cbind(stack_data,df_cart_bag)
+    stack_data$TARGET<-stack_data$obs_cart_bag
+    stack_data$stack_data<-NULL
+    stack_data$cart_bag<-as.double(as.character((stack_data$cart_bag)))
+    formuler<-c(formuler,"cart_bag")}
+  #************************************************
+  #************************************************
+>>>>>>> master
   
   levels(stack_data[,"TARGET"])[1] <- "One"
   levels(stack_data[,"TARGET"])[2] <- "Two"
   
+<<<<<<< HEAD
   
   stack_formula<-as.formula(paste("TARGET"," ~ ",paste(c("log","nnet","svm"), collapse="+"),sep = ""))
   
@@ -168,6 +495,25 @@ pred_func<-function(train,hold_out,formul,method_sam, repeat_no,vars_all){
   resul_perf["spec","rf_stack"]<-caret:: specificity(resul_raw[,"rf_stack"],hold_out[,TARGET])
   resul_perf["accu","rf_stack"]<-(as.data.frame(confusionMatrix(resul_raw[,"rf_stack"],hold_out[,TARGET])$overall))[1,]
   
+=======
+  stack_formula<-as.formula(paste("TARGET"," ~ ",paste(formuler, collapse="+"),sep = ""))
+  
+  
+  
+  if(rf_bag_stack!=0){
+    mod_rf_bag_stack<-caret::train(stack_formula,  data=stack_data, method="rf",
+                                   trControl = control_, tuneGrid=expand.grid(mtry = ncol(train)-4),
+                                   tuneLength = 7)
+    
+    resul_raw$rf_bag_stack<-predict(mod_rf_bag_stack, newdata=resul_prob, type="raw")
+    resul_prob$rf_bag_stack<-predict(mod_rf_bag_stack, newdata=resul_prob, type="prob")[,2]
+    
+    resul_perf["auc","rf_bag_stack"]<-AUC:: auc(roc(resul_prob[,"rf_bag_stack"],hold_out[,TARGET]))
+    resul_perf["sen","rf_bag_stack"]<-caret:: sensitivity(resul_raw[,"rf_bag_stack"],hold_out[,TARGET])
+    resul_perf["spec","rf_bag_stack"]<-caret:: specificity(resul_raw[,"rf_bag_stack"],hold_out[,TARGET])
+    resul_perf["accu","rf_bag_stack"]<-(as.data.frame(confusionMatrix(resul_raw[,"rf_bag_stack"],hold_out[,TARGET])$overall))[1,]
+  }
+>>>>>>> master
   
   
   out_object<-list()
@@ -249,7 +595,7 @@ row_missing_function <- function(input_data){
   na_count_row <- data.frame(na_count_row) #transforming this into a data_frame
   return(na_count_row)
 }
-
+#input_data<-heart.df.cleaned.lit
 col_missing_function <- function(input_data){
   na_count_col <- apply(input_data, 2, function(y) length(which(is.na(y)))/nrow(input_data)) # counting nas in each column
   na_count_col <- data.frame(na_count_col) #transforming this into a data_frame
@@ -360,15 +706,22 @@ table_cleaner<-function(input_object){
   return(input_object)
 }
 
-# input_object<-heart_df 
-table_cleaner_simple<-function(Try_data,col2row_emp,ID){
+#################################################
+# Try_data<-heart.df.cleaned.lit[c(all_vars,"year2","ID")]
+# kept_opt<-c("FUNC_STAT_TRR")
+# ID<-"ID"
+# kept_col<-c("year2")
+# col2row_emp<-1
+table_cleaner_simple<-function(Try_data,col2row_emp,ID,kept_col,kept_opt){
   #_______________________________Required Libraries_______________________________________________________________________________________
   # Install any needed package with the following command: install.packages("Name", dependencies = c("Depends", "Suggests"))
+  data0<-Try_data
+  Try_data<-data0[complete.cases(data0[kept_col]),]
   
-  paper<-matrix(0, ncol = 4, nrow = 100000)
-  paper<-as.data.frame(paper)
+  # paper<-matrix(0, ncol = 4, nrow = 100000)
+  # paper<-as.data.frame(paper)
   
-  names(paper)<- c("remained_col", "column_max","remained_row","row_max")
+  # names(paper)<- c("remained_col", "column_max","remained_row","row_max")
   
   max_col<-0
   max_row<-0
@@ -396,24 +749,20 @@ table_cleaner_simple<-function(Try_data,col2row_emp,ID){
         print(c("nrow",nrow(Try_data_temp)))
       }
     }
-    if(max_col>max_row*col2row_emp){
-    if (max_emp==max_col)
-    {
-      if((ncol(Try_data))>2){
-        f<-which(count_col$na_count_col==max_col)
-        i<-length(f)
-
-        if(length(f)>0){
-          Try_data_temp<<- Try_data[, -f]}else{
-            
-            if((nrow(Try_data))>3){
-              a<-which(count_row$na_count_row==max_row)
-              Try_data_temp <<- Try_data[-a,]
-            }
-          }
+    if(max_col>=max_row*col2row_emp){
+      b<-names(Try_data[which(count_col$na_count_col ==max_col)])
+      
+      if (max_emp==max_col){
+        if((ncol(Try_data))>2){
+          #in the next lines, I try to find which columns are the emptiest and then take out the one that I don't want to be deleted
+          
+          f<-which(count_col$na_count_col==max_col)
+          print(paste("iteration: ",i," // dropped column name: ",names(Try_data[f]),sep=""))
+          Try_data_temp<<- Try_data[, -f]
+        }
         
       }
-    }
+      
       print(c("ncol",ncol(Try_data_temp)))
     }else{
       if((nrow(Try_data))>3){
@@ -424,21 +773,37 @@ table_cleaner_simple<-function(Try_data,col2row_emp,ID){
       }
       print(c("nrow",nrow(Try_data_temp)))
     }
-
     
-    if(i<100000){
-      paper$remained_col[i]<-ncol(Try_data)
-      paper$column_max[i]<-max_col
-      paper$row_max[i]<-max_row
-      paper$remained_row[i]<-nrow(Try_data)}
+    
+    # if(i<100000){
+    #   paper$remained_col[i]<-ncol(Try_data)
+    #   paper$column_max[i]<-max_col
+    #   paper$row_max[i]<-max_row
+    #   paper$remained_row[i]<-nrow(Try_data)}
     
   }
+  
   input_object<-list()
-
+  
   print("Data Cleaning is Done! Exit the tool. Run the tool again, load the cleaned file for Data Analysis")
   out_object<-list()
   out_object$col_names<-names(Try_data_temp)
   out_object$row_ID<-Try_data_temp[ID]
+  
+  if(sum(names(data0) %in% kept_opt)>0){
+    temp<-data0[out_object$row_ID$ID,which(names(data0) %in% kept_opt)]
+    if(sum(names(data0) %in% kept_opt)==1){
+      temp<-as.data.frame(temp)
+      names(temp)<-names(data0[kept_opt])}
+    
+    data_inc<-cbind(Try_data_temp,temp)
+    data_inc<-data_inc[complete.cases(data_inc[kept_opt]),]
+    out_object$col_names_inc<-names(data_inc)
+    out_object$row_ID_inc<-data_inc[ID]
+  }else{
+    out_object$col_names_inc<-out_object$col_names
+    out_object$row_ID_inc<-out_object$row_ID
+  }
   
   return(out_object)
 }
@@ -2051,7 +2416,7 @@ class_generator_bino <- function(gstatus, gtime, p_unit,predict_length){
       if(gstatus==0){return(NA)}
       if(gstatus==1){return(1)}
     }
-      
+    
     
   }else{
     return(0)
@@ -2159,29 +2524,29 @@ matrix_filler<-function(col_no,filling_matrix,filler_matrix,common_col){
 }
 
 #__________________________________converting categorical variables to dummy variables_____________________
-dummy_maker<-function(data,begin,end){
-  for(i in begin:end){
-    if(class(data[,i])!="numeric"){data[,i]<-as.factor(data[,i])}
-  }
-  new_cols<-matrix(0, ncol = 1, nrow = nrow(data))
-  new_cols<-as.data.frame(new_cols)
-  new_cols[,1]<-NULL
-  T<-NULL
-  
-  for(i in begin:end){
-    if(nlevels(data[,i])>1){
-      formula<-as.formula(paste("~",colnames(data)[i],"-1",collapse = " "))
-      dummy_matrix<-as.data.frame(model.matrix(formula, data=data ))
-      dummy_matrix[,1]<-NULL
-      new_cols<-cbind(new_cols,dummy_matrix)
-      T<-c(T,i)
-    }
-  }
-  if(!is.null(T)){
-    data<-data[ ,-T]
-    data<-cbind(new_cols,data)}
-  return(data)
-}
+# dummy_maker<-function(data,begin,end){
+#   for(i in begin:end){
+#     if(class(data[,i])!="numeric"){data[,i]<-as.factor(data[,i])}
+#   }
+#   new_cols<-matrix(0, ncol = 1, nrow = nrow(data))
+#   new_cols<-as.data.frame(new_cols)
+#   new_cols[,1]<-NULL
+#   T<-NULL
+#   
+#   for(i in begin:end){
+#     if(nlevels(data[,i])>1){
+#       formula<-as.formula(paste("~",colnames(data)[i],"-1",collapse = " "))
+#       dummy_matrix<-as.data.frame(model.matrix(formula, data=data ))
+#       dummy_matrix[,1]<-NULL
+#       new_cols<-cbind(new_cols,dummy_matrix)
+#       T<-c(T,i)
+#     }
+#   }
+#   if(!is.null(T)){
+#     data<-data[ ,-T]
+#     data<-cbind(new_cols,data)}
+#   return(data)
+# }
 pre_process<-function(x){
   # removing near zero columns
   nzv<-nearZeroVar(x)
