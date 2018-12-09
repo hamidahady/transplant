@@ -9,38 +9,30 @@
 #dataset: the dataset that has NAs, var_name_vector: vector for variables names
 #var_na_vector: this is a vector that contains NA equivalent values associated var names in var_name_vector
 #each cell in var_na_vector might have multiple values for NAs
+ 
 
-dataset<-thoracic_data
-var_name_vector<-as.character(NA_identifier$VARIABLE.NAME)
-var_na_vector<-NA_identifier$nas
-  
 na_maker <- function(dataset,var_name_vector,var_na_vector){
-i<-286
-j<-232
-k<-1
+
   for(i in 1:ncol(dataset)){
     for(j in 1:length(var_name_vector)){
       if(grepl(names(dataset[i]),var_name_vector[j])){
-        print(i)
-        print(j)
-        if(length(as.character(var_na_vector[j]))>0){
-          str(var_na_vector[j])
-        for(k in 1:length(var_na_vector[j])){
-          dataset[dataset[,i] == var_na_vector[j][k],i] <- NA}
-        
+        if(nchar(as.character(var_na_vector[j]))>0){
+          for(k in 1:length(unlist(strsplit(as.character(var_na_vector[j]), "; "))) ){
+            temp<-dataset[,i]
+  # next if checks if the NA value we think is really inside our data or not, otherwise we might get an error
+            if((unlist(strsplit(as.character(var_na_vector[j]), "; ")))[k] %in% as.data.frame(table(dataset[,i]))[,1] ){
+         
+            temp[temp==(unlist(strsplit(as.character(var_na_vector[j]), "; ")))[k]]<-NA
+            }
+            dataset[,i]<-temp
+          }
         }
     }
   }
-   
+  }
+
+return(dataset)
 }
-
-
-
-}
-
-
-
-
 
 #===============================================
 #============remove extra libraries and packages in r
@@ -124,10 +116,10 @@ table_cleaner<-function(input_object){
   NA_cells<-input_object$NA_cells
   NA_cells<-unlist(strsplit(NA_cells, split=","))
   
-  for(i in 1:length(NA_cells)){
-    
-    Try_data[Try_data == NA_cells[i]] <- NA
-    gc()}
+  # for(i in 1:length(NA_cells)){
+  #   
+  #   Try_data[Try_data == NA_cells[i]] <- NA
+  #   gc()}
   
   new_data<-input_object$file_new_data
   

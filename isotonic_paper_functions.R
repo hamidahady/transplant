@@ -1,4 +1,238 @@
+# method_sam<-under sampling is "RUS" otherwise put "NONE"
+# formul<-formula for training
+# hold_out<-hold_out set
+# repeat_no<- how many time we repeat the cross validation
+# vars_all<- a refrence to all the variables we used for showing their importance
+temp<-train
+train<-temp
+formul<-formul_year7
+method_sam<-"RUS"
+repeat_no<-1
+vars_all<-var_desc$VARIABLE.NAME
 
+pred_func<-function(train,hold_out,formul,method_sam, repeat_no,vars_all){
+  # identifying the dependent variable or TARGET
+  TARGET<-as.character(formul)[2]
+  
+  # I used 5 fold cross validation with 3 repeats
+  control_<- trainControl(method = "repeatedcv",  savePredictions = TRUE, number=5, 
+                          repeats = repeat_no,
+                          verboseIter = FALSE,returnResamp = "all",classProbs = TRUE, summaryFunction = twoClassSummary)
+  
+  svm_cost<-.5
+  svm_sigma<-.0001
+  
+  if(method_sam=="RUS"){
+    train<-RUS_func(train,TARGET)
+  }
+  
+  
+  resul_raw<-as.data.frame(matrix(NA, ncol = 6, nrow = nrow(hold_out)))
+  names(resul_raw)<-c("log","svm","nnet","rf","rf_stack","TARGET")
+  resul_raw$TARGET<-hold_out[,TARGET]
+  resul_prob<-resul_raw
+  
+  
+  resul_perf<-as.data.frame(matrix(NA, ncol = 5, nrow = 4))
+  names(resul_perf)<-c("log","svm","nnet","rf","rf_stack")
+  rownames(resul_perf)<-c("auc","sen","spec","accu")
+  
+  
+  # i did parallel processing fo this part
+  tasks <- list(
+    mod_log = function() caret::train(formul,  data=train, method="glm", family="binomial",
+                                      trControl = control_, tuneLength = 10, metric="ROC"),
+    
+    mod_nnet = function() caret::train(formul,  data=train, method="nnet", family="binomial",
+                                       trControl = control_,  tuneGrid=expand.grid(size=5, decay=0.1), MaxNWts=20000,
+                                       tuneLength = 10),
+    
+    mod_svm = function() caret::train(formul,  data=train, method="svmRadial", family="binomial",
+                                      trControl = control_,  tuneGrid=expand.grid(C=svm_cost, sigma=svm_sigma),
+                                      tuneLength = 10),
+    
+    mod_rf =  function() caret::train(formul,  data=train, method="rf",
+                                      trControl = control_, tuneGrid=expand.grid(mtry = ncol(train)-4),
+                                      tuneLength = ncol(train)-1)
+  )
+  out <- parallel::mclapply( 
+    tasks, 
+    function(f) f())
+  
+  print(paste("regular prediction of ", TARGET," is done",sep=""))
+  
+  importance<-list()
+  
+  
+  if(class(try(varImp(out$mod_log),silent = TRUE))!="try-error"){
+    temp0<-as.data.frame(varImp(out$mod_log)[1])
+    names(temp0)<-c("importance")
+    temp0$variables<-rownames(temp0)
+    importance$log<-temp0
+    }
+  
+  if(class(try(varImp(out$mod_svm),silent = TRUE))!="try-error"){
+    temp0<-as.data.frame(varImp(out$mod_svm)[1])
+    names(temp0)<-c("importance")
+    temp0$variables<-rownames(temp0)
+    importance$svm<-temp0
+  }
+  
+  if(class(try(varImp(out$mod_nnet),silent = TRUE))!="try-error"){
+    temp0<-as.data.frame(varImp(out$mod_nnet)[1])
+    names(temp0)<-c("importance")
+    temp0$variables<-rownames(temp0)
+    importance$nnet<-temp0
+  }
+  
+  if(class(try(varImp(out$mod_rf),silent = TRUE))!="try-error"){
+    temp0<-as.data.frame(varImp(out$mod_rf)[1])
+    names(temp0)<-c("importance")
+    temp0$variables<-rownames(temp0)
+    importance$rf<-temp0
+  }
+  
+  
+  resul_raw$log<-predict(out$mod_log, newdata=hold_out, type="raw")
+  resul_prob$log<-predict(out$mod_log, newdata=hold_out, type="prob")[,2]
+  
+  resul_raw$svm<-predict(out$mod_svm, newdata=hold_out, type="raw")
+  resul_prob$svm<-predict(out$mod_svm, newdata=hold_out, type="prob")[,2]
+  
+  resul_raw$nnet<-predict(out$mod_nnet, newdata=hold_out, type="raw")
+  resul_prob$nnet<-predict(out$mod_nnet, newdata=hold_out, type="prob")[,2]
+  
+  resul_raw$rf<-predict(out$mod_rf, newdata=hold_out, type="raw")
+  resul_prob$rf<-predict(out$mod_rf, newdata=hold_out, type="prob")[,2]
+  
+  resul_perf["auc","log"]<-AUC:: auc(roc(resul_prob[,"log"],hold_out[,TARGET]))
+  resul_perf["sen","log"]<-caret:: sensitivity(resul_raw[,"log"],hold_out[,TARGET])
+  resul_perf["spec","log"]<-caret:: specificity(resul_raw[,"log"],hold_out[,TARGET])
+  resul_perf["accu","log"]<-(as.data.frame(confusionMatrix(resul_raw[,"log"],hold_out[,TARGET])$overall))[1,]
+  
+  resul_perf["auc","svm"]<-AUC:: auc(roc(resul_prob[,"svm"],hold_out[,TARGET]))
+  resul_perf["sen","svm"]<-caret:: sensitivity(resul_raw[,"svm"],hold_out[,TARGET])
+  resul_perf["spec","svm"]<-caret:: specificity(resul_raw[,"svm"],hold_out[,TARGET])
+  resul_perf["accu","svm"]<-(as.data.frame(confusionMatrix(resul_raw[,"svm"],hold_out[,TARGET])$overall))[1,]
+  
+  resul_perf["auc","nnet"]<-AUC:: auc(roc(resul_prob[,"nnet"],hold_out[,TARGET]))
+  resul_perf["sen","nnet"]<-caret:: sensitivity(resul_raw[,"nnet"],hold_out[,TARGET])
+  resul_perf["spec","nnet"]<-caret:: specificity(resul_raw[,"nnet"],hold_out[,TARGET])
+  resul_perf["accu","nnet"]<-(as.data.frame(confusionMatrix(resul_raw[,"nnet"],hold_out[,TARGET])$overall))[1,]
+  
+  resul_perf["auc","rf"]<-AUC:: auc(roc(resul_prob[,"rf"],hold_out[,TARGET]))
+  resul_perf["sen","rf"]<-caret:: sensitivity(resul_raw[,"rf"],hold_out[,TARGET])
+  resul_perf["spec","rf"]<-caret:: specificity(resul_raw[,"rf"],hold_out[,TARGET])
+  resul_perf["accu","rf"]<-(as.data.frame(confusionMatrix(resul_raw[,"rf"],hold_out[,TARGET])$overall))[1,]
+  
+  
+  df_log<-as.data.frame(cbind(out$mod_log$pred$obs,out$mod_log$pred$Two,out$mod_log$pred$Resample,out$mod_log$pred$rowIndex))
+  names(df_log)<-c("obs_log","log","fold_rep_log","index_log")
+  df_log<-df_log[order(df_log$index),]
+  
+  df_nnet<-as.data.frame(cbind(out$mod_nnet$pred$obs,out$mod_nnet$pred$Two,out$mod_nnet$pred$Resample,out$mod_nnet$pred$rowIndex))
+  names(df_nnet)<-c("obs_nnet","nnet","fold_rep_nnet","index_nnet")
+  df_nnet<-df_nnet[order(df_nnet$index),]
+  
+  df_svm<-as.data.frame(cbind(out$mod_svm$pred$obs,out$mod_svm$pred$Two,out$mod_svm$pred$Resample,out$mod_svm$pred$rowIndex))
+  names(df_svm)<-c("obs_svm","svm","fold_rep_svm","index_svm")
+  df_svm<-df_svm[order(df_svm$index),]
+  
+  stack_data<-cbind(df_log,df_nnet,df_svm)
+  stack_data$TARGET<-stack_data$obs_log
+  
+  levels(stack_data[,"TARGET"])[1] <- "One"
+  levels(stack_data[,"TARGET"])[2] <- "Two"
+  
+  
+  stack_formula<-as.formula(paste("TARGET"," ~ ",paste(c("log","nnet","svm"), collapse="+"),sep = ""))
+  
+  
+  stack_data$log<-as.double(as.character((stack_data$log)))
+  stack_data$nnet<-as.double(as.character((stack_data$nnet)))
+  stack_data$svm<-as.double(as.character((stack_data$svm)))
+  
+  
+  mod_rf_stack<-caret::train(stack_formula,  data=stack_data, method="rf",
+                             trControl = control_, tuneGrid=expand.grid(mtry = ncol(train)-4),
+                             tuneLength = 7)
+  
+  
+  
+  resul_raw$rf_stack<-predict(mod_rf_stack, newdata=resul_prob, type="raw")
+  resul_prob$rf_stack<-predict(mod_rf_stack, newdata=resul_prob, type="prob")[,2]
+  
+  
+  resul_perf["auc","rf_stack"]<-AUC:: auc(roc(resul_prob[,"rf_stack"],hold_out[,TARGET]))
+  resul_perf["sen","rf_stack"]<-caret:: sensitivity(resul_raw[,"rf_stack"],hold_out[,TARGET])
+  resul_perf["spec","rf_stack"]<-caret:: specificity(resul_raw[,"rf_stack"],hold_out[,TARGET])
+  resul_perf["accu","rf_stack"]<-(as.data.frame(confusionMatrix(resul_raw[,"rf_stack"],hold_out[,TARGET])$overall))[1,]
+  
+  
+  
+  out_object<-list()
+  out_object$resul_raw<-resul_raw
+  out_object$resul_prob<-resul_prob
+  out_object$resul_perf<-resul_perf
+  out_object$stack_data<-stack_data
+  
+  return(out_object)
+  
+  
+}
+#============================================================================
+#===============================================
+#============remove extra libraries and packages in r
+#===============================================
+#this function is for converting some values that are actually NA but they are specified with the different values
+#dataset: the dataset that has NAs, var_name_vector: vector for variables names
+#var_na_vector: this is a vector that contains NA equivalent values associated var names in var_name_vector
+#each cell in var_na_vector might have multiple values for NAs
+
+
+na_maker <- function(dataset,var_name_vector,var_na_vector){
+  
+  for(i in 1:ncol(dataset)){
+    for(j in 1:length(var_name_vector)){
+      if(grepl(names(dataset[i]),var_name_vector[j])){
+        if(nchar(as.character(var_na_vector[j]))>0){
+          for(k in 1:length(unlist(strsplit(as.character(var_na_vector[j]), "; "))) ){
+            temp<-dataset[,i]
+            # next if checks if the NA value we think is really inside our data or not, otherwise we might get an error
+            if((unlist(strsplit(as.character(var_na_vector[j]), "; ")))[k] %in% as.data.frame(table(dataset[,i]))[,1] ){
+              
+              temp[temp==(unlist(strsplit(as.character(var_na_vector[j]), "; ")))[k]]<-NA
+            }
+            dataset[,i]<-temp
+          }
+        }
+      }
+    }
+  }
+  
+  return(dataset)
+}
+
+#===============================================
+#============remove extra libraries and packages in r
+#===============================================
+get_os <- function(){
+  sysinf <- Sys.info()
+  if (!is.null(sysinf)){
+    os <- sysinf['sysname']
+    if (os == 'Darwin')
+      os <- "MAC"
+  } else { ## mystery machine
+    os <- .Platform$OS.type
+    if (grepl("^darwin", R.version$os))
+      os <- "MAC"
+    if (grepl("linux-gnu", R.version$os))
+      os <- "LINUX"
+  }
+  toupper(os)
+}
+
+#===============================================
 #===============================================
 #============remove extra libraries and packages in r
 #===============================================
@@ -124,6 +358,89 @@ table_cleaner<-function(input_object){
   
   
   return(input_object)
+}
+
+# input_object<-heart_df 
+table_cleaner_simple<-function(Try_data,col2row_emp,ID){
+  #_______________________________Required Libraries_______________________________________________________________________________________
+  # Install any needed package with the following command: install.packages("Name", dependencies = c("Depends", "Suggests"))
+  
+  paper<-matrix(0, ncol = 4, nrow = 100000)
+  paper<-as.data.frame(paper)
+  
+  names(paper)<- c("remained_col", "column_max","remained_row","row_max")
+  
+  max_col<-0
+  max_row<-0
+  Try_data_temp <<- Try_data
+  
+  for(i in 1:100000){
+    Try_data<-Try_data_temp
+    gc()
+    count_col <- col_missing_function(Try_data)
+    gc()
+    count_row <- row_missing_function(Try_data)
+    max_col<-max(count_col)
+    max_row<-max(count_row)
+    max_emp<- max(max_col,max_row)
+    
+    if(max_col==0){break()}
+    if(max_row==0){break()}
+    
+    if (max_emp==max_row)
+    {
+      if((nrow(Try_data))>3){
+        a<-which(count_row$na_count_row==max_row)
+        
+        Try_data_temp <<- Try_data[-a,]
+        print(c("nrow",nrow(Try_data_temp)))
+      }
+    }
+    if(max_col>max_row*col2row_emp){
+    if (max_emp==max_col)
+    {
+      if((ncol(Try_data))>2){
+        f<-which(count_col$na_count_col==max_col)
+        i<-length(f)
+
+        if(length(f)>0){
+          Try_data_temp<<- Try_data[, -f]}else{
+            
+            if((nrow(Try_data))>3){
+              a<-which(count_row$na_count_row==max_row)
+              Try_data_temp <<- Try_data[-a,]
+            }
+          }
+        
+      }
+    }
+      print(c("ncol",ncol(Try_data_temp)))
+    }else{
+      if((nrow(Try_data))>3){
+        a<-which(count_row$na_count_row==max_row)
+        
+        Try_data_temp <<- Try_data[-a,]
+        
+      }
+      print(c("nrow",nrow(Try_data_temp)))
+    }
+
+    
+    if(i<100000){
+      paper$remained_col[i]<-ncol(Try_data)
+      paper$column_max[i]<-max_col
+      paper$row_max[i]<-max_row
+      paper$remained_row[i]<-nrow(Try_data)}
+    
+  }
+  input_object<-list()
+
+  print("Data Cleaning is Done! Exit the tool. Run the tool again, load the cleaned file for Data Analysis")
+  out_object<-list()
+  out_object$col_names<-names(Try_data_temp)
+  out_object$row_ID<-Try_data_temp[ID]
+  
+  return(out_object)
 }
 
 #this function yield ID columns and change variable with high numbers of categories to 5 levels
@@ -1724,16 +2041,18 @@ conso_bin<-function(data_lit,Random_Forrest,Lasso,FFS,itself_svm,itself_log,itse
 
 #_________________________
 # TARGET generator for Bionomial
+
 class_generator_bino <- function(gstatus, gtime, p_unit,predict_length){
   p_unit<-as.numeric(p_unit)
   predict_length<-as.numeric(predict_length)
   
   if(gtime < p_unit*predict_length){
-    if(gstatus == 0){
-      return(NA)
-    }else {
-      return(1)
+    if(is.na(gstatus)){return(NA)}else{
+      if(gstatus==0){return(NA)}
+      if(gstatus==1){return(1)}
     }
+      
+    
   }else{
     return(0)
   }
@@ -1769,7 +2088,8 @@ var_finder <- function(input1,input2){
 }
 
 #finding importance of variables from a model
-
+#vars_org<-VarsData_Phase
+# input_object<-out$mod_log
 model_imp_exc <- function(input_object,vars_org){
   imp_model<-varImp(input_object)
   imp_model<-as.data.frame(imp_model$importance)
@@ -1875,10 +2195,11 @@ pre_process<-function(x){
   if(!is.null(comboInfo$remove)){x<-x[, -comboInfo$remove]}
   return(x)}
 
-RUS_func <- function(input_data){
+
+RUS_func <- function(input_data,TARGET){
   
-  Train_Two <- input_data[ which(input_data$TARGET=="Two"), ]
-  Train_One <- input_data[ which(input_data$TARGET=="One"), ]
+  Train_Two <- input_data[ which(input_data[TARGET]=="Two"), ]
+  Train_One <- input_data[ which(input_data[TARGET]=="One"), ]
   if(nrow(Train_Two)<=nrow(Train_One)){
     sample_size<-nrow(Train_Two)
     Train_One<-Train_One[sample(nrow(Train_One), sample_size), ]
