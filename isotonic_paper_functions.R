@@ -10,7 +10,6 @@ method_sam<-"RUS"
 repeat_no<-1
 vars_all<-var_desc$VARIABLE.NAME
 
-<<<<<<< HEAD
 pred_func<-function(train,hold_out,formul,method_sam, repeat_no,vars_all){
 =======
 
@@ -106,7 +105,7 @@ pred_func<-function(train,hold_out,formul,method_sam,log=1,svm=1,nnet=1,rf_bag=1
   TARGET<-as.character(formul)[2]
   
   # I used 5 fold cross validation with 3 repeats
-<<<<<<< HEAD
+
   control_<- trainControl(method = "repeatedcv",  savePredictions = TRUE, number=5, 
                           repeats = repeat_no,
                           verboseIter = FALSE,returnResamp = "all",classProbs = TRUE, summaryFunction = twoClassSummary)
@@ -120,7 +119,7 @@ pred_func<-function(train,hold_out,formul,method_sam,log=1,svm=1,nnet=1,rf_bag=1
   svm_cost<-.5
   svm_sigma<-.0001
   
-<<<<<<< HEAD
+
 =======
   coef<-as.data.frame(table(hold_out[TARGET]))
   coef<-max(coef[2])/min(coef[2])
@@ -130,7 +129,6 @@ pred_func<-function(train,hold_out,formul,method_sam,log=1,svm=1,nnet=1,rf_bag=1
     train<-RUS_func(train,TARGET)
   }
   
-<<<<<<< HEAD
   
   resul_raw<-as.data.frame(matrix(NA, ncol = 6, nrow = nrow(hold_out)))
   names(resul_raw)<-c("log","svm","nnet","rf","rf_stack","TARGET")
@@ -148,7 +146,6 @@ pred_func<-function(train,hold_out,formul,method_sam,log=1,svm=1,nnet=1,rf_bag=1
   resul_prob<-resul_raw
   
   
-<<<<<<< HEAD
   resul_perf<-as.data.frame(matrix(NA, ncol = 5, nrow = 4))
   names(resul_perf)<-c("log","svm","nnet","rf","rf_stack")
 =======
@@ -160,7 +157,7 @@ pred_func<-function(train,hold_out,formul,method_sam,log=1,svm=1,nnet=1,rf_bag=1
   
   # i did parallel processing fo this part
   tasks <- list(
-<<<<<<< HEAD
+
     mod_log = function() caret::train(formul,  data=train, method="glm", family="binomial",
                                       trControl = control_, tuneLength = 10, metric="ROC"),
     
@@ -210,8 +207,6 @@ pred_func<-function(train,hold_out,formul,method_sam,log=1,svm=1,nnet=1,rf_bag=1
   print(paste("regular prediction of ", TARGET," is done",sep=""))
   
   importance<-list()
-<<<<<<< HEAD
-  
   
   if(class(try(varImp(out$mod_log),silent = TRUE))!="try-error"){
     temp0<-as.data.frame(varImp(out$mod_log)[1])
@@ -469,8 +464,6 @@ pred_func<-function(train,hold_out,formul,method_sam,log=1,svm=1,nnet=1,rf_bag=1
   
   levels(stack_data[,"TARGET"])[1] <- "One"
   levels(stack_data[,"TARGET"])[2] <- "Two"
-  
-<<<<<<< HEAD
   
   stack_formula<-as.formula(paste("TARGET"," ~ ",paste(c("log","nnet","svm"), collapse="+"),sep = ""))
   
