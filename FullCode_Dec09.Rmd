@@ -240,7 +240,6 @@ cat("Number of patients after dropping irrelevant patients: ",nrow(heart.df.clea
 # Subsetting the data and creating other variables based on literature or to capture time effects
 base<-heart.df.cleaned
 heart.df.cleaned<-base
-table(heart.df.cleaned$HEMO_PA_MN_TRR)
 
 heart.df.cleaned <- subset(heart.df.cleaned) %>%  
   #ref1
@@ -276,32 +275,165 @@ base[c("HEMO_PA_MN_TRR" , "HEMO_PCW_TRR","HEMO_CO_TRR","ECMO_TCR" , "ECMO_TRR","
   "TRANSFUSIONS", "PREV_TX", "ICU", "VAS", "VENTILATOR_TRR","HEMO_SYS_TRR", "CREAT_TRR","TBILI")]<-NULL
 
  # DIAG was used in ref1, but it has same form with TCR_DGN and THORACIC_DGN so we recategorize all three together
+
+  val_old<-c(1000,1001,1002,1003,1004,1005,1006,1049,1007,1200)
+  val_new<-c("DILATED_MYOPATHY_IDI","DILATED_MYOPATHY_OTH","DILATED_MYOPATHY_OTH","DILATED_MYOPATHY_OTH",
+             "DILATED_MYOPATHY_OTH","DILATED_MYOPATHY_OTH","DILATED_MYOPATHY_OTH","DILATED_MYOPATHY_OTH",
+             "DILATED_MYOPATHY_ISC","CORONARY")
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="DIAG",val_old,val_new)
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="TCR_DGN",val_old,val_new)
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="THORACIC_DGN",val_old,val_new)
+
+ base[ c("TCR_DGN", "DIAG","THORACIC_DGN")]<-NULL
  
-table(heart.df.cleaned$TCR_DGN)
-table(heart.df.cleaned$DIAG)
-table(heart.df.cleaned$THORACIC_DGN)
+ #Due to discrepency, I drop these 2 variables especially natural cause for death is not same in both
+ heart.df.cleaned[c("DEATH_CIRCUM_DON","DEATH_MECH_DON")]<-NULL
+ 
+ base[c("DEATH_CIRCUM_DON","DEATH_MECH_DON")]<-NULL
+ 
+val_old<-c(1,2,3,4,999,"Unknown")
+val_new<-c("ANOXIA","CEREBROVASCULAR/STROKE","HEAD TRAUMA","OTHER","OTHER",NA)
+heart.df.cleaned<-cat_changer(heart.df.cleaned,var="COD_CAD_DON",val_old,val_new)
+  
+val_old<-c("A","A1","A2","B","O","AB","A1B","A2B")
+val_new<-c("A","A","A","B","O","AB","AB","AB")
+heart.df.cleaned<-cat_changer(heart.df.cleaned,var="ABO",val_old,val_new)
+heart.df.cleaned<-cat_changer(heart.df.cleaned,var="ABO_DON",val_old,val_new)
 
-  heart.df.cleaned$temp<-heart.df.cleaned$DIAG
+val_old<-c(1,2,3,4,5,998)
+val_new<-c("no","one","two","other","other",NA)
+heart.df.cleaned<-cat_changer(heart.df.cleaned,var="DIAB",val_old,val_new)
+
+  # previous cardiac surgery /merge of (PRIOR_CARD_SURG_TCR, PRIOR_CARD_SURG_TRR)
+  
+  heart.df.cleaned$CARD_SURG<-NA
   for(i in 1:nrow(heart.df.cleaned)){
-    if(!is.na(heart.df.cleaned$DIAG[i])){
-      heart.df.cleaned$DIAG[i]<-"other"
-      if(heart.df.cleaned$temp[i]==1000){heart.df.cleaned$DIAG[i]<-"DILATED_MYOPATHY_IDI"}
+    if(!is.na(heart.df.cleaned$PRIOR_CARD_SURG_TCR[i])){
+      if(heart.df.cleaned$PRIOR_CARD_SURG_TCR[i]=="Y"){heart.df.cleaned$CARD_SURG[i]<-"Y"}
       
-      if((heart.df.cleaned$temp[i]>=1001 & heart.df.cleaned$temp[i]<= 1006) |
-         (heart.df.cleaned$temp[i]==1049)){heart.df.cleaned$DIAG[i]<-"DILATED_MYOPATHY_OTH"}
-      
-      if(heart.df.cleaned$temp[i]==1007){heart.df.cleaned$DIAG[i]<-"DILATED_MYOPATHY_ISC"}
-      
-      if(heart.df.cleaned$temp[i]==1200){heart.df.cleaned$DIAG[i]<-"CORONARY"}
-
+      if(heart.df.cleaned$PRIOR_CARD_SURG_TCR[i]=="N"){
+        
+        if(!is.na(heart.df.cleaned$PRIOR_CARD_SURG_TRR[i])){
+          
+          if(heart.df.cleaned$PRIOR_CARD_SURG_TRR[i]=="N"){heart.df.cleaned$CARD_SURG[i]<-"N"}
+        }
+      }
     }
+    if(!is.na(heart.df.cleaned$PRIOR_CARD_SURG_TRR[i])){
+      if(heart.df.cleaned$PRIOR_CARD_SURG_TRR[i]=="Y"){heart.df.cleaned$CARD_SURG[i]<-"Y"}}
   }
 
 
+# the following section is associated to antigen matching we have the matching parameter which means if donor-recepient 
+# number of matched antigen coming from parent (0: no match, 1: one matched, 2: both matched)
+# we drop the antigen location numbers (trivial) and just keep the matching parameters
+heart.df.cleaned[c("DA1","DA2","RA1","RA2","DB1","DB2","RB1","RB2","RDR1","RDR2","DDR1","DDR2")]<-NULL 
+#these are the matching parameters that we keep
+# HLAMIS, AMIS, BMIS , DRMIS
 
-sum(as.data.frame(table(heart.df.cleaned$TCR_DGN))[2])
-sum(as.data.frame(table(heart.df.cleaned$DIAG))[2])
-sum(as.data.frame(table(heart.df.cleaned$THORACIC_DGN))[2])
+
+# refrence for HLAMIS
+# Weisdorf, Daniel, et al. "Classification of HLA-matching for retrospective analysis of unrelated donor transplantation: revised definitions # to predict survival." Biology of Blood and Marrow Transplantation 14.7 (2008): 748-758.
+
+# refrences for AMIS, BMIS, DRMIS:
+# Parham, Peter. The immune system. Garland Science, 2014.
+val_old<-c(0,1,2,3,4,5,6)
+val_new<-c("a","a","a","b","c","f","e")
+heart.df.cleaned<-cat_changer(heart.df.cleaned,var="HLAMIS",val_old,val_new)
+
+  # Transplant era / TX_YEAR:
+  # I focused on after 2000. however, I can do for the rest, together or 4 different modeling
+  # -1995
+  # 1996-2000
+  # 2001-2005
+  # 2006-
+  heart.df.cleaned$TX_YEAR_CAT<-heart.df.cleaned$TX_YEAR
+  
+  # categoirizing the transplantation date
+  for(i in 1:nrow(heart.df.cleaned)){
+    if(!is.na(heart.df.cleaned$TX_YEAR[i])){ 
+      if(heart.df.cleaned$TX_YEAR[i]<=1995){heart.df.cleaned$TX_YEAR_CAT[i]<-"A"}
+      else if(heart.df.cleaned$TX_YEAR[i]>1995 && heart.df.cleaned$TX_YEAR[i]<=2000){heart.df.cleaned$TX_YEAR_CAT[i]<-"B"}
+      else if(heart.df.cleaned$TX_YEAR[i]>2000 && heart.df.cleaned$TX_YEAR[i]<=2005){heart.df.cleaned$TX_YEAR_CAT[i]<-"C"}
+      else if(heart.df.cleaned$TX_YEAR[i]>2005){heart.df.cleaned$TX_YEAR_CAT[i]<-"D"}
+    }
+  }
+  heart.df.cleaned$TX_YEAR<-NULL
+  
+  base[c("COD_CAD_DON","ABO","ABO_DON","DIAB","PRIOR_CARD_SURG_TCR","PRIOR_CARD_SURG_TRR",
+       "DA1","DA2","RA1","RA2","DB1","DB2","RB1","RB2","RDR1","RDR2","DDR1","DDR2","HLAMIS","AMIS","BMIS","DRMIS",
+       "TX_YEAR")]<-NULL
+
+
+ # the following block is our variable manipulation based on the other literature as specified in Ali Dag's paper
+  
+  heart.df.cleaned$ETH_MAT<-NA
+  for(i in 1:nrow(heart.df.cleaned)){
+    if(!is.na(heart.df.cleaned$ETHCAT[i])){
+      if(!is.na(heart.df.cleaned$ETHCAT_DON[i])){
+        if(heart.df.cleaned$ETHCAT_DON[i]==heart.df.cleaned$ETHCAT[i]){
+          heart.df.cleaned$ETH_MAT[i]<-"Y"}else{heart.df.cleaned$ETH_MAT[i]<-"N"}
+      }
+    }
+  }
+  
+  heart.df.cleaned$GENDER_MAT<-NA
+  for(i in 1:nrow(heart.df.cleaned)){
+    if(!is.na(heart.df.cleaned$GENDER[i])){
+      if(!is.na(heart.df.cleaned$GENDER_DON[i])){
+        if(heart.df.cleaned$GENDER[i]==heart.df.cleaned$GENDER_DON[i]){
+          heart.df.cleaned$GENDER_MAT[i]<-"Y"}else{heart.df.cleaned$GENDER_MAT[i]<-"N"}
+      }
+    }
+  }  
+  
+  # PROC_TY_HR, from literature
+  val_old<-c(1,2)
+  val_new<-c("Bicaval","Traditional")
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="PROC_TY_HR",val_old,val_new)
+  
+  # SHARE_TY, ALLOCATION TYPE-LOCAL/REGIONAL/NATIONAL - 3=LOCAL/4=REGIONAL/5=NATIONAL/6=FOREIGN
+  val_old<-c(3,4)
+  val_new<-c("LOCAL","REGIONAL")
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="SHARE_TY",val_old,val_new)
+  
+  # EDUCATION
+  val_old<-c(1,2,3,4,5,6,996,998)
+  val_new<-c("a","a","b","c","d","d",NA,NA)
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="EDUCATION",val_old,val_new)
+  
+  # ETHCAT, ethnicity of recepients
+  val_old<-c(1,2,4,5,6,7,9,998)
+  val_new<-c("w","b","h","o","o","o","o",NA)
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="ETHCAT",val_old,val_new)
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="ETHCAT_DON",val_old,val_new)
+  # the following variables identifies if they are hispanic/latino or not
+  # ETHNICITY
+  
+  # I dropped PRI_PAYMENT_CTRY_TRR because too many NAs
+  
+PRI_PAYMENT_CTRY_TCR
+PRI_PAYMENT_CTRY_TRR
+PRI_PAYMENT_TCR
+PRI_PAYMENT_TRR
+
+
+base[c("ETHCAT","ETHCAT_DON","GENDER","GENDER_DON","PROC_TY_HR","SHARE_TY","EDUCATION","ETHCAT","ETHCAT_DON",
+       "ETHNICITY","PRI_PAYMENT_CTRY_TCR", "PRI_PAYMENT_CTRY_TRR","PRI_PAYMENT_TCR", "PRI_PAYMENT_TRR")]<-NULL
+  
+  
+table(heart.df.cleaned$PRI_PAYMENT_TRR)
+table(heart.df.cleaned$ETHCAT_DON)
+table(heart.df.cleaned$ETHNICITY)
+table(heart.df$BMIS)
+
+table(heart.df$DA1)
+table(heart.df$DA2)
+table(heart.df$PROC_TY_HR)
+
+table(heart.df$HLAMIS)
+
+
 
 ```
 
