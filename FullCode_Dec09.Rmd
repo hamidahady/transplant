@@ -38,7 +38,7 @@ p_load(dplyr,caret,foreign,
        kernlab,
        e1071,DT)
 
-source("https://raw.githubusercontent.com/hamidahady/transplant/master/isotonic_paper_functions.R")
+source("https://raw.githubusercontent.com/hamidahady/transplant/Hamid/isotonic_paper_functions.R")
 
 ############################ Data Gathering #########################
 # first I download the data from github and then merge them into one large file named heart.df

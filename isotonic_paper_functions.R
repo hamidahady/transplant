@@ -1,18 +1,4 @@
-# method_sam<-under sampling is "RUS" otherwise put "NONE"
-# formul<-formula for training
-# hold_out<-hold_out set
-# repeat_no<- how many time we repeat the cross validation
-# vars_all<- a refrence to all the variables we used for showing their importance
-temp<-train
-train<-temp
-formul<-formul_year7
-method_sam<-"RUS"
-repeat_no<-1
-vars_all<-var_desc$VARIABLE.NAME
 
-<<<<<<< HEAD
-pred_func<-function(train,hold_out,formul,method_sam, repeat_no,vars_all){
-=======
 
 # It does RUS function based on a coefficient for balancing levels of the trainset
 # I usually develop the coefficient based on the distribution of the holdout set
@@ -89,93 +75,90 @@ dummy_maker2<-function(input_data,char_var){
 
 # method_sam<-under sampling is "RUS" otherwise put "NONE"
 # formul<-formula for training
-# hold_out<-hold_out set
+# hold_out<-hold_out_new set
 # repeat_no<- how many time we repeat the cross validation
 # vars_all<- a refrence to all the variables we used for showing their importance
-# temp<-train
+# temp<-train_new
 # train<-temp
-# formul<-formul_year8
-# method_sam<-"RUS"
+# formul<- eval(parse(text = paste("formul_year_sames",i,sep = "")))
+# method_sam<-"NONE"
 # repeat_no<-1
+# fold_no<-5
 # vars_all<-var_desc$VARIABLE.NAME
 
-pred_func<-function(train,hold_out,formul,method_sam,log=1,svm=1,nnet=1,rf_bag=1,
-                    rf_bag_stack=1,c5_boost=1, gbm_boost=1,cart_bag=1,repeat_no, fold_no){
->>>>>>> master
+
+pred_func<-function(train,hold_out,formul,method_sam,seed_no=110,output_name="results",output_location="current",
+                    save_ondrive="yes", log=1,svm=1,nnet=1,rf_bag=1,
+                    rf_bag_stack=1,c5_boost=1, gbm_boost=1,cart_bag=1,repeat_no=1, fold_no=5,comments="nothing"){
+  
+  if(output_location=="current"){
+    location_<-getwd()
+  }else{
+    
+    if(class(try(setwd(output_location),silent = TRUE))!="try-error"){location_<-setwd(output_location)}else{
+      location_<-getwd()
+    }}
+  
+  location_file<-paste(location_,"/",output_name,"_",Sys.info()["nodename"],".",
+                       gsub(" ", "",gsub(":", "-", format(Sys.time(), "%b.%Y.%d.%a.%X"))),".RData",sep="")
+  
+
+  
+  set.seed(seed_no)
   # identifying the dependent variable or TARGET
   TARGET<-as.character(formul)[2]
   
   # I used 5 fold cross validation with 3 repeats
-<<<<<<< HEAD
-  control_<- trainControl(method = "repeatedcv",  savePredictions = TRUE, number=5, 
-                          repeats = repeat_no,
-                          verboseIter = FALSE,returnResamp = "all",classProbs = TRUE, summaryFunction = twoClassSummary)
-=======
   control_<- trainControl(method = "repeatedcv",  savePredictions = TRUE, number=fold_no, 
                           repeats = repeat_no,
                           verboseIter = FALSE,returnResamp = "all",classProbs = TRUE, 
                           summaryFunction = twoClassSummary)
->>>>>>> master
+  
+  train_pred_two<-train["ID"]
   
   svm_cost<-.5
   svm_sigma<-.0001
   
-<<<<<<< HEAD
-=======
   coef<-as.data.frame(table(hold_out[TARGET]))
   coef<-max(coef[2])/min(coef[2])
   
->>>>>>> master
+  holdout_DIS<-as.data.frame(table(hold_out[TARGET]))
+  vars_no<-length(all.vars(formul))-1
+  
+  leak_track_before<-sum(hold_out$ID %in% train$ID)
+  leak_track_after<-0
+  TARGET_DIS_before<-as.data.frame(table(train[TARGET]))
+  TARGET_DIS_after<-"NONE"
+  Balance_method<-"NONE"
+  
   if(method_sam=="RUS"){
     train<-RUS_func(train,TARGET)
+    
+    leak_track_after<-sum(hold_out$ID %in% train$ID)
+    TARGET_DIS_after<-as.data.frame(table(train[TARGET]))
+    Balance_method<-"RUS"
   }
   
-<<<<<<< HEAD
-  
-  resul_raw<-as.data.frame(matrix(NA, ncol = 6, nrow = nrow(hold_out)))
-  names(resul_raw)<-c("log","svm","nnet","rf","rf_stack","TARGET")
-=======
   if(method_sam=="RUS_dist"){
     train<-RUS_func_dist(train,TARGET,coef)
   }
   
   
-  resul_raw<-as.data.frame(matrix(NA, ncol = 9, nrow = nrow(hold_out)))
+  resul_raw<-as.data.frame(matrix(NA, ncol = 10, nrow = nrow(hold_out)))
   names(resul_raw)<-c("log","svm","nnet","rf_bag","rf_bag_stack",
-                      "c5_boost", "gbm_boost","cart_bag","TARGET")
->>>>>>> master
+                      "c5_boost", "gbm_boost","cart_bag","TARGET","ID")
   resul_raw$TARGET<-hold_out[,TARGET]
+  resul_raw$ID<-hold_out$ID
   resul_prob<-resul_raw
   
   
-<<<<<<< HEAD
-  resul_perf<-as.data.frame(matrix(NA, ncol = 5, nrow = 4))
-  names(resul_perf)<-c("log","svm","nnet","rf","rf_stack")
-=======
   resul_perf<-as.data.frame(matrix(NA, ncol = 8, nrow = 4))
   names(resul_perf)<-c("log","svm","nnet","rf_bag","rf_bag_stack","c5_boost", "gbm_boost","cart_bag")
->>>>>>> master
   rownames(resul_perf)<-c("auc","sen","spec","accu")
-  
-  
+
+
   # i did parallel processing fo this part
   tasks <- list(
-<<<<<<< HEAD
-    mod_log = function() caret::train(formul,  data=train, method="glm", family="binomial",
-                                      trControl = control_, tuneLength = 10, metric="ROC"),
-    
-    mod_nnet = function() caret::train(formul,  data=train, method="nnet", family="binomial",
-                                       trControl = control_,  tuneGrid=expand.grid(size=5, decay=0.1), MaxNWts=20000,
-                                       tuneLength = 10),
-    
-    mod_svm = function() caret::train(formul,  data=train, method="svmRadial", family="binomial",
-                                      trControl = control_,  tuneGrid=expand.grid(C=svm_cost, sigma=svm_sigma),
-                                      tuneLength = 10),
-    
-    mod_rf =  function() caret::train(formul,  data=train, method="rf",
-                                      trControl = control_, tuneGrid=expand.grid(mtry = ncol(train)-4),
-                                      tuneLength = ncol(train)-1)
-=======
     
     mod_log = function() if(log!=0){caret::train(formul,  data=train, method="glm", family="binomial",
                                                  trControl = control_, tuneLength = 10, metric="ROC")},
@@ -201,7 +184,6 @@ pred_func<-function(train,hold_out,formul,method_sam,log=1,svm=1,nnet=1,rf_bag=1
     mod_cart_bag = function() if(cart_bag!=0){caret::train(formul,  data=train, method="treebag", family="binomial",
                                                            trControl = control_, tuneLength = 10, metric="ROC")}
     
->>>>>>> master
   )
   out <- parallel::mclapply( 
     tasks, 
@@ -209,93 +191,19 @@ pred_func<-function(train,hold_out,formul,method_sam,log=1,svm=1,nnet=1,rf_bag=1
   
   print(paste("regular prediction of ", TARGET," is done",sep=""))
   
+
   importance<-list()
-<<<<<<< HEAD
-  
-  
-  if(class(try(varImp(out$mod_log),silent = TRUE))!="try-error"){
-    temp0<-as.data.frame(varImp(out$mod_log)[1])
-    names(temp0)<-c("importance")
-    temp0$variables<-rownames(temp0)
-    importance$log<-temp0
-    }
-  
-  if(class(try(varImp(out$mod_svm),silent = TRUE))!="try-error"){
-    temp0<-as.data.frame(varImp(out$mod_svm)[1])
-    names(temp0)<-c("importance")
-    temp0$variables<-rownames(temp0)
-    importance$svm<-temp0
-  }
-  
-  if(class(try(varImp(out$mod_nnet),silent = TRUE))!="try-error"){
-    temp0<-as.data.frame(varImp(out$mod_nnet)[1])
-    names(temp0)<-c("importance")
-    temp0$variables<-rownames(temp0)
-    importance$nnet<-temp0
-  }
-  
-  if(class(try(varImp(out$mod_rf),silent = TRUE))!="try-error"){
-    temp0<-as.data.frame(varImp(out$mod_rf)[1])
-    names(temp0)<-c("importance")
-    temp0$variables<-rownames(temp0)
-    importance$rf<-temp0
-  }
-  
-  
-  resul_raw$log<-predict(out$mod_log, newdata=hold_out, type="raw")
-  resul_prob$log<-predict(out$mod_log, newdata=hold_out, type="prob")[,2]
-  
-  resul_raw$svm<-predict(out$mod_svm, newdata=hold_out, type="raw")
-  resul_prob$svm<-predict(out$mod_svm, newdata=hold_out, type="prob")[,2]
-  
-  resul_raw$nnet<-predict(out$mod_nnet, newdata=hold_out, type="raw")
-  resul_prob$nnet<-predict(out$mod_nnet, newdata=hold_out, type="prob")[,2]
-  
-  resul_raw$rf<-predict(out$mod_rf, newdata=hold_out, type="raw")
-  resul_prob$rf<-predict(out$mod_rf, newdata=hold_out, type="prob")[,2]
-  
-  resul_perf["auc","log"]<-AUC:: auc(roc(resul_prob[,"log"],hold_out[,TARGET]))
-  resul_perf["sen","log"]<-caret:: sensitivity(resul_raw[,"log"],hold_out[,TARGET])
-  resul_perf["spec","log"]<-caret:: specificity(resul_raw[,"log"],hold_out[,TARGET])
-  resul_perf["accu","log"]<-(as.data.frame(confusionMatrix(resul_raw[,"log"],hold_out[,TARGET])$overall))[1,]
-  
-  resul_perf["auc","svm"]<-AUC:: auc(roc(resul_prob[,"svm"],hold_out[,TARGET]))
-  resul_perf["sen","svm"]<-caret:: sensitivity(resul_raw[,"svm"],hold_out[,TARGET])
-  resul_perf["spec","svm"]<-caret:: specificity(resul_raw[,"svm"],hold_out[,TARGET])
-  resul_perf["accu","svm"]<-(as.data.frame(confusionMatrix(resul_raw[,"svm"],hold_out[,TARGET])$overall))[1,]
-  
-  resul_perf["auc","nnet"]<-AUC:: auc(roc(resul_prob[,"nnet"],hold_out[,TARGET]))
-  resul_perf["sen","nnet"]<-caret:: sensitivity(resul_raw[,"nnet"],hold_out[,TARGET])
-  resul_perf["spec","nnet"]<-caret:: specificity(resul_raw[,"nnet"],hold_out[,TARGET])
-  resul_perf["accu","nnet"]<-(as.data.frame(confusionMatrix(resul_raw[,"nnet"],hold_out[,TARGET])$overall))[1,]
-  
-  resul_perf["auc","rf"]<-AUC:: auc(roc(resul_prob[,"rf"],hold_out[,TARGET]))
-  resul_perf["sen","rf"]<-caret:: sensitivity(resul_raw[,"rf"],hold_out[,TARGET])
-  resul_perf["spec","rf"]<-caret:: specificity(resul_raw[,"rf"],hold_out[,TARGET])
-  resul_perf["accu","rf"]<-(as.data.frame(confusionMatrix(resul_raw[,"rf"],hold_out[,TARGET])$overall))[1,]
-  
-  
-  df_log<-as.data.frame(cbind(out$mod_log$pred$obs,out$mod_log$pred$Two,out$mod_log$pred$Resample,out$mod_log$pred$rowIndex))
-  names(df_log)<-c("obs_log","log","fold_rep_log","index_log")
-  df_log<-df_log[order(df_log$index),]
-  
-  df_nnet<-as.data.frame(cbind(out$mod_nnet$pred$obs,out$mod_nnet$pred$Two,out$mod_nnet$pred$Resample,out$mod_nnet$pred$rowIndex))
-  names(df_nnet)<-c("obs_nnet","nnet","fold_rep_nnet","index_nnet")
-  df_nnet<-df_nnet[order(df_nnet$index),]
-  
-  df_svm<-as.data.frame(cbind(out$mod_svm$pred$obs,out$mod_svm$pred$Two,out$mod_svm$pred$Resample,out$mod_svm$pred$rowIndex))
-  names(df_svm)<-c("obs_svm","svm","fold_rep_svm","index_svm")
-  df_svm<-df_svm[order(df_svm$index),]
-  
-  stack_data<-cbind(df_log,df_nnet,df_svm)
-  stack_data$TARGET<-stack_data$obs_log
-=======
   stack_data<-NA
   formuler<-c()
+  
+
   
   # investigation of the logistic regression model
   # ==============================================
   if(log!=0){if(class(try(varImp(out$mod_log),silent = TRUE))!="try-error"){
+    
+    train_pred_two[(out$mod_log$pred$rowIndex),"pred_train_log"]<-out$mod_log$pred$Two
+    
     temp0<-as.data.frame(varImp(out$mod_log)[1])
     names(temp0)<-c("importance")
     temp0$variables<-rownames(temp0)
@@ -335,7 +243,11 @@ pred_func<-function(train,hold_out,formul,method_sam,log=1,svm=1,nnet=1,rf_bag=1
     if((class(try(predict(out$mod_svm, newdata=hold_out, type="raw"),silent = TRUE))!="try-error")
        & (has_error(predict(out$mod_svm, newdata=hold_out, type="raw"))==FALSE)
        & (has_warning(predict(out$mod_svm, newdata=hold_out, type="raw"))==FALSE)
+       & (!is.na(sum(out$mod_svm$pred$Two)))
     ){
+      train_pred_two[(out$mod_svm$pred$rowIndex),"pred_train_svm"]<-out$mod_svm$pred$Two
+      str(out$mod_svm$pred$Two)
+      
       resul_raw$svm<-predict(out$mod_svm, newdata=hold_out, type="raw")
       resul_prob$svm<-predict(out$mod_svm, newdata=hold_out, type="prob")[,2]
       resul_perf["auc","svm"]<-AUC:: auc(roc(resul_prob[,"svm"],hold_out[,TARGET]))
@@ -361,6 +273,9 @@ pred_func<-function(train,hold_out,formul,method_sam,log=1,svm=1,nnet=1,rf_bag=1
   # investigation of the neural network model
   # ==============================================
   if(nnet!=0){if(class(try(varImp(out$mod_nnet),silent = TRUE))!="try-error"){
+    
+    train_pred_two[(out$mod_nnet$pred$rowIndex),"pred_train_nnet"]<-out$mod_nnet$pred$Two
+    
     temp0<-as.data.frame(varImp(out$mod_nnet)[1])
     names(temp0)<-c("importance")
     temp0$variables<-rownames(temp0)
@@ -390,6 +305,7 @@ pred_func<-function(train,hold_out,formul,method_sam,log=1,svm=1,nnet=1,rf_bag=1
   # investigation of the random forest bagging model
   # ==============================================
   if(rf_bag!=0){if(class(try(varImp(out$mod_rf_bag),silent = TRUE))!="try-error"){
+    train_pred_two[(out$mod_rf_bag$pred$rowIndex),"pred_train_rf_bag"]<-out$mod_rf_bag$pred$Two
     temp0<-as.data.frame(varImp(out$mod_rf_bag)[1])
     names(temp0)<-c("importance")
     temp0$variables<-rownames(temp0)
@@ -407,6 +323,7 @@ pred_func<-function(train,hold_out,formul,method_sam,log=1,svm=1,nnet=1,rf_bag=1
   # investigation of the c5 boosting model
   # ==============================================
   if(c5_boost!=0){if(class(try(varImp(out$mod_c5_boost),silent = TRUE))!="try-error"){
+    
     temp0<-as.data.frame(varImp(out$mod_c5_boost)[1])
     names(temp0)<-c("importance")
     temp0$variables<-rownames(temp0)
@@ -424,6 +341,7 @@ pred_func<-function(train,hold_out,formul,method_sam,log=1,svm=1,nnet=1,rf_bag=1
   # investigation of the stochastic gradient boosting model
   # ==============================================
   if(gbm_boost!=0){if(class(try(varImp(out$mod_gbm_boost),silent = TRUE))!="try-error"){
+
     temp0<-as.data.frame(varImp(out$mod_gbm_boost)[1])
     names(temp0)<-c("importance")
     temp0$variables<-rownames(temp0)
@@ -441,6 +359,7 @@ pred_func<-function(train,hold_out,formul,method_sam,log=1,svm=1,nnet=1,rf_bag=1
   # investigation of the cart bagging model
   # ==============================================
   if(cart_bag!=0){if(class(try(varImp(out$mod_cart_bag),silent = TRUE))!="try-error"){
+    train_pred_two[(out$mod_cart_bag$pred$rowIndex),"pred_train_cart_bag"]<-out$mod_cart_bag$pred$Two
     temp0<-as.data.frame(varImp(out$mod_cart_bag)[1])
     names(temp0)<-c("importance")
     temp0$variables<-rownames(temp0)
@@ -465,42 +384,16 @@ pred_func<-function(train,hold_out,formul,method_sam,log=1,svm=1,nnet=1,rf_bag=1
     formuler<-c(formuler,"cart_bag")}
   #************************************************
   #************************************************
->>>>>>> master
   
   levels(stack_data[,"TARGET"])[1] <- "One"
   levels(stack_data[,"TARGET"])[2] <- "Two"
   
-<<<<<<< HEAD
-  
-  stack_formula<-as.formula(paste("TARGET"," ~ ",paste(c("log","nnet","svm"), collapse="+"),sep = ""))
-  
-  
-  stack_data$log<-as.double(as.character((stack_data$log)))
-  stack_data$nnet<-as.double(as.character((stack_data$nnet)))
-  stack_data$svm<-as.double(as.character((stack_data$svm)))
-  
-  
-  mod_rf_stack<-caret::train(stack_formula,  data=stack_data, method="rf",
-                             trControl = control_, tuneGrid=expand.grid(mtry = ncol(train)-4),
-                             tuneLength = 7)
-  
-  
-  
-  resul_raw$rf_stack<-predict(mod_rf_stack, newdata=resul_prob, type="raw")
-  resul_prob$rf_stack<-predict(mod_rf_stack, newdata=resul_prob, type="prob")[,2]
-  
-  
-  resul_perf["auc","rf_stack"]<-AUC:: auc(roc(resul_prob[,"rf_stack"],hold_out[,TARGET]))
-  resul_perf["sen","rf_stack"]<-caret:: sensitivity(resul_raw[,"rf_stack"],hold_out[,TARGET])
-  resul_perf["spec","rf_stack"]<-caret:: specificity(resul_raw[,"rf_stack"],hold_out[,TARGET])
-  resul_perf["accu","rf_stack"]<-(as.data.frame(confusionMatrix(resul_raw[,"rf_stack"],hold_out[,TARGET])$overall))[1,]
-  
-=======
   stack_formula<-as.formula(paste("TARGET"," ~ ",paste(formuler, collapse="+"),sep = ""))
   
   
   
-  if(rf_bag_stack!=0){
+  if(rf_bag_stack!=0 &
+     (sum(complete.cases(stack_data))== nrow(stack_data[formuler]))){
     mod_rf_bag_stack<-caret::train(stack_formula,  data=stack_data, method="rf",
                                    trControl = control_, tuneGrid=expand.grid(mtry = ncol(train)-4),
                                    tuneLength = 7)
@@ -513,16 +406,38 @@ pred_func<-function(train,hold_out,formul,method_sam,log=1,svm=1,nnet=1,rf_bag=1
     resul_perf["spec","rf_bag_stack"]<-caret:: specificity(resul_raw[,"rf_bag_stack"],hold_out[,TARGET])
     resul_perf["accu","rf_bag_stack"]<-(as.data.frame(confusionMatrix(resul_raw[,"rf_bag_stack"],hold_out[,TARGET])$overall))[1,]
   }
->>>>>>> master
-  
+
   
   out_object<-list()
   out_object$resul_raw<-resul_raw
   out_object$resul_prob<-resul_prob
   out_object$resul_perf<-resul_perf
   out_object$stack_data<-stack_data
+  out_object$train_pred_two<-train_pred_two
   
-  return(out_object)
+  general<-list()
+  general$TARGET_DIS_before<-TARGET_DIS_before
+  general$TARGET_DIS_after<-TARGET_DIS_after
+  general$Balance_method<-Balance_method
+
+  general$leak_track_before<-leak_track_before
+  general$leak_track_after<-leak_track_after
+
+  general$holdout_DIS<-holdout_DIS
+  general$vars_no<-vars_no
+  
+  general$file_info<-location_file
+  
+  summary_general<-as.data.frame(c(TARGET_DIS_before[2],TARGET_DIS_after[2],Balance_method,leak_track_before,leak_track_after,holdout_DIS[2],vars_no))
+  names(summary_general)<-c("TARGET_DIS_before","TARGET_DIS_after","Balance_method","leak_track_before","leak_track_after","holdout_DIS","vars_no")
+  
+  out_object$general<-general
+  out_object$summary_general<-summary_general
+  out_object$comments<-comments
+  if(toupper(save_ondrive)=="YES"){
+  save(out_object,file = location_file)}
+  
+ return(out_object)
   
   
 }
