@@ -36,7 +36,7 @@ p_load(dplyr,caret,foreign,
        C50,
        randomForest,
        kernlab,
-       e1071)
+       e1071,DT)
 
 source("https://raw.githubusercontent.com/hamidahady/transplant/master/isotonic_paper_functions.R")
 
@@ -94,18 +94,220 @@ source("https://raw.githubusercontent.com/hamidahady/transplant/master/isotonic_
 heart.form <- read.csv("C:/Users/hza0020/Box/Transplant/Thesis/github/transplant/transplant/data/var_desc.csv")  
 
 ```
-**In the First Section, we drop some variables and observations, based on these criterias:**
+**In the next Section, we drop some variables and observations, based on these criterias:**
  - variables associated to before the surgery data
  - variables that did not end & those added before 2000
  - variables that are not interesting/relevant for survival analysis (e.g. follow up number, Donor ID, Dates, and ...)
  - patients who are older than 18 years old
  - patients that are associated extreme 0.1 lightest people
  - patients that are associated extreme 0.1 shortest people
- 
+ _ patient who did not have info. of transplanted organ
+ - patients who has lung transplant, too.
  
 ```{r}
+# Identifying the variables that are discarded for further analysis
+vars_discarded <- heart.form %>% # We created a column a colum INTERPRETATION_TYPE  
+  subset(INTERPRETATION_TYPE=="D", select=c(1,2))
+heart.discard <- vars_discarded$VARIABLE.NAME %>% as.character()
 
+# Identifying the variables that did not end & those added before 2000
+var.end.dates <- trimws(heart.form$VAR.END.DATE) %>% str_trim()
+if.var.did.not.end <- which(var.end.dates=="")
+names.of.var.did.not.end <- heart.form[if.var.did.not.end, 1] 
+
+# Identifying the variables that ended
+vars_ended <-heart.form[which(heart.form$VARIABLE.NAME %in% names(heart.df)[!(names(heart.df) %in% names.of.var.did.not.end)]),(1:2)]
+
+
+vars.added.dates <- heart.form$VAR.START.DATE %>% as.character.Date()
+vars.added.dates[which(vars.added.dates=="01-Oct-87, 01-Oct-90")] <- "01-Oct-90"
+vars.added.years<- sapply(vars.added.dates, function(x) str_extract_all(x,"[0-9]{1,2}")[[1]][2]) %>% as.integer()
+heart.form$YR_ADDED <- vars.added.years
+vars.added.before.2000 <- subset(heart.form,YR_ADDED>=87,
+                                 select = c(1))  # available variables added before 2000
+vars.added.NA <- subset(heart.form,is.na(YR_ADDED),select = c(1))
+vars.added.all <- rbind(vars.added.before.2000,vars.added.NA)
+vars.added.all <- vars.added.all[["VARIABLE.NAME"]] %>% 
+  as.character()
+
+# Subsetting the data nd getting rid of variables that are ended and extreme patients or patients that are less than 18
+heart.df.cleaned <- subset(heart.df, WL_ORG=="HR") %>% # Heart 
+  subset(AGE>=18) %>% # Adults only
+  # we excluded too light or too short people
+  subset(WGT_KG_DON_CALC >= quantile(WGT_KG_DON_CALC, 0.0001, na.rm = TRUE)) %>% 
+  subset(WGT_KG_TCR >= quantile(WGT_KG_TCR, 0.0001, na.rm = TRUE)) %>%
+  subset(HGT_CM_DON_CALC >= quantile(HGT_CM_DON_CALC, 0.0001, na.rm = TRUE)) %>% 
+  subset(HGT_CM_TCR >= quantile(HGT_CM_TCR, 0.0001, na.rm = TRUE)) %>% 
+  subset(select=intersect(names.of.var.did.not.end,vars.added.all))
+
+
+#Identifying and removing the variables that are post transplant
+# Based on observations from the Form and Form Section Descriptors
+vars.post.trans.index1 <-  sapply(heart.form$FORM.SECTION,
+                                  function(x) str_detect(x,
+                                                         "POST TRANSPLANT CLINICAL INFORMATION"))
+vars.post.trans.index2 <-  sapply(heart.form$FORM,
+                                  function(x) str_detect(x,
+                                                         "TRF/TRR|TRR/TRF-CALCULATED|TRR/TRF|TRF"))
+vars_post<- heart.form[as.logical(vars.post.trans.index1+vars.post.trans.index2),][,1] %>%
+  as.character()
+
+# Identifying the post transplant variables
+vars_posttrans<-heart.form[which(heart.form$VARIABLE.NAME %in% vars_post),(1:2)]
+
+vars.post.trans <- intersect(colnames(heart.df.cleaned),
+                             vars_post)
+heart.df.cleaned <- select(heart.df.cleaned,-vars.post.trans)
+heart.discard <- intersect(heart.discard, colnames(heart.df.cleaned))
+heart.df.cleaned <- select(heart.df.cleaned, -heart.discard) 
 
 ```
+<br />
+<br />
+**Here are the variables that we dropped for bring not interesting/irrelavence**
+```{r , message=FALSE, cache=FALSE, error=FALSE}
+DT::datatable(vars_discarded)
+```
+<br />
+<br />
+**Here are the variables that ended. Their adding date is chaecked, even if they dropped late (2015) but the added early so they are intersting (e.g. PRAMR_CL2).**
+```{r , message=FALSE, cache=FALSE, error=FALSE}
+DT::datatable(vars_ended)
+```
+<br />
+<br />
+**Here are the variables that are relevent to the post transplant info.**
+```{r , message=FALSE, cache=FALSE, error=FALSE}
+DT::datatable(vars_posttrans)
+```
+<br />
+<br />
+**Here are a report about the remaining variables (discarded means irrelevant/not interesting variables)**
+**We lready got rid of discarded variables so their frequency is zero**
+```{r , message=FALSE, cache=FALSE, error=FALSE}
+
+rem_type<-as.data.frame(table(heart.form[which(heart.form$VARIABLE.NAME %in% names(heart.df.cleaned)), "INTERPRETATION_TYPE"]))
+names(rem_type)<-c("Variable Type","Frequency")
+rem_type$`Variable Type`<-c("Categorical","Discarded","Date","Numerical")
+
+org_type<-as.data.frame(table(heart.df$WL_ORG))
+names(org_type)<-c("Organ Type","No. of Patients")
+org_type$`Variable Type`<-c("UNKOWN","Heart & Lung","Heart","Lung")
+DT::datatable(org_type)
+DT::datatable(rem_type)
+
+cat("Number of patients after dropping irrelevant patients: ",nrow(heart.df.cleaned))
+
+```
+<br />
+<br />
+<br />
+<br />
+**inthe following section variables are recategorized, drived, and developed based on literature considering the pool of patients**
+```{r , message=FALSE, cache=FALSE, error=FALSE}
+# ref1: Medved, Dennis, et al. "Improving prediction of heart transplantation outcome using deep learning techniques." Scientific reports 8.1 (2018): 3613.
+  # refer to a tool provided in the: http://ihtsa.cs.lth.se/ , which is product of this paper:
+  # https://www.nature.com/articles/s41598-018-21417-7.pdf
+  
+  # In this paper they used these variables for recipients:
+  # Diagnosis, Age, Gender, Height, Weight, insulin treated diabetes, infection within two weeks, Blood group, previous blood transfusion,
+  # previously transplanted, previous cardiac surgery, intensive care unit, mechanical ventilation,
+  # ECMO, ventiricular assist device, transplant era, SPP, PVR, creatinine, serum bilirubin,
+  # use (mg/dl) instead of (mio mol/l), PRA>10%, HLA-DR 2 mismatch
+  # Also, they used these variables for donor:
+  # Age, Gender, Height, Weight, Duration of ischemia, Blood group, cause of death
+
+  # we also used the following variables without any change:
+  # Age / AGE, AGE_DON
+  # Height / HGT_CM_CALC, HGT_CM_DON_CALC, HGT_CM_TCR, INIT_HGT_CM_CALC, 
+  # Gender / GENDER, GENDER_DON
+  # Weight / WGT_KG_DON_CALC, WGT_KG_TCR, WGT_KG_CALC, PERCENT_WGT_CHANGE (we made it)
+  # infection within two weeks / INFECT_IV_DRUG_TRR
+  # previous blood transfusion / TRANSFUSIONS
+  # Previously transplanted / PREV_TX
+  # Intensive care unit / ICU
+  # ventiricular assist device / VAS
+  # Mechanical ventilation / VENTILATOR_TRR
+  # SPP (mmHG), systolic pulmonary pressure  / HEMO_SYS_TRR
+  # Creatinine / CREAT_TRR
+  # Serum bilirubin (Î¼mol/l) / TBILI
+  # Use (mg/dl) instead of (Î¼mol/l) / TBILI
+  # we used mg/dl
+  # we did not work with PRAMR since it is added after 2004
+
+# ref2: Dag, Ali, et al. "Predicting heart transplantation outcomes through data analytics." Decision Support Systems 94 (2017): 42-52.
+
+# Subsetting the data and creating other variables based on literature or to capture time effects
+base<-heart.df.cleaned
+heart.df.cleaned<-base
+table(heart.df.cleaned$HEMO_PA_MN_TRR)
+
+heart.df.cleaned <- subset(heart.df.cleaned) %>%  
+  #ref1
+  mutate(PVR = (HEMO_PA_MN_TRR- HEMO_PCW_TRR)*79.72/HEMO_CO_TRR) %>% 
+  #ref1
+  mutate(ISCHTIME = ISCHTIME*60) %>% 
+  #ref1
+  mutate(ECMO = ifelse(ECMO_TCR + ECMO_TRR == 0, 0, 1)) %>% 
+  # PVR, pulmonary vascular resistance / its calculation is based on the below mentioned links:
+  # https://en.wikipedia.org/wiki/Vascular_resistance
+  # http://www.scymed.com/en/smnxph/phkhr013.htm
+  # https://radiopaedia.org/articles/mean-pulmonary-arterial-pressure  (calculation of Mean Pulmonary Arterial Pressure)
+  # PVR= (Mean Pulmonary Arterial Pressure (mmHg) - Pulmonary Capillary Wedge Pressure (mmHg)) * 79.72 / Cardiac Output (L/min)
+  # PVR = (HEMO_PA_MN_TRR - HEMO_PCW_TRR)* 79.72 / HEMO_CO_TRR
+
+  # ECMO / merge of (ECMO_TCR, ECMO_TRR)
+
+  # The following variables are mutated by the author
+  mutate(BMI_CHNG = 100*(BMI_CALC- INIT_BMI_CALC)/INIT_BMI_CALC) %>%
+  mutate(WAITING_TIME = TX_DATE - INIT_DATE)  %>%
+  mutate(WGT_CHNG = 100*(WGT_KG_CALC - INIT_WGT_KG_CALC)/INIT_WGT_KG_CALC) %>%
+  mutate(HGT_CHNG = 100*(HGT_CM_CALC - INIT_HGT_CM_CALC)/INIT_HGT_CM_CALC) %>%
+  mutate(AGE_MAT = abs(AGE - AGE_DON)) %>%
+  mutate(BMI_MAT = abs(BMI_CALC - BMI_DON_CALC))
+
+# we did below variable based on the previous section
+base[c("HEMO_PA_MN_TRR" , "HEMO_PCW_TRR","HEMO_CO_TRR","ECMO_TCR" , "ECMO_TRR","BMI_CALC", "INIT_BMI_CALC",
+       "TX_DATE" , "INIT_DATE", "WGT_KG_CALC" , "INIT_WGT_KG_CALC", "HGT_CM_CALC" , "INIT_HGT_CM_CALC",
+       "AGE" , "AGE_DON" , "BMI_DON_CALC")]<-NULL
+# we do not need anything on the beow variable based on ref1
+ base[ c("AGE", "AGE_DON","HGT_CM_CALC", "HGT_CM_DON_CALC", "HGT_CM_TCR", "INIT_HGT_CM_CALC",
+  "GENDER", "GENDER_DON", "WGT_KG_DON_CALC", "WGT_KG_TCR", "WGT_KG_CALC", "INFECT_IV_DRUG_TRR",
+  "TRANSFUSIONS", "PREV_TX", "ICU", "VAS", "VENTILATOR_TRR","HEMO_SYS_TRR", "CREAT_TRR","TBILI")]<-NULL
+
+ # DIAG was used in ref1, but it has same form with TCR_DGN and THORACIC_DGN so we recategorize all three together
+ 
+table(heart.df.cleaned$TCR_DGN)
+table(heart.df.cleaned$DIAG)
+table(heart.df.cleaned$THORACIC_DGN)
+
+  heart.df.cleaned$temp<-heart.df.cleaned$DIAG
+  for(i in 1:nrow(heart.df.cleaned)){
+    if(!is.na(heart.df.cleaned$DIAG[i])){
+      heart.df.cleaned$DIAG[i]<-"other"
+      if(heart.df.cleaned$temp[i]==1000){heart.df.cleaned$DIAG[i]<-"DILATED_MYOPATHY_IDI"}
+      
+      if((heart.df.cleaned$temp[i]>=1001 & heart.df.cleaned$temp[i]<= 1006) |
+         (heart.df.cleaned$temp[i]==1049)){heart.df.cleaned$DIAG[i]<-"DILATED_MYOPATHY_OTH"}
+      
+      if(heart.df.cleaned$temp[i]==1007){heart.df.cleaned$DIAG[i]<-"DILATED_MYOPATHY_ISC"}
+      
+      if(heart.df.cleaned$temp[i]==1200){heart.df.cleaned$DIAG[i]<-"CORONARY"}
+
+    }
+  }
+
+
+
+sum(as.data.frame(table(heart.df.cleaned$TCR_DGN))[2])
+sum(as.data.frame(table(heart.df.cleaned$DIAG))[2])
+sum(as.data.frame(table(heart.df.cleaned$THORACIC_DGN))[2])
+
+```
+
+
+
+
+
 
 
