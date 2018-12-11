@@ -91,7 +91,7 @@ source("https://raw.githubusercontent.com/hamidahady/transplant/Hamid/isotonic_p
 #####end of importing the data
 
 # heart.form contains the variable definitions of each variable in data
-heart.form <- read.csv("C:/Users/hza0020/Box/Transplant/Thesis/github/transplant/transplant/data/var_desc.csv")  
+heart.form <- read.csv("https://raw.githubusercontent.com/hamidahady/transplant/Hamid/data/var_desc.csv")  
 
 ```
 **In the next Section, we drop some variables and observations, based on these criterias:**
@@ -259,7 +259,7 @@ heart.df.cleaned <- subset(heart.df.cleaned) %>%
 
   # The following variables are mutated by the author
   mutate(BMI_CHNG = 100*(BMI_CALC- INIT_BMI_CALC)/INIT_BMI_CALC) %>%
-  mutate(WAITING_TIME = TX_DATE - INIT_DATE)  %>%
+  # mutate(WAITING_TIME = TX_DATE - INIT_DATE)  %>%  #no need, because it is already in there as "DAYSWAIT_CHRON"
   mutate(WGT_CHNG = 100*(WGT_KG_CALC - INIT_WGT_KG_CALC)/INIT_WGT_KG_CALC) %>%
   mutate(HGT_CHNG = 100*(HGT_CM_CALC - INIT_HGT_CM_CALC)/INIT_HGT_CM_CALC) %>%
   mutate(AGE_MAT = abs(AGE - AGE_DON)) %>%
@@ -410,24 +410,212 @@ heart.df.cleaned<-cat_changer(heart.df.cleaned,var="HLAMIS",val_old,val_new)
   # the following variables identifies if they are hispanic/latino or not
   # ETHNICITY
   
-  # I dropped PRI_PAYMENT_CTRY_TRR because too many NAs
-  
-PRI_PAYMENT_CTRY_TCR
-PRI_PAYMENT_CTRY_TRR
-PRI_PAYMENT_TCR
-PRI_PAYMENT_TRR
+  # I dropped PRI_PAYMENT_CTRY_TRR and PRI_PAYMENT_CTRY_TRR because too many NAs
+  heart.df.cleaned[c("PRI_PAYMENT_CTRY_TCR","PRI_PAYMENT_CTRY_TRR")]<-NULL
 
 
-base[c("ETHCAT","ETHCAT_DON","GENDER","GENDER_DON","PROC_TY_HR","SHARE_TY","EDUCATION","ETHCAT","ETHCAT_DON",
-       "ETHNICITY","PRI_PAYMENT_CTRY_TCR", "PRI_PAYMENT_CTRY_TRR","PRI_PAYMENT_TCR", "PRI_PAYMENT_TRR")]<-NULL
-  
-  
-table(heart.df.cleaned$PRI_PAYMENT_TRR)
-table(heart.df.cleaned$ETHCAT_DON)
-table(heart.df.cleaned$ETHNICITY)
-table(heart.df$BMIS)
+  val_old<-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14)
+  val_new<-c("pv","pbma","pbmcffs","pbmoth","pbmoth","pbmoth","pbmoth","other","other","other","other","other","other","other")
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="PRI_PAYMENT_TCR",val_old,val_new)
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="PRI_PAYMENT_TRR",val_old,val_new)
 
-table(heart.df$DA1)
+  val_old<-c(1,2,3,4,5,6,7,8,9,10,11)
+  val_new<-c("NE","NE","SE","SE","W","W","MW","MW","NE","MW","SE")
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="REGION",val_old,val_new)
+
+  # here we recategrize FUNC_STAT_TCR, based on their activitiy level and hospitalization status
+  # https://www.communitycarenc.org/media/tool-resource-files/what-does-it-take-qualify-personal-care-services-d.pdf
+  # http://www.npcrc.org/files/news/karnofsky_performance_scale.pdf
+
+  val_old<-c(1,2,3,996,998,2010,2020,2030,2040,2050,2060,2070,2080,2090,2100)
+  val_new<-c("A","B","B",NA,NA,"C","C","C","C","D","D","D","E","E","E")
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="FUNC_STAT_TRR",val_old,val_new)
+  # level OTHER in the next variable has low observations but it does not seem to be merged with other categories
+  # I rather keep them than drop them because if this category will not important anyway and not selected as an important feature
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="FUNC_STAT_TCR",val_old,val_new)
+  
+  # save1
+
+  base[c("ETHCAT","ETHCAT_DON","GENDER","GENDER_DON","PROC_TY_HR","SHARE_TY","EDUCATION",
+       "ETHNICITY","PRI_PAYMENT_CTRY_TCR", "PRI_PAYMENT_CTRY_TRR","PRI_PAYMENT_TCR", "PRI_PAYMENT_TRR",
+       "REGION","FUNC_STAT_TRR","FUNC_STAT_TCR")]<-NULL
+  
+  # now, I finished the literature variables, I investigate the other variables bymyself
+  # following variables has too many NAs, so they are dropped
+  
+ heart.df.cleaned[ c("WLHL", "WLHR", "WLIN" , "WLKI", "WLKP" ,"WLLI", "WLLU", "WLPA","WLPI","VAD_AT_LISTING",
+                     "VAD_WHILE_LISTED","VESSELS_50STEN","WALL_ABN_GLOB_DON","WALL_ABN_SEG_DON" ,"RECOV_COUNTRY",
+                     "PT_OTH4_OSTXT_DON","PT_OTH3_OSTXT_DON","OTHER_INF_OSTXT_DON","OTHER_INF_CONF_DON",
+                     "MALIG_TY_OSTXT","MALIG_TY_OSTXT_TCR","INSULIN_DUR_DON","INIT_O2","HIST_INSULIN_DEP_DON",
+                     "HCV_ANTIBODY_DON","HCV_RIBA_DON","HCV_RNA_DON","HCV_TEST_DON","HBV_TEST_DON",
+                     "HBV_SUR_ANTIGEN_DON","HBV_DNA_DON","GROUPING","FEV1_TRR","FVC_TRR","END_PRIORITY",
+                     "END_O2","EBV_DNA_DON","EBV_IGG_DON","EBV_IGM_DON","EBV_TEST_DON","CONTROLLED",
+                     "CANCER_FREE_INT_DON","BLOOD_INF_CONF_DON","CALC_LAS_LISTDATE","DIAG_OSTXT",
+                     "INIT_PRIORITY","INIT_CREAT","CMV_IGG_DON", "CMV_IGM_DON", "CMV_NUCLEIC_DON",
+                     "CMV_TEST_DON", "COD_LIV_DON" ,"COD_OSTXT_DON","DIABDUR_DON","EXERCISE_O2" ,"LIV_DON_TY")]<-NULL
+ 
+ #these variables are not useful because their (pattern of) distribution is not helpful
+ # I drop maligancy (MALIG_TY,MALIG_TY_TCR) variables because the levels of categories are not distinguishable very well, also there is too many NAs
+ #one way is divide it by larger categories like different cancers, but even after this the number of observations in the levels
+ # will be too low.
+ heart.df.cleaned[ c("WL_ID_CODE", "WL_ORG","INIT_DATE","TX_DATE","CTR_CODE","DATA_TRANSPLANT",
+                     "DATA_WAITLIST","DISTANCE", "DON_RETYP","ECD_DONOR","END_OPO_CTR_CODE","HOME_STATE_DON",
+                     "INIT_OPO_CTR_CODE", "INOTROP_VASO_CO_TRR","INOTROP_VASO_DIA_TRR","INOTROP_VASO_MN_TRR", 
+                     "INOTROP_VASO_PCW_TRR","INOTROP_VASO_SYS_TCR","INOTROP_VASO_SYS_TRR","LISTING_CTR_CODE","LOS",
+                     "MALIG_TY","MALIG_TY_TCR")]<-NULL
+ 
+ #the following variables(s) almost all the patients are in one category
+ #age group is "A" because we already selected the adult patients
+ # I checked them in the entire dataset , too. so they may not even in our limited observations but I considered
+ # them as almost one-level categorical variable because of the original large dataset
+ heart.df.cleaned[ c("HIST_MI","END_BLU_FLG","END_CREAT","END_LLU_FLG","END_RLU_FLG","EDUCATION_DON",
+                     "CITIZENSHIP","CITIZENSHIP_DON","CANCER_SITE_DON","HIST_CANCER_DON",
+                     "SKIN_CANCER_DON","EXTRACRANIAL_CANCER_DON","INTRACRANIAL_CANCER_DON","AGE_GROUP","BIOPSY_DGN",
+                     "DIURETICS_DON","INIT_RLU_FLG","INIT_LLU_FLG","INIT_BLU_FLG","DON_TY","HIV_SEROSTATUS","HTLV2_OLD_DON",
+                     "INHALED_NO", "INHALED_NO_TRR","LVAD_AT_LISTING","LVAD_WHILE_LISTED")]<-NULL
+ 
+ base[ c("WLHL", "WLHR", "WLIN" , "WLKI", "WLKP" ,"WLLI", "WLLU", "WLPA","WLPI","VAD_AT_LISTING",
+         "VAD_WHILE_LISTED","VESSELS_50STEN","WALL_ABN_GLOB_DON","WALL_ABN_SEG_DON" ,"WL_ID_CODE", "WL_ORG",
+         "RECOV_COUNTRY","PT_OTH4_OSTXT_DON","PT_OTH3_OSTXT_DON","OTHER_INF_OSTXT_DON","OTHER_INF_CONF_DON",
+         "MALIG_TY_OSTXT","MALIG_TY_OSTXT_TCR","INSULIN_DUR_DON","INIT_O2","HIST_INSULIN_DEP_DON",
+         "HIST_MI","HCV_ANTIBODY_DON","HCV_RIBA_DON","HCV_RNA_DON","HCV_TEST_DON",
+         "HBV_TEST_DON","HBV_SUR_ANTIGEN_DON","HBV_DNA_DON","GROUPING","FEV1_TRR","FVC_TRR","END_PRIORITY","END_BLU_FLG",
+         "END_CREAT","END_LLU_FLG","END_O2","END_RLU_FLG","EBV_DNA_DON","EBV_IGG_DON","EBV_IGM_DON","EBV_TEST_DON",
+         "EDUCATION_DON","CONTROLLED","CITIZENSHIP","CITIZENSHIP_DON","CANCER_FREE_INT_DON","CANCER_SITE_DON",
+         "HIST_CANCER_DON","SKIN_CANCER_DON","EXTRACRANIAL_CANCER_DON","INTRACRANIAL_CANCER_DON","AGE_GROUP","BIOPSY_DGN",
+         "BLOOD_INF_CONF_DON","CALC_LAS_LISTDATE","DIAG_OSTXT","DIURETICS_DON","INIT_RLU_FLG","INIT_PRIORITY","INIT_LLU_FLG",
+         "INIT_DATE","INIT_CREAT","INIT_BLU_FLG","TX_DATE","CMV_IGG_DON", "CMV_IGM_DON","CMV_NUCLEIC_DON","CMV_TEST_DON",
+         "COD_LIV_DON", "COD_OSTXT_DON" 
+         )]<-NULL
+  
+   # save2
+
+   # Here the NA equivalent characters would change to NA
+  {
+    NA_cells<-c(""," ","U")
+    
+    for(i in 1:length(NA_cells)){
+      heart.df.cleaned[heart.df.cleaned == NA_cells[i]] <- NA
+      gc()}
+  }
+ 
+ #here the categorical variables that are fine and we use them for feature selection
+ # ABO_MAT (the last category just has 13 observations), ANTIHYPE_DON , BLOOD_INF_DON, CARDARREST_NEURO
+ # CLIN_INFECT_DON, CONTIN_CIG_DON, CONTIN_COCAINE_DON, CONTIN_OTH_DRUG_DON , CRSMATCH_DONE, DDAVP_DON, DIABETES_DON
+ # DIAL_AFTER_LIST , DIAL_PRIOR_TX, DIET_DON, GSTATUS, GTIME,HEPARIN_DON,HIST_CIG_DON,HIST_COCAINE_DON
+ # HIST_HYPERTENS_DON, HIST_OTH_DRUG_DON, IABP_TCR ,IABP_TRR, IMPL_DEFIBRIL, INOTROPES_TCR ,INOTROPES_TRR, INOTROPIC  
+ # check: https://en.wikipedia.org/wiki/Inotrope, LIFE_SUP_TRR, LIFE_SUP_TCR, LV_EJECT_METH, ,"MALIG", "MALIG_TCR", "MED_COND_TRR"
+ 
+ #here the numerical variable the we use them for feature selection 
+ # BUN_DON CREAT_DON 
+ # patients number of days in different levels of ptiorities:
+ # "DAYS_STAT1", "DAYS_STAT1A" , "DAYS_STAT1B"   ,  "DAYS_STAT2"
+ # Slaughter, Mark S. "UNOS status of heart transplant patients supported with a left ventricular assist device: 
+ # is it time to reconsider the status criteria?." Texas Heart Institute Journal 38.5 (2011): 549.
+ # DAYSWAIT_CHRON, END_BMI_CALC, HEMO_CO_TCR,HEMO_PA_DIA_TCR,HEMO_PA_DIA_TRR,HEMO_PA_MN_TCR,HEMO_PCW_TCR,HEMO_SYS_TCR
+ # LV_EJECT :https://www.uwhealth.org/health/topic/special/heart-failure-with-reduced-ejection-fraction-systolic-heart-failure/tx4090abc.html 
+ 
+ 
+  val_old<-c(1,2,3,4,5,6,7,998)
+  val_new<-c("NO","BNOR","BAPS","BAOTH","BAOTH","BAOTH","BAOTH",NA)
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="BRONCHO_LT_DON",val_old,val_new)
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="BRONCHO_RT_DON",val_old,val_new)
+  
+  val_old<-c(0,1,2,3,4,5,998,999)
+  val_new<-c(NA,NA,"NOR","AB","AB","ABboth",NA,NA)
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="CHEST_XRAY_DON",val_old,val_new)
+  
+  val_old<-c("C","I","N","ND","P","U")
+  val_new<-c(NA,NA,"Neg",NA,"POS",NA)
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="CMV_DON",val_old,val_new)
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="EBV_SEROSTATUS",val_old,val_new)
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="HBV_CORE",val_old,val_new)
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="HBV_CORE_DON",val_old,val_new)
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="HBV_SUR_ANTIGEN",val_old,val_new)
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="HCV_SEROSTATUS",val_old,val_new)
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="HEP_C_ANTI_DON",val_old,val_new)
+  
+  val_old<-c(1,2,3)
+  val_new<-c("NO", "YES","YES")
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="CORONARY_ANGIO",val_old,val_new)
+  
+  val_old<-c(1,2,3,4,5,998)
+  val_new<-c("NO", "YES","YES","YES","YES",NA)
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="HIST_DIABETES_DON",val_old,val_new)
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="HYPERTENS_DUR_DON",val_old,val_new)
+  
+  # although 2099 has low frequeency I can not merge due to this paper:
+  # Huang, Edmund, et al. "Incidence of conversion to active waitlist status among temporarily inactive obese renal transplant candidates." 
+  # Transplantation 98.2 (2014): 177-186.
+  val_old<-c(2010,2020,2030,2090,2999)
+  val_new<-c("ONE", "ONE","TWO","ONE","OTHER")
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="END_STAT",val_old,val_new)
+  heart.df.cleaned<-cat_changer(heart.df.cleaned,var="INIT_STAT",val_old,val_new)
+  
+# LAST_INACT_REASON definition , I got it from: https://www.srtr.org/requesting-srtr-data/saf-data-dictionary/
+# 1: Candidate cannot be contacted
+# 2: Candidate choice
+# 3: Candidate work-up incomplete
+# 4: Insurance issues
+# 5: Medical non-compliance
+# 6: Inappropriate substance use
+# 7: Temporarily too sick
+# 8: Temporarily too well
+# 9: Weight currently inappropriate for transplant
+# 10: TX'ed - removal pending UNET data correction
+# 11: Inactivation due to VAD implantation and/or VAD complication
+# 12: TX Pending
+# 13: Physician/Surgeon unavailable
+# 14: Candidate for living donor transplant only
+# I regroup if it's inactive because of health issue
+val_old<-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14)
+val_new<-c("ONE", "ONE","ONE","ONE","ONE", "ONE","TWO","ONE","TWO", "ONE","ONE","ONE","ONE","ONE")
+heart.df.cleaned<-cat_changer(heart.df.cleaned,var="LAST_INACT_REASON",val_old,val_new)
+
+  
+ base[ c("ABO_MAT", "ANTIHYPE_DON" , "BLOOD_INF_DON","BRONCHO_LT_DON","BRONCHO_RT_DON","CARDARREST_NEURO",
+         "CHEST_XRAY_DON", "CLIN_INFECT_DON","CMV_DON","BUN_DON","CONTIN_CIG_DON", "CONTIN_COCAINE_DON", "CONTIN_OTH_DRUG_DON",          
+          "CORONARY_ANGIO","CREAT_DON","CRSMATCH_DONE","CTR_CODE","DATA_TRANSPLANT","DATA_WAITLIST", "DAYS_STAT1",
+         "DAYS_STAT1A","DAYS_STAT1B","DAYS_STAT2","DAYSWAIT_CHRON","DDAVP_DON","DIABDUR_DON","DIABETES_DON","DIAL_AFTER_LIST",
+         "DIAL_PRIOR_TX","DIET_DON","DISTANCE","DON_RETYP","DON_TY","EBV_SEROSTATUS","ECD_DONOR", "END_BMI_CALC",
+         "END_OPO_CTR_CODE","END_STAT","EXERCISE_O2","GSTATUS","GTIME","HBV_CORE","HBV_CORE_DON","HBV_SUR_ANTIGEN","HCV_SEROSTATUS",
+         "HEMO_CO_TCR","HEMO_PA_DIA_TCR","HEMO_PA_DIA_TRR","HEMO_PA_MN_TCR","HEMO_PCW_TCR","HEMO_SYS_TCR","HEP_C_ANTI_DON",
+         "HEPARIN_DON","HIST_CIG_DON","HIST_COCAINE_DON","HIST_DIABETES_DON", "HIST_HYPERTENS_DON", "HIV_SEROSTATUS", "HIST_OTH_DRUG_DON",
+          "HOME_STATE_DON","HTLV2_OLD_DON","HYPERTENS_DUR_DON","IABP_TCR" ,"IABP_TRR","IMPL_DEFIBRIL","INHALED_NO","INHALED_NO_TRR","INIT_STAT",
+         "INIT_OPO_CTR_CODE", "INOTROP_VASO_CO_TRR","INOTROP_VASO_DIA_TRR","INOTROP_VASO_MN_TRR", "INOTROP_VASO_PCW_TRR","INOTROP_VASO_SYS_TCR",
+         "INOTROP_VASO_SYS_TRR","INOTROPES_TCR","INOTROPES_TRR", "INOTROPIC","ISCHTIME","LAST_INACT_REASON","LIFE_SUP_TRR", "LIFE_SUP_TCR",
+         "LISTING_CTR_CODE","LIV_DON_TY","LOS","LV_EJECT", "LV_EJECT_METH","LVAD_AT_LISTING","LVAD_WHILE_LISTED","MALIG", "MALIG_TCR",
+         "MALIG_TY","MALIG_TY_TCR","MED_COND_TRR")]<-NULL
+ 
+names(base[1:10])      
+
+table(heart.df.cleaned$LOS)  
+table(heart.df.cleaned$LV_EJECT)
+table(heart.df.cleaned$LV_EJECT_METH)
+table(heart.df.cleaned$LVAD_AT_LISTING)  
+table(heart.df.cleaned$LVAD_WHILE_LISTED)
+
+table(heart.df.cleaned$MALIG) 
+table(heart.df.cleaned$MALIG_TCR)
+table(heart.df.cleaned$MALIG_TY)
+table(heart.df.cleaned$MALIG_TY_TCR)             
+table(heart.df.cleaned$MED_COND_TRR)
+ 
+
+sum(as.data.frame(table(heart.df$MALIG_TY))[2])
+sum(as.data.frame(table(heart.df.cleaned$MALIG_TY))[2])
+table(heart.df$MALIG_TY)
+table(heart.df$END_STAT)
+table(heart.df$SKIN_CANCER_DON)
+table(heart.dfWLKP)
+table(heart.df$WLLI)
+table(heart.df$WLLU)
+table(heart.df$WLPA)
+table(heart.df$WLPI)
+
+
+
+table(heart.df$REGION)
 table(heart.df$DA2)
 table(heart.df$PROC_TY_HR)
 
