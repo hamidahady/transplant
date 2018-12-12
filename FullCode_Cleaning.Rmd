@@ -94,15 +94,16 @@ source("https://raw.githubusercontent.com/hamidahady/transplant/Hamid/isotonic_p
 heart.form <- read.csv("https://raw.githubusercontent.com/hamidahady/transplant/Hamid/data/var_desc.csv")  
 
 ```
-**In the next Section, we drop some variables and observations, based on these criterias:**
- - variables associated to before the surgery data
- - variables that did not end & those added before 2000
- - variables that are not interesting/relevant for survival analysis (e.g. follow up number, Donor ID, Dates, and ...)
- - patients who are older than 18 years old
- - patients that are associated extreme 0.1 lightest people
- - patients that are associated extreme 0.1 shortest people
- _ patient who did not have info. of transplanted organ
- - patients who has lung transplant, too.
+> ### In the next Section, we drop some variables and observations, based on these criterias:
+
+* variables associated to before the surgery data
+* variables that did not end & those added before 2000
+* variables that are not interesting/relevant for survival analysis (e.g. follow up number, Donor ID, Dates, and ...)
+* patients who are older than 18 years old
+* patients that are associated extreme 0.1 lightest people
+* patients that are associated extreme 0.1 shortest people
+* patient who did not have info. of transplanted organ
+* patients who has lung transplant, too.
  
 ```{r}
 # Identifying the variables that are discarded for further analysis
@@ -164,19 +165,19 @@ heart.df.cleaned <- select(heart.df.cleaned, -heart.discard)
 ```
 <br />
 <br />
-**Here are the variables that we dropped for bring not interesting/irrelavence**
+**Here are the variables that in the initial check we dropped them for being not interesting/irrelavence**
 ```{r , message=FALSE, cache=FALSE, error=FALSE}
 DT::datatable(vars_discarded)
 ```
 <br />
 <br />
-**Here are the variables that ended. Their adding date is chaecked, even if they dropped late (2015) but the added early so they are intersting (e.g. PRAMR_CL2).**
+**Here are the variables that ended. Their adding date is checked, even if they dropped late (2015) but the added early so they are not intersting (e.g. PRAMR_CL2).**
 ```{r , message=FALSE, cache=FALSE, error=FALSE}
 DT::datatable(vars_ended)
 ```
 <br />
 <br />
-**Here are the variables that are relevent to the post transplant info.**
+**Here are the variables that are relevent to the post transplant info. So, we dropped them.**
 ```{r , message=FALSE, cache=FALSE, error=FALSE}
 DT::datatable(vars_posttrans)
 ```
@@ -188,7 +189,7 @@ DT::datatable(vars_posttrans)
 
 rem_type<-as.data.frame(table(heart.form[which(heart.form$VARIABLE.NAME %in% names(heart.df.cleaned)), "INTERPRETATION_TYPE"]))
 names(rem_type)<-c("Variable Type","Frequency")
-rem_type$`Variable Type`<-c("Categorical","Discarded","Date","Numerical")
+rem_type$`Variable Type`<-c("Categorical","Initially Discarded","Date","Numerical")
 
 org_type<-as.data.frame(table(heart.df$WL_ORG))
 names(org_type)<-c("Organ Type","No. of Patients")
@@ -265,14 +266,6 @@ heart.df.cleaned <- subset(heart.df.cleaned) %>%
   mutate(AGE_MAT = abs(AGE - AGE_DON)) %>%
   mutate(BMI_MAT = abs(BMI_CALC - BMI_DON_CALC))
 
-# we did below variable based on the previous section
-base[c("HEMO_PA_MN_TRR" , "HEMO_PCW_TRR","HEMO_CO_TRR","ECMO_TCR" , "ECMO_TRR","BMI_CALC", "INIT_BMI_CALC",
-       "TX_DATE" , "INIT_DATE", "WGT_KG_CALC" , "INIT_WGT_KG_CALC", "HGT_CM_CALC" , "INIT_HGT_CM_CALC",
-       "AGE" , "AGE_DON" , "BMI_DON_CALC")]<-NULL
-# we do not need anything on the beow variable based on ref1
- base[ c("AGE", "AGE_DON","HGT_CM_CALC", "HGT_CM_DON_CALC", "HGT_CM_TCR", "INIT_HGT_CM_CALC",
-  "GENDER", "GENDER_DON", "WGT_KG_DON_CALC", "WGT_KG_TCR", "WGT_KG_CALC", "INFECT_IV_DRUG_TRR",
-  "TRANSFUSIONS", "PREV_TX", "ICU", "VAS", "VENTILATOR_TRR","HEMO_SYS_TRR", "CREAT_TRR","TBILI")]<-NULL
 
  # DIAG was used in ref1, but it has same form with TCR_DGN and THORACIC_DGN so we recategorize all three together
 
@@ -284,13 +277,10 @@ base[c("HEMO_PA_MN_TRR" , "HEMO_PCW_TRR","HEMO_CO_TRR","ECMO_TCR" , "ECMO_TRR","
   heart.df.cleaned<-cat_changer(heart.df.cleaned,var="TCR_DGN",val_old,val_new)
   heart.df.cleaned<-cat_changer(heart.df.cleaned,var="THORACIC_DGN",val_old,val_new)
 
- base[ c("TCR_DGN", "DIAG","THORACIC_DGN")]<-NULL
- 
+
  #Due to discrepency, I drop these 2 variables especially natural cause for death is not same in both
  heart.df.cleaned[c("DEATH_CIRCUM_DON","DEATH_MECH_DON")]<-NULL
- 
- base[c("DEATH_CIRCUM_DON","DEATH_MECH_DON")]<-NULL
- 
+
 val_old<-c(1,2,3,4,999,"Unknown")
 val_new<-c("ANOXIA","CEREBROVASCULAR/STROKE","HEAD TRAUMA","OTHER","OTHER",NA)
 heart.df.cleaned<-cat_changer(heart.df.cleaned,var="COD_CAD_DON",val_old,val_new)
@@ -359,10 +349,6 @@ heart.df.cleaned<-cat_changer(heart.df.cleaned,var="HLAMIS",val_old,val_new)
     }
   }
   heart.df.cleaned$TX_YEAR<-NULL
-  
-  base[c("COD_CAD_DON","ABO","ABO_DON","DIAB","PRIOR_CARD_SURG_TCR","PRIOR_CARD_SURG_TRR",
-       "DA1","DA2","RA1","RA2","DB1","DB2","RB1","RB2","RDR1","RDR2","DDR1","DDR2","HLAMIS","AMIS","BMIS","DRMIS",
-       "TX_YEAR")]<-NULL
 
 
  # the following block is our variable manipulation based on the other literature as specified in Ali Dag's paper
@@ -433,12 +419,17 @@ heart.df.cleaned<-cat_changer(heart.df.cleaned,var="HLAMIS",val_old,val_new)
   # level OTHER in the next variable has low observations but it does not seem to be merged with other categories
   # I rather keep them than drop them because if this category will not important anyway and not selected as an important feature
   heart.df.cleaned<-cat_changer(heart.df.cleaned,var="FUNC_STAT_TCR",val_old,val_new)
-  
-  # save1
 
-  base[c("ETHCAT","ETHCAT_DON","GENDER","GENDER_DON","PROC_TY_HR","SHARE_TY","EDUCATION",
-       "ETHNICITY","PRI_PAYMENT_CTRY_TCR", "PRI_PAYMENT_CTRY_TRR","PRI_PAYMENT_TCR", "PRI_PAYMENT_TRR",
-       "REGION","FUNC_STAT_TRR","FUNC_STAT_TCR")]<-NULL
+  
+```
+
+<br />
+<br />
+<br />
+<br />
+**inthe following section variables are recategorized, drived, and developed based on studying their definitions and distributions**
+```{r , message=FALSE, cache=FALSE, error=FALSE}
+  
   
   # now, I finished the literature variables, I investigate the other variables bymyself
   # following variables has too many NAs, so they are dropped
@@ -480,20 +471,6 @@ heart.df.cleaned<-cat_changer(heart.df.cleaned,var="HLAMIS",val_old,val_new)
                      "PO2_DONE_DON","PROS_INFUS_TCR","PROS_INFUS_TRR","PROSTACYCLIN_TCR","PULM_INF_CONF_DON","RECOV_OUT_US","REM_CD","RESIST_INF",
                      "TX_PROCEDUR_TY", "TX_TYPE", "TXED" , "TXHRT","VDRL_DON")]<-NULL
  
- base[ c("WLHL", "WLHR", "WLIN" , "WLKI", "WLKP" ,"WLLI", "WLLU", "WLPA","WLPI","VAD_AT_LISTING",
-         "VAD_WHILE_LISTED","VESSELS_50STEN","WALL_ABN_GLOB_DON","WALL_ABN_SEG_DON" ,"WL_ID_CODE", "WL_ORG",
-         "RECOV_COUNTRY","OTHER_INF_OSTXT_DON","OTHER_INF_CONF_DON",
-         "MALIG_TY_OSTXT","MALIG_TY_OSTXT_TCR","INSULIN_DUR_DON","INIT_O2","HIST_INSULIN_DEP_DON",
-         "HIST_MI","HCV_ANTIBODY_DON","HCV_RIBA_DON","HCV_RNA_DON","HCV_TEST_DON",
-         "HBV_TEST_DON","HBV_SUR_ANTIGEN_DON","HBV_DNA_DON","GROUPING","FEV1_TRR","FVC_TRR","END_PRIORITY","END_BLU_FLG",
-         "END_CREAT","END_LLU_FLG","END_O2","END_RLU_FLG","EBV_DNA_DON","EBV_IGG_DON","EBV_IGM_DON","EBV_TEST_DON",
-         "EDUCATION_DON","CONTROLLED","CITIZENSHIP","CITIZENSHIP_DON","CANCER_FREE_INT_DON","CANCER_SITE_DON",
-         "HIST_CANCER_DON","SKIN_CANCER_DON","EXTRACRANIAL_CANCER_DON","INTRACRANIAL_CANCER_DON","AGE_GROUP","BIOPSY_DGN",
-         "BLOOD_INF_CONF_DON","CALC_LAS_LISTDATE","DIAG_OSTXT","DIURETICS_DON","INIT_RLU_FLG","INIT_PRIORITY","INIT_LLU_FLG",
-         "INIT_DATE","INIT_CREAT","INIT_BLU_FLG","TX_DATE","CMV_IGG_DON", "CMV_IGM_DON","CMV_NUCLEIC_DON","CMV_TEST_DON",
-         "COD_LIV_DON", "COD_OSTXT_DON" 
-         )]<-NULL
-  
 
 
    # Here the NA equivalent characters would change to NA
@@ -505,19 +482,7 @@ heart.df.cleaned<-cat_changer(heart.df.cleaned,var="HLAMIS",val_old,val_new)
       gc()}
   }
 
- {
-    NA_cells<-c(""," ","U")
-    
-    for(i in 1:length(NA_cells)){
-      base[base == NA_cells[i]] <- NA
-      gc()}
-  }
- 
- 
- 
-# save2
-
- #here the categorical variables that are fine and we use them for feature selection
+ # here the categorical variables that are fine and we use them for feature selection
  # ABO_MAT (the last category just has 13 observations), ANTIHYPE_DON , BLOOD_INF_DON, CARDARREST_NEURO
  # CLIN_INFECT_DON, CONTIN_CIG_DON, CONTIN_COCAINE_DON, CONTIN_OTH_DRUG_DON , CRSMATCH_DONE, DDAVP_DON, DIABETES_DON
  # DIAL_AFTER_LIST , DIAL_PRIOR_TX, DIET_DON, GSTATUS, GTIME,HEPARIN_DON,HIST_CIG_DON,HIST_COCAINE_DON
@@ -639,7 +604,7 @@ for(i in 1:nrow(temp)){
 }
 
 heart.df.cleaned[c("PT_OTH1_OSTXT_DON","PT_OTH2_OSTXT_DON","PT_OTH3_OSTXT_DON","PT_OTH4_OSTXT_DON")]<-NULL
-heart.df.cleaned<-cbind(heart.df.cleaned,temp)
+heart.df.cleaned<-cbind(heart.df.cleaned,new_vars)
 
 
 val_old<-c(1,2,3,998)
@@ -649,83 +614,25 @@ heart.df.cleaned<-cat_changer(heart.df.cleaned,var="STERNOTOMY_TRR",val_old,val_
 
 
 
- base[ c("ABO_MAT", "ANTIHYPE_DON" , "BLOOD_INF_DON","BRONCHO_LT_DON","BRONCHO_RT_DON","CARDARREST_NEURO",
-         "CHEST_XRAY_DON", "CLIN_INFECT_DON","CMV_DON","BUN_DON","CONTIN_CIG_DON", "CONTIN_COCAINE_DON", "CONTIN_OTH_DRUG_DON",          
-          "CORONARY_ANGIO","CREAT_DON","CRSMATCH_DONE","CTR_CODE","DATA_TRANSPLANT","DATA_WAITLIST", "DAYS_STAT1",
-         "DAYS_STAT1A","DAYS_STAT1B","DAYS_STAT2","DAYSWAIT_CHRON","DDAVP_DON","DIABDUR_DON","DIABETES_DON","DIAL_AFTER_LIST",
-         "DIAL_PRIOR_TX","DIET_DON","DISTANCE","DON_RETYP","DON_TY","EBV_SEROSTATUS","ECD_DONOR", "END_BMI_CALC",
-         "END_OPO_CTR_CODE","END_STAT","EXERCISE_O2","GSTATUS","GTIME","HBV_CORE","HBV_CORE_DON","HBV_SUR_ANTIGEN","HCV_SEROSTATUS",
-         "HEMO_CO_TCR","HEMO_PA_DIA_TCR","HEMO_PA_DIA_TRR","HEMO_PA_MN_TCR","HEMO_PCW_TCR","HEMO_SYS_TCR","HEP_C_ANTI_DON",
-         "HEPARIN_DON","HIST_CIG_DON","HIST_COCAINE_DON","HIST_DIABETES_DON", "HIST_HYPERTENS_DON", "HIV_SEROSTATUS", "HIST_OTH_DRUG_DON",
-          "HOME_STATE_DON","HTLV2_OLD_DON","HYPERTENS_DUR_DON","IABP_TCR" ,"IABP_TRR","IMPL_DEFIBRIL","INHALED_NO","INHALED_NO_TRR","INIT_STAT",
-         "INIT_OPO_CTR_CODE", "INOTROP_VASO_CO_TRR","INOTROP_VASO_DIA_TRR","INOTROP_VASO_MN_TRR", "INOTROP_VASO_PCW_TRR","INOTROP_VASO_SYS_TCR",
-         "INOTROP_VASO_SYS_TRR","INOTROPES_TCR","INOTROPES_TRR", "INOTROPIC","ISCHTIME","LAST_INACT_REASON","LIFE_SUP_TRR", "LIFE_SUP_TCR",
-         "LISTING_CTR_CODE","LIV_DON_TY","LOS","LV_EJECT", "LV_EJECT_METH","LVAD_AT_LISTING","LVAD_WHILE_LISTED","MALIG", "MALIG_TCR",
-         "MALIG_TY","MALIG_TY_TCR","MED_COND_TRR","MULTIORG", "NON_HRT_DON","NUM_PREV_TX","O2_REQ_CALC","ONVENT","OPO_CTR_CODE","ORGAN",
-         "OTH_DGN_OSTXT","OTH_LIFE_SUP_OSTXT_TCR","OTH_LIFE_SUP_OSTXT_TRR","OTH_LIFE_SUP_TCR","OTH_LIFE_SUP_TRR","OTHER_HYPERTENS_MED_DON",
-         "OTHER_INF_DON","PCO2_TRR","PERM_STATE","PGE_TRR","PO2","PO2_DONE_DON","PO2_FIO2_DON","PRIOR_CARD_SURG_TYPE_OSTXT_TCR",  
-         "PRIOR_CARD_SURG_TYPE_OSTXT_TRR","PRIOR_CARD_SURG_TYPE_TCR","PRIOR_CARD_SURG_TYPE_TRR","PRIOR_LUNG_SURG_TRR",
-         "PRIOR_LUNG_SURG_TYPE_OSTXT_TRR","PRIOR_LUNG_SURG_TYPE_TRR","PROS_INFUS_TCR","PROS_INFUS_TRR","PROSTACYCLIN_TCR",
-         "PROTEIN_URINE","PRVTXDIF","PT_CODE","PT_DIURETICS_DON","PT_OTH1_OSTXT_DON", "PT_OTH2_OSTXT_DON","PT_OTH3_OSTXT_DON", "PT_OTH4_OSTXT_DON",
-         "PT_STEROIDS_DON","PT_T3_DON","PT_T4_DON","PULM_CATH_DON","PULM_INF_CONF_DON","PULM_INF_DON","RECOV_OUT_US","REM_CD","RESIST_INF","RESUSCIT_DUR",
-         "RVAD_AT_LISTING","RVAD_WHILE_LISTED", "SGOT_DON","SGPT_DON", "STERNOTOMY_TRR","STEROID","SUD_DEATH","TATTOOS","TBILI_DON","TOT_SERUM_ALBUM",
-         "TRANSPLANT_COUNTRY","TRR_ID_CODE","TRTREJ1Y","TX_PROCEDUR_TY","TX_TYPE", "TXED" , "TXHRT","TXINT" ,"TXKID","TXLIV","TXLNG","TXPAN",
-         "URINE_INF_CONF_DON","URINE_INF_DON","VASODIL_DON" , "VDRL_DON","VENT_SUPPORT_AFTER_LIST","VENT_SUPPORT_TRR","VENT_TIMEFRAME_TRR","VENTILATOR_TCR" )]<-NULL
-      
-names(base)      
+```
+<br />
+<br />
+<br />
+<br />
+**Here are a report about the remaining variables (discarded means irrelevant/not interesting variables)**
+```{r , message=FALSE, cache=FALSE, error=FALSE}
+
+rem_type2<-as.data.frame(table(heart.form[which(heart.form$VARIABLE.NAME %in% names(heart.df.cleaned)), "INTERPRETATION_TYPE"]))
+names(rem_type2)<-c("Variable Type","Frequency")
+rem_type2$`Variable Type`<-c("Categorical","Initially Discarded","Date","Numerical")
+
+cat("here is the brand new variables that I developed from the dataset")
+str(heart.df.cleaned[,c("BMI_CHNG","WGT_CHNG","HGT_CHNG","AGE_MAT","BMI_MAT","GENDER_MAT","ETH_MAT","CARD_SURG","TX_YEAR_CAT","HEPARIN", "ANCEF", "DOPAMINE", "ZOSYN")])
 
 
-
-                                                                  
-                                
-
-table(heart.df.cleaned$VASODIL_DON)  
-table(heart.df.cleaned$VDRL_DON)
-table(heart.df.cleaned$VENT_SUPPORT_AFTER_LIST)
-table(heart.df.cleaned$VENT_SUPPORT_TRR)  
-table(heart.df.cleaned$VENT_TIMEFRAME_TRR)
-
-table(heart.df.cleaned$VENTILATOR_TCR) 
-table(heart.df.cleaned$TXLNG)
-table(heart.df.cleaned$TXPAN)
-table(heart.df.cleaned$URINE_INF_CONF_DON)             
-table(heart.df.cleaned$URINE_INF_DON)
- 
-table(heart.df.cleaned$PT_T3_DON)             
-table(heart.df.cleaned$PT_STEROIDS_DON)
-
-sum(as.data.frame(table(heart.df$TOT_SERUM_ALBUM))[2])
-sum(as.data.frame(table(heart.df.cleaned$TOT_SERUM_ALBUM))[2])
-temp<-as.data.frame(table(heart.df.cleaned$SGOT_DON))
-temp<-as.data.frame(table(heart.df.cleaned$SGPT_DON))
-temp<-as.data.frame(table(heart.df.cleaned$PT_OTH3_OSTXT_DON))
-temp<-as.data.frame(table(heart.df.cleaned$PT_OTH4_OSTXT_DON))
-
-table(heart.df$STERNOTOMY_TRR)
-table(heart.df$WLKP)
-table(heart.df$TRANSPLANT_COUNTRY)
-table(heart.df$PT_OTH2_OSTXT_DON)
-table(heart.df$PT_OTH3_OSTXT_DON)
-table(heart.df$PT_OTH4_OSTXT_DON)
-
-PT_OTH1_OSTXT_DON
-PT_OTH2_OSTXT_DON
-PT_OTH3_OSTXT_DON
-PT_OTH4_OSTXT_DON
-
-
-table(heart.df$REGION)
-table(heart.df$DA2)
-table(heart.df$PROC_TY_HR)
-
-table(heart.df$HLAMIS)
-
-
+cat("Number of patients: ",nrow(heart.df.cleaned),"& Number of variables: ",ncol(heart.df.cleaned))
 
 ```
-
-
-
 
 
 
