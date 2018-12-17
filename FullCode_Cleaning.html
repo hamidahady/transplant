@@ -13,7 +13,7 @@
 <meta name="author" content="Fadel M. Megahed" />
 <meta name="author" content="Ying-Ju Tessa Chen" />
 
-<meta name="date" content="2018-12-12" />
+<meta name="date" content="2018-12-16" />
 
 <title>Data Cleaning for transplant surgeries</title>
 
@@ -253,7 +253,7 @@ div.tocify {
 <h4 class="author"><em>Hamidreza Ahady Dolatsara<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a></em></h4>
 <h4 class="author"><em>Fadel M. Megahed<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a></em></h4>
 <h4 class="author"><em>Ying-Ju Tessa Chen<a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a></em></h4>
-<h4 class="date"><em>December 12, 2018</em></h4>
+<h4 class="date"><em>December 16, 2018</em></h4>
 
 </div>
 
@@ -397,14 +397,14 @@ heart.discard &lt;- intersect(heart.discard, colnames(heart.df.cleaned))
 heart.df.cleaned &lt;- select(heart.df.cleaned, -heart.discard) </code></pre>
 <p><br /> <br /> <strong>Here are the variables that in the initial check we dropped them for being not interesting/irrelavence</strong></p>
 <pre class="r"><code>DT::datatable(vars_discarded)</code></pre>
-<p><div id="htmlwidget-c294fb5fd75445561a84" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-c294fb5fd75445561a84">{"x":{"filter":"none","data":[["11","13","14","34","60","63","65","66","67","68","69","70","72","107","121","127","147","148","156","232","274","279","281","298","336","369","379","384","393","394","400","407","425"],["ACTIVATE_DATE","ADMISSION_DATE","ADMIT_DATE_DON","CANCER_OTH_OSTXT_DON","COD","COD_OSTXT","COD_OSTXT_WL","COD_WL","COD2","COD2_OSTXT","COD3","COD3_OSTXT","COMPOSITE_DEATH_DATE","DEATH_DATE","DISCHARGE_DATE","DONOR_ID","END_DATE","END_HGT_CM_CALC","END_WGT_KG_CALC","INIT_AGE","LASTFUNO","LISTYR","LOS","MEASUREMENT_DATE_TRR","POST_TX_VENT_SUPPORT","PSTATUS","PTIME","PX_STAT_DATE","RECOVERY_DATE_DON","REFERRAL_DATE","RETXDATE","SSDMF_DEATH_DATE","TCR_DGN_OSTXT"],["ALLOCATION TIME BEGINNING DATE","RECIPIENT DATE OF ADMISSION TO TX CENTER","DONOR ADMIT DATE","DECEASED DONOR-CANCER SITE-OTHER SPECIFY","RECIPIENT PRIMARY CAUSE OF DEATH","RECIPIENT PRIMARY CAUSE OF DEATH - OTHER SPECIFY","WL CANDIDATE CAUSE OF DEATH FOR DEATH REMOVAL, OTHER SPECIFIED","CANDIDATE CAUSE OF DEATH FOR DEATH REMOVAL","RECIPIENT CONTRIBUTORY CAUSE OF DEATH 1","RECIPIENT CONTRIBUTARY CAUSE OF DEATH 1- OTHER SPECIFY","RECIPIENT CONTRIBUTORY CAUSE OF DEATH 2","RECIPIENT CONTRIBUTARY CAUSE OF DEATH 2- OTHER SPECIFY","Composite Patient Death Date from OPTN or Verified from External Sources","DATE DIED, FOR PATIENT REMOVED FROM THE WAITING LIST FOR REASON OF DEATH","RECIPIENT DISCHARGE DATE FROM TX CENTER","ENCRYPTED DONOR IDENTIFIER","EARLIEST OF DATES OF REMOVAL FROM WAITING LIST, TRANSPLANT, DEATH, OR TIME COPY OF DATA CREATED","Calculated Candidate Height in CM at Removal/Current Time","Calculated Candidate Weight in KG at Removal/Current Time","AGE IN YEARS AT TIME OF LISTING","LAST FOLLOWUP NUMBER","ACTUAL YEAR REGISTRANT LISTED (WITHOUT DATE OFFSET)","RECIPIENT LENGTH OF STAY POST TX","TRR MEASUREMENT DATE (PEDIATRIC)","RECIPIENT VENTILATOR SUPPORT POST TRANSPLANT","Boolean Most Recent Patient Status (based on composite death date) (1=Dead, 0=Alive)","Patient Survival Time in days (based on composite death date)","RECIPIENT STATUS DATE","ORGAN RECOVERY DATE","DATE OF REFERRAL CALL","DATE RE-TRANSPLANTED","SOCIAL SECURITY DEATH MASTER FILE DEATH DATE","CANDIDATE TEXT OF OTHER SPECIFY DIAGNOSIS AT LISTING"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>VARIABLE.NAME<\/th>\n      <th>DESCRIPTION<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script> <br /> <br /> <strong>Here are the variables that ended. Their adding date is checked, even if they dropped late (2015) but the added early so they are not intersting (e.g. PRAMR_CL2).</strong></p>
+<p><div id="htmlwidget-0d8e52844b593f2e8212" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-0d8e52844b593f2e8212">{"x":{"filter":"none","data":[["11","13","14","34","60","63","65","66","67","68","69","70","72","107","121","127","147","148","156","232","274","279","281","298","336","369","379","384","393","394","400","407","425"],["ACTIVATE_DATE","ADMISSION_DATE","ADMIT_DATE_DON","CANCER_OTH_OSTXT_DON","COD","COD_OSTXT","COD_OSTXT_WL","COD_WL","COD2","COD2_OSTXT","COD3","COD3_OSTXT","COMPOSITE_DEATH_DATE","DEATH_DATE","DISCHARGE_DATE","DONOR_ID","END_DATE","END_HGT_CM_CALC","END_WGT_KG_CALC","INIT_AGE","LASTFUNO","LISTYR","LOS","MEASUREMENT_DATE_TRR","POST_TX_VENT_SUPPORT","PSTATUS","PTIME","PX_STAT_DATE","RECOVERY_DATE_DON","REFERRAL_DATE","RETXDATE","SSDMF_DEATH_DATE","TCR_DGN_OSTXT"],["ALLOCATION TIME BEGINNING DATE","RECIPIENT DATE OF ADMISSION TO TX CENTER","DONOR ADMIT DATE","DECEASED DONOR-CANCER SITE-OTHER SPECIFY","RECIPIENT PRIMARY CAUSE OF DEATH","RECIPIENT PRIMARY CAUSE OF DEATH - OTHER SPECIFY","WL CANDIDATE CAUSE OF DEATH FOR DEATH REMOVAL, OTHER SPECIFIED","CANDIDATE CAUSE OF DEATH FOR DEATH REMOVAL","RECIPIENT CONTRIBUTORY CAUSE OF DEATH 1","RECIPIENT CONTRIBUTARY CAUSE OF DEATH 1- OTHER SPECIFY","RECIPIENT CONTRIBUTORY CAUSE OF DEATH 2","RECIPIENT CONTRIBUTARY CAUSE OF DEATH 2- OTHER SPECIFY","Composite Patient Death Date from OPTN or Verified from External Sources","DATE DIED, FOR PATIENT REMOVED FROM THE WAITING LIST FOR REASON OF DEATH","RECIPIENT DISCHARGE DATE FROM TX CENTER","ENCRYPTED DONOR IDENTIFIER","EARLIEST OF DATES OF REMOVAL FROM WAITING LIST, TRANSPLANT, DEATH, OR TIME COPY OF DATA CREATED","Calculated Candidate Height in CM at Removal/Current Time","Calculated Candidate Weight in KG at Removal/Current Time","AGE IN YEARS AT TIME OF LISTING","LAST FOLLOWUP NUMBER","ACTUAL YEAR REGISTRANT LISTED (WITHOUT DATE OFFSET)","RECIPIENT LENGTH OF STAY POST TX","TRR MEASUREMENT DATE (PEDIATRIC)","RECIPIENT VENTILATOR SUPPORT POST TRANSPLANT","Boolean Most Recent Patient Status (based on composite death date) (1=Dead, 0=Alive)","Patient Survival Time in days (based on composite death date)","RECIPIENT STATUS DATE","ORGAN RECOVERY DATE","DATE OF REFERRAL CALL","DATE RE-TRANSPLANTED","SOCIAL SECURITY DEATH MASTER FILE DEATH DATE","CANDIDATE TEXT OF OTHER SPECIFY DIAGNOSIS AT LISTING"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>VARIABLE.NAME<\/th>\n      <th>DESCRIPTION<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script> <br /> <br /> <strong>Here are the variables that ended. Their adding date is checked, even if they dropped late (2015) but the added early so they are not intersting (e.g. PRAMR_CL2).</strong></p>
 <pre class="r"><code>DT::datatable(vars_ended)</code></pre>
-<p><div id="htmlwidget-b48793404eb34af19940" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-b48793404eb34af19940">{"x":{"filter":"none","data":[["40","43","45","52","54","57","73","75","77","85","89","93","116","119","124","128","206","213","216","220","275","289","293","295","300","310","311","312","328","331","332","337","338","339","340","341","342","343","408","416","428","429","431","432","462","463","464","465"],["CARDIAC_OUTPUT_CATH_OLD_DON","CEREB_VASC","CIG_GRT_10_OLD","CMV_IGG","CMV_IGM","CMV_OLD_LIV_DON","CONTIN_ALCOHOL_OLD_DON","CONTIN_CIG_OLD","CONTIN_IV_DRUG_OLD_DON","CREAT2_OLD","CVP_CATH_OLD_DON","DANTIARR_OLD","DIAL_TY_TCR","DIASTOLIC_PA_CATH_OLD_DON","DOBUT_DON_OLD","DOPAMINE_DON_OLD","HIST_ALCOHOL_OLD_DON","HIST_IV_DRUG_OLD_DON","HISTRY_CIG_OLD","HTLV1_OLD_DON","LEFT_VENT_REMODEL_OLD","MALIG_TRR","MALIG_TY_OSTXT_TRR","MALIG_TY_TRR","MOST_RCNT_CREAT","OTH_DON_MED1_OSTXT_DON_OLD","OTH_DON_MED2_OSTXT_DON_OLD","OTH_DON_MED3_OSTXT_DON_OLD","PGE_TCR","PNEUMORED_OLD","PNEUMOTHORAX_OLD","PRAMR","PRAMR_CL1","PRAMR_CL2","PRAPK","PRAPK_CL1","PRAPK_CL2","PRETREAT_MED_DON_OLD","STERNOTOMY_TCR","SYSTOLIC_PA_CATH_OLD_DON","THORACOT_LT_OLD","THORACOT_RT_OLD","TRANSFUS_INTRAOP_NUM_OLD_DON","TRANSFUS_PRIOR_NUM_OLD_DON","VAD_TAH_OSTXT_TCR","VAD_TAH_OSTXT_TRR","VAD_TAH_TCR","VAD_TAH_TRR"],["ARCHIVED DDR CARDIAC OUTPUT","PATIENT SYMPTOMATIC CEREBROVASCULAR DISEASE @ REGISTRATION","HISTORY OF CIGARETTE USE &gt;10 PACK YEARS @ REGISTRATION","RECIPIENT-CMV BY IGG TEST RESULT  @ TRANSPLANT","RECIPIENT-CMV BY IGM TEST RESULT  @ TRANSPLANT","LIV DONOR CMV -SEROLOGY (PRE 10/25/99 DATA)","DECEASED DONOR-HISTORY OF ALCOHOL DEPENDENCY+ RECENT 6MO USE","CIGARETTE USE &gt; 10 PACK YRS AND CONINUED USE DURING LAST SIX MONTHS","DECEASED DONOR-HISTORY OF IV DRUG USE+RECENT 6MO USE","MOST RECENT CREATININE &gt; 2.0 MG/DL Y/N (ONLY COLLECTED 04/01/1994 TO 10/25/1999)","ARCHIVED DDR CVP CATHETER","DECEASED DONOR GIVEN ANTIARRYTHMICS 24 HOURS PRIOR TO CROSS CLAMP","PATIENT TYPE OF DIALYSIS @ REGISTRATION","ARCHIVED DDR PA CATHETER DIASTOLIC","DECEASED DONOR-DOBUTAMINE W/IN 24 HRS PRE-CROSS CLAMP","DECEASED DONOR-DOPAMINE W/IN 24 HRS PRE-CROSS CLAMP","DECEASED DONOR-HISTORY OF ALCOHOL DEPENDENCY","DECEASED DONOR-HISTORY OF IV DRUG USE IN PAST","CIGARETTE USE &gt; 20 PACK YRS (PRE-10/25/99)","DECEASED DONOR-ANTIBODY TO HTLV I RESULT","LEFT VENTRICULAR REMODELING OCCURRING BEFORE LISTING","RECIPIENT ANY KNOWN MALIGNANCIES SINCE LISTING  @ TRANSPLANT","TRR MALIGNANCY TYPE TEXT","TYPE OF MALIGNANCY BETWEEN LISTING AND TRANSPLANT","PATIENT MOST RECENT ABSOLUTE CREATININE AT LISTING","DECEASED DONOR OTHER MEDICATIONS1 W/IN 24 HRS PRE-CROSS CLAMP","DECEASED DONOR OTHER MEDICATIONS2 W/IN 24 HRS PRE-CROSS CLAMP","DECEASED DONOR OTHER MEDICATIONS3 W/IN 24 HRS PRE-CROSS CLAMP","PATIENT ON LIFE SUPPORT: PGE @ REGISTRATION","CANDIDATE PNEUMOREDUCTION PRIOR TO LISTING","CANDIDATE PNEUMOTHORAZ PRIOR TO LISTING","RECIPIENT MOST RECENT PRA% @ TRANSPLANT","RECIPIENT MOST RECENT PRA% CLASS I @ TRANSPLANT ","RECIPIENT MOST RECENT PRA% CLASS II @ TRANSPLANT ","RECIPIENT PEAK PRA% @ TRANSPLANT","RECIPIENT PEAK PRA% CLASS I @ TRANSPLANT ","RECIPIENT PEAK PRA% CLASS II @ TRANSPLANT ","DECEASED DONOR PRE-RECOVERY MEDICATION(S) FROM BRAIN DEATH TO 24 HRS PRIOR TO PROCUREMENT","EVENTS OCCURRING PRIOR TO LISTING: STERNOTOMY","ARCHIVED DDR PA SYSTOLIC","CANDIDATE THORACOTOMY LEFT AT LISTING","CANDIDATE THORACOTOMY RIGHT AT LISTING","ARCHIVED DDR TRANSFUSION UNITS INTRAOPERATIVELY","ARCHIVED DDR TRANSUFISION UNITS PRE-OPERATIVELY","CANDIDATE ON LIFE SUPPORT - VAD/TAH @ REGISTRATION, OTHER SPECIFY","RECIPIENT ON LIFE SUPPORT - VAD/TAH @ TRANSPLANT, OTHER SPECIFY ","CANDIDATE ON LIFE SUPPORT - VAD/TAH @ REGISTRATION","RECIPIENT ON LIFE SUPPORT - VAD/TAH @ TRANSPLANT"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>VARIABLE.NAME<\/th>\n      <th>DESCRIPTION<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script> <br /> <br /> <strong>Here are the variables that are relevent to the post transplant info. So, we dropped them.</strong></p>
+<p><div id="htmlwidget-9d472941ba682f9e0cab" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-9d472941ba682f9e0cab">{"x":{"filter":"none","data":[["40","43","45","52","54","57","73","75","77","85","89","93","116","119","124","128","206","213","216","220","275","289","293","295","300","310","311","312","328","331","332","337","338","339","340","341","342","343","408","416","428","429","431","432","462","463","464","465"],["CARDIAC_OUTPUT_CATH_OLD_DON","CEREB_VASC","CIG_GRT_10_OLD","CMV_IGG","CMV_IGM","CMV_OLD_LIV_DON","CONTIN_ALCOHOL_OLD_DON","CONTIN_CIG_OLD","CONTIN_IV_DRUG_OLD_DON","CREAT2_OLD","CVP_CATH_OLD_DON","DANTIARR_OLD","DIAL_TY_TCR","DIASTOLIC_PA_CATH_OLD_DON","DOBUT_DON_OLD","DOPAMINE_DON_OLD","HIST_ALCOHOL_OLD_DON","HIST_IV_DRUG_OLD_DON","HISTRY_CIG_OLD","HTLV1_OLD_DON","LEFT_VENT_REMODEL_OLD","MALIG_TRR","MALIG_TY_OSTXT_TRR","MALIG_TY_TRR","MOST_RCNT_CREAT","OTH_DON_MED1_OSTXT_DON_OLD","OTH_DON_MED2_OSTXT_DON_OLD","OTH_DON_MED3_OSTXT_DON_OLD","PGE_TCR","PNEUMORED_OLD","PNEUMOTHORAX_OLD","PRAMR","PRAMR_CL1","PRAMR_CL2","PRAPK","PRAPK_CL1","PRAPK_CL2","PRETREAT_MED_DON_OLD","STERNOTOMY_TCR","SYSTOLIC_PA_CATH_OLD_DON","THORACOT_LT_OLD","THORACOT_RT_OLD","TRANSFUS_INTRAOP_NUM_OLD_DON","TRANSFUS_PRIOR_NUM_OLD_DON","VAD_TAH_OSTXT_TCR","VAD_TAH_OSTXT_TRR","VAD_TAH_TCR","VAD_TAH_TRR"],["ARCHIVED DDR CARDIAC OUTPUT","PATIENT SYMPTOMATIC CEREBROVASCULAR DISEASE @ REGISTRATION","HISTORY OF CIGARETTE USE &gt;10 PACK YEARS @ REGISTRATION","RECIPIENT-CMV BY IGG TEST RESULT  @ TRANSPLANT","RECIPIENT-CMV BY IGM TEST RESULT  @ TRANSPLANT","LIV DONOR CMV -SEROLOGY (PRE 10/25/99 DATA)","DECEASED DONOR-HISTORY OF ALCOHOL DEPENDENCY+ RECENT 6MO USE","CIGARETTE USE &gt; 10 PACK YRS AND CONINUED USE DURING LAST SIX MONTHS","DECEASED DONOR-HISTORY OF IV DRUG USE+RECENT 6MO USE","MOST RECENT CREATININE &gt; 2.0 MG/DL Y/N (ONLY COLLECTED 04/01/1994 TO 10/25/1999)","ARCHIVED DDR CVP CATHETER","DECEASED DONOR GIVEN ANTIARRYTHMICS 24 HOURS PRIOR TO CROSS CLAMP","PATIENT TYPE OF DIALYSIS @ REGISTRATION","ARCHIVED DDR PA CATHETER DIASTOLIC","DECEASED DONOR-DOBUTAMINE W/IN 24 HRS PRE-CROSS CLAMP","DECEASED DONOR-DOPAMINE W/IN 24 HRS PRE-CROSS CLAMP","DECEASED DONOR-HISTORY OF ALCOHOL DEPENDENCY","DECEASED DONOR-HISTORY OF IV DRUG USE IN PAST","CIGARETTE USE &gt; 20 PACK YRS (PRE-10/25/99)","DECEASED DONOR-ANTIBODY TO HTLV I RESULT","LEFT VENTRICULAR REMODELING OCCURRING BEFORE LISTING","RECIPIENT ANY KNOWN MALIGNANCIES SINCE LISTING  @ TRANSPLANT","TRR MALIGNANCY TYPE TEXT","TYPE OF MALIGNANCY BETWEEN LISTING AND TRANSPLANT","PATIENT MOST RECENT ABSOLUTE CREATININE AT LISTING","DECEASED DONOR OTHER MEDICATIONS1 W/IN 24 HRS PRE-CROSS CLAMP","DECEASED DONOR OTHER MEDICATIONS2 W/IN 24 HRS PRE-CROSS CLAMP","DECEASED DONOR OTHER MEDICATIONS3 W/IN 24 HRS PRE-CROSS CLAMP","PATIENT ON LIFE SUPPORT: PGE @ REGISTRATION","CANDIDATE PNEUMOREDUCTION PRIOR TO LISTING","CANDIDATE PNEUMOTHORAZ PRIOR TO LISTING","RECIPIENT MOST RECENT PRA% @ TRANSPLANT","RECIPIENT MOST RECENT PRA% CLASS I @ TRANSPLANT ","RECIPIENT MOST RECENT PRA% CLASS II @ TRANSPLANT ","RECIPIENT PEAK PRA% @ TRANSPLANT","RECIPIENT PEAK PRA% CLASS I @ TRANSPLANT ","RECIPIENT PEAK PRA% CLASS II @ TRANSPLANT ","DECEASED DONOR PRE-RECOVERY MEDICATION(S) FROM BRAIN DEATH TO 24 HRS PRIOR TO PROCUREMENT","EVENTS OCCURRING PRIOR TO LISTING: STERNOTOMY","ARCHIVED DDR PA SYSTOLIC","CANDIDATE THORACOTOMY LEFT AT LISTING","CANDIDATE THORACOTOMY RIGHT AT LISTING","ARCHIVED DDR TRANSFUSION UNITS INTRAOPERATIVELY","ARCHIVED DDR TRANSUFISION UNITS PRE-OPERATIVELY","CANDIDATE ON LIFE SUPPORT - VAD/TAH @ REGISTRATION, OTHER SPECIFY","RECIPIENT ON LIFE SUPPORT - VAD/TAH @ TRANSPLANT, OTHER SPECIFY ","CANDIDATE ON LIFE SUPPORT - VAD/TAH @ REGISTRATION","RECIPIENT ON LIFE SUPPORT - VAD/TAH @ TRANSPLANT"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>VARIABLE.NAME<\/th>\n      <th>DESCRIPTION<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script> <br /> <br /> <strong>Here are the variables that are relevent to the post transplant info. So, we dropped them.</strong></p>
 <pre class="r"><code>DT::datatable(vars_posttrans)</code></pre>
-<p><div id="htmlwidget-ef1f5dc8fafcc780c81c" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-ef1f5dc8fafcc780c81c">{"x":{"filter":"none","data":[["12","60","63","67","68","69","70","72","165","170","171","172","173","336","365","366","367","368","369","383","384","396"],["ACUTE_REJ_EPI","COD","COD_OSTXT","COD2","COD2_OSTXT","COD3","COD3_OSTXT","COMPOSITE_DEATH_DATE","FUNC_STAT_TRF","GRF_FAIL_CAUSE","GRF_FAIL_CAUSE_OSTXT","GRF_FAIL_DATE","GRF_STAT","POST_TX_VENT_SUPPORT","PST_AIRWAY","PST_DIAL","PST_PACEMAKER","PST_STROKE","PSTATUS","PX_STAT","PX_STAT_DATE","REINTUBATED"],["DID RECIPIENT HAVE ANY ACUTE REJECTION EPISODES PRE DISCHARGE?","RECIPIENT PRIMARY CAUSE OF DEATH","RECIPIENT PRIMARY CAUSE OF DEATH - OTHER SPECIFY","RECIPIENT CONTRIBUTORY CAUSE OF DEATH 1","RECIPIENT CONTRIBUTARY CAUSE OF DEATH 1- OTHER SPECIFY","RECIPIENT CONTRIBUTORY CAUSE OF DEATH 2","RECIPIENT CONTRIBUTARY CAUSE OF DEATH 2- OTHER SPECIFY","Composite Patient Death Date from OPTN or Verified from External Sources","RECIPIENT FUNCTIONAL STATUS-MOST RECENT AT FOLLOW-UP","CAUSE OF GRAFT FAILURE","CAUSE OF GRAFT FAILURE OTHER SPECIFIED TEXT","DATE OF GRAFT FAILURE","GRAFT STATUS","RECIPIENT VENTILATOR SUPPORT POST TRANSPLANT","EVENTS PRIOR TO DISCHARGE: AIRWAY DEHISCENCE","EVENTS PRIOR TO DISCHARGE: DIALYSIS","EVENTS PRIOR TO DISCHARGE: PERMANENT PACEMAKER","EVENTS PRIOR TO DISCHARGE: STROKE","Boolean Most Recent Patient Status (based on composite death date) (1=Dead, 0=Alive)","RECIPIENT STATUS(Died, ReTX, Lost, Alive)","RECIPIENT STATUS DATE","RECIPIENT REINTUBATED POST TRANSPLANT"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>VARIABLE.NAME<\/th>\n      <th>DESCRIPTION<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script> <br /> <br /> <strong>Here are a report about the remaining variables (discarded means irrelevant/not interesting variables)</strong> <strong>We lready got rid of discarded variables so their frequency is zero</strong></p>
+<p><div id="htmlwidget-bde5434c175146fd874c" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-bde5434c175146fd874c">{"x":{"filter":"none","data":[["12","60","63","67","68","69","70","72","165","170","171","172","173","336","365","366","367","368","369","383","384","396"],["ACUTE_REJ_EPI","COD","COD_OSTXT","COD2","COD2_OSTXT","COD3","COD3_OSTXT","COMPOSITE_DEATH_DATE","FUNC_STAT_TRF","GRF_FAIL_CAUSE","GRF_FAIL_CAUSE_OSTXT","GRF_FAIL_DATE","GRF_STAT","POST_TX_VENT_SUPPORT","PST_AIRWAY","PST_DIAL","PST_PACEMAKER","PST_STROKE","PSTATUS","PX_STAT","PX_STAT_DATE","REINTUBATED"],["DID RECIPIENT HAVE ANY ACUTE REJECTION EPISODES PRE DISCHARGE?","RECIPIENT PRIMARY CAUSE OF DEATH","RECIPIENT PRIMARY CAUSE OF DEATH - OTHER SPECIFY","RECIPIENT CONTRIBUTORY CAUSE OF DEATH 1","RECIPIENT CONTRIBUTARY CAUSE OF DEATH 1- OTHER SPECIFY","RECIPIENT CONTRIBUTORY CAUSE OF DEATH 2","RECIPIENT CONTRIBUTARY CAUSE OF DEATH 2- OTHER SPECIFY","Composite Patient Death Date from OPTN or Verified from External Sources","RECIPIENT FUNCTIONAL STATUS-MOST RECENT AT FOLLOW-UP","CAUSE OF GRAFT FAILURE","CAUSE OF GRAFT FAILURE OTHER SPECIFIED TEXT","DATE OF GRAFT FAILURE","GRAFT STATUS","RECIPIENT VENTILATOR SUPPORT POST TRANSPLANT","EVENTS PRIOR TO DISCHARGE: AIRWAY DEHISCENCE","EVENTS PRIOR TO DISCHARGE: DIALYSIS","EVENTS PRIOR TO DISCHARGE: PERMANENT PACEMAKER","EVENTS PRIOR TO DISCHARGE: STROKE","Boolean Most Recent Patient Status (based on composite death date) (1=Dead, 0=Alive)","RECIPIENT STATUS(Died, ReTX, Lost, Alive)","RECIPIENT STATUS DATE","RECIPIENT REINTUBATED POST TRANSPLANT"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>VARIABLE.NAME<\/th>\n      <th>DESCRIPTION<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script> <br /> <br /> <strong>Here are a report about the remaining variables (discarded means irrelevant/not interesting variables)</strong> <strong>We lready got rid of discarded variables so their frequency is zero</strong></p>
 <pre class="r"><code>rem_type&lt;-as.data.frame(table(heart.form[which(heart.form$VARIABLE.NAME %in% names(heart.df.cleaned)), &quot;INTERPRETATION_TYPE&quot;]))
 names(rem_type)&lt;-c(&quot;Variable Type&quot;,&quot;Frequency&quot;)
 rem_type$`Variable Type`&lt;-c(&quot;Categorical&quot;,&quot;Initially Discarded&quot;,&quot;Date&quot;,&quot;Numerical&quot;)
@@ -413,11 +413,11 @@ org_type&lt;-as.data.frame(table(heart.df$WL_ORG))
 names(org_type)&lt;-c(&quot;Organ Type&quot;,&quot;No. of Patients&quot;)
 org_type$`Variable Type`&lt;-c(&quot;UNKOWN&quot;,&quot;Heart &amp; Lung&quot;,&quot;Heart&quot;,&quot;Lung&quot;)
 DT::datatable(org_type)</code></pre>
-<div id="htmlwidget-f6c75493801ef66eebe7" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-f6c75493801ef66eebe7">{"x":{"filter":"none","data":[["1","2","3","4"],["","HL","HR","LU"],[428,3148,103570,52172],["UNKOWN","Heart &amp; Lung","Heart","Lung"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Organ Type<\/th>\n      <th>No. of Patients<\/th>\n      <th>Variable Type<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-7effeb9faf2b26485e28" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-7effeb9faf2b26485e28">{"x":{"filter":"none","data":[["1","2","3","4"],["","HL","HR","LU"],[428,3148,103570,52172],["UNKOWN","Heart &amp; Lung","Heart","Lung"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Organ Type<\/th>\n      <th>No. of Patients<\/th>\n      <th>Variable Type<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>DT::datatable(rem_type)</code></pre>
-<div id="htmlwidget-517942a75a00c0844853" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-517942a75a00c0844853">{"x":{"filter":"none","data":[["1","2","3","4"],["Categorical","Initially Discarded","Date","Numerical"],[255,0,3,57]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Variable Type<\/th>\n      <th>Frequency<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-b8422cb798321a258a4b" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-b8422cb798321a258a4b">{"x":{"filter":"none","data":[["1","2","3","4"],["Categorical","Initially Discarded","Date","Numerical"],[255,0,3,57]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Variable Type<\/th>\n      <th>Frequency<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>cat(&quot;Number of patients after dropping irrelevant patients: &quot;,nrow(heart.df.cleaned))</code></pre>
 <pre><code>## Number of patients after dropping irrelevant patients:  48442</code></pre>
 <p><br /> <br /> <br /> <br /> <strong>inthe following section variables are recategorized, drived, and developed based on literature considering the pool of patients</strong></p>
@@ -446,16 +446,14 @@ DT::datatable(org_type)</code></pre>
   # Mechanical ventilation / VENTILATOR_TRR
   # SPP (mmHG), systolic pulmonary pressure  / HEMO_SYS_TRR
   # Creatinine / CREAT_TRR
-  # Serum bilirubin (ÃÂ¼mol/l) / TBILI
-  # Use (mg/dl) instead of (ÃÂ¼mol/l) / TBILI
+  # Serum bilirubin (Î¼mol/l) / TBILI
+  # Use (mg/dl) instead of (Î¼mol/l) / TBILI
   # we used mg/dl
   # we did not work with PRAMR since it is added after 2004
 
 # ref2: Dag, Ali, et al. &quot;Predicting heart transplantation outcomes through data analytics.&quot; Decision Support Systems 94 (2017): 42-52.
 
 # Subsetting the data and creating other variables based on literature or to capture time effects
-base&lt;-heart.df.cleaned
-heart.df.cleaned&lt;-base
 
 heart.df.cleaned &lt;- subset(heart.df.cleaned) %&gt;%  
   #ref1
@@ -546,24 +544,25 @@ val_old&lt;-c(0,1,2,3,4,5,6)
 val_new&lt;-c(&quot;a&quot;,&quot;a&quot;,&quot;a&quot;,&quot;b&quot;,&quot;c&quot;,&quot;f&quot;,&quot;e&quot;)
 heart.df.cleaned&lt;-cat_changer(heart.df.cleaned,var=&quot;HLAMIS&quot;,val_old,val_new)
 
-  # Transplant era / TX_YEAR:
-  # I focused on after 2000. however, I can do for the rest, together or 4 different modeling
-  # -1995
-  # 1996-2000
-  # 2001-2005
-  # 2006-
-  heart.df.cleaned$TX_YEAR_CAT&lt;-heart.df.cleaned$TX_YEAR
-  
-  # categoirizing the transplantation date
-  for(i in 1:nrow(heart.df.cleaned)){
-    if(!is.na(heart.df.cleaned$TX_YEAR[i])){ 
-      if(heart.df.cleaned$TX_YEAR[i]&lt;=1995){heart.df.cleaned$TX_YEAR_CAT[i]&lt;-&quot;A&quot;}
-      else if(heart.df.cleaned$TX_YEAR[i]&gt;1995 &amp;&amp; heart.df.cleaned$TX_YEAR[i]&lt;=2000){heart.df.cleaned$TX_YEAR_CAT[i]&lt;-&quot;B&quot;}
-      else if(heart.df.cleaned$TX_YEAR[i]&gt;2000 &amp;&amp; heart.df.cleaned$TX_YEAR[i]&lt;=2005){heart.df.cleaned$TX_YEAR_CAT[i]&lt;-&quot;C&quot;}
-      else if(heart.df.cleaned$TX_YEAR[i]&gt;2005){heart.df.cleaned$TX_YEAR_CAT[i]&lt;-&quot;D&quot;}
-    }
-  }
-  heart.df.cleaned$TX_YEAR&lt;-NULL
+# previously, I categorized the transplant year in different groups based on the Nature paper, however Dr. Tessa believes to leave it as it is.
+  # # Transplant era / TX_YEAR:
+  # # I focused on after 2000. however, I can do for the rest, together or 4 different modeling
+  # # -1995
+  # # 1996-2000
+  # # 2001-2005
+  # # 2006-
+  # heart.df.cleaned$TX_YEAR_CAT&lt;-heart.df.cleaned$TX_YEAR
+  # 
+  # # categoirizing the transplantation date
+  # for(i in 1:nrow(heart.df.cleaned)){
+  #   if(!is.na(heart.df.cleaned$TX_YEAR[i])){ 
+  #     if(heart.df.cleaned$TX_YEAR[i]&lt;=1995){heart.df.cleaned$TX_YEAR_CAT[i]&lt;-&quot;A&quot;}
+  #     else if(heart.df.cleaned$TX_YEAR[i]&gt;1995 &amp;&amp; heart.df.cleaned$TX_YEAR[i]&lt;=2000){heart.df.cleaned$TX_YEAR_CAT[i]&lt;-&quot;B&quot;}
+  #     else if(heart.df.cleaned$TX_YEAR[i]&gt;2000 &amp;&amp; heart.df.cleaned$TX_YEAR[i]&lt;=2005){heart.df.cleaned$TX_YEAR_CAT[i]&lt;-&quot;C&quot;}
+  #     else if(heart.df.cleaned$TX_YEAR[i]&gt;2005){heart.df.cleaned$TX_YEAR_CAT[i]&lt;-&quot;D&quot;}
+  #   }
+  # }
+  # heart.df.cleaned$TX_YEAR&lt;-NULL
 
 
  # the following block is our variable manipulation based on the other literature as specified in Ali Dag's paper
@@ -634,24 +633,15 @@ heart.df.cleaned&lt;-cat_changer(heart.df.cleaned,var=&quot;HLAMIS&quot;,val_old
   # level OTHER in the next variable has low observations but it does not seem to be merged with other categories
   # I rather keep them than drop them because if this category will not important anyway and not selected as an important feature
   heart.df.cleaned&lt;-cat_changer(heart.df.cleaned,var=&quot;FUNC_STAT_TCR&quot;,val_old,val_new)</code></pre>
-<p><br /> <br /> <br /> <br /> <strong>inthe following section variables are recategorized, drived, and developed based on studying their definitions and distributions</strong></p>
-<pre class="r"><code>  # now, I finished the literature variables, I investigate the other variables bymyself
-  # following variables has too many NAs, so they are dropped
-  
- heart.df.cleaned[ c(&quot;WLHL&quot;, &quot;WLHR&quot;, &quot;WLIN&quot; , &quot;WLKI&quot;, &quot;WLKP&quot; ,&quot;WLLI&quot;, &quot;WLLU&quot;, &quot;WLPA&quot;,&quot;WLPI&quot;,&quot;VAD_AT_LISTING&quot;,
-                     &quot;VAD_WHILE_LISTED&quot;,&quot;VESSELS_50STEN&quot;,&quot;WALL_ABN_GLOB_DON&quot;,&quot;WALL_ABN_SEG_DON&quot; ,&quot;RECOV_COUNTRY&quot;,
-                     &quot;OTHER_INF_OSTXT_DON&quot;,&quot;OTHER_INF_CONF_DON&quot;,
-                     &quot;MALIG_TY_OSTXT&quot;,&quot;MALIG_TY_OSTXT_TCR&quot;,&quot;INSULIN_DUR_DON&quot;,&quot;INIT_O2&quot;,&quot;HIST_INSULIN_DEP_DON&quot;,
-                     &quot;HCV_ANTIBODY_DON&quot;,&quot;HCV_RIBA_DON&quot;,&quot;HCV_RNA_DON&quot;,&quot;HCV_TEST_DON&quot;,&quot;HBV_TEST_DON&quot;,
-                     &quot;HBV_SUR_ANTIGEN_DON&quot;,&quot;HBV_DNA_DON&quot;,&quot;GROUPING&quot;,&quot;FEV1_TRR&quot;,&quot;FVC_TRR&quot;,&quot;END_PRIORITY&quot;,
-                     &quot;END_O2&quot;,&quot;EBV_DNA_DON&quot;,&quot;EBV_IGG_DON&quot;,&quot;EBV_IGM_DON&quot;,&quot;EBV_TEST_DON&quot;,&quot;CONTROLLED&quot;,
-                     &quot;CANCER_FREE_INT_DON&quot;,&quot;BLOOD_INF_CONF_DON&quot;,&quot;CALC_LAS_LISTDATE&quot;,&quot;DIAG_OSTXT&quot;,
-                     &quot;INIT_PRIORITY&quot;,&quot;INIT_CREAT&quot;,&quot;CMV_IGG_DON&quot;, &quot;CMV_IGM_DON&quot;, &quot;CMV_NUCLEIC_DON&quot;,
-                     &quot;CMV_TEST_DON&quot;, &quot;COD_LIV_DON&quot; ,&quot;COD_OSTXT_DON&quot;,&quot;DIABDUR_DON&quot;,&quot;EXERCISE_O2&quot; ,&quot;LIV_DON_TY&quot;,&quot;O2_REQ_CALC&quot;,
-                     &quot;OTH_DGN_OSTXT&quot;,&quot;PCO2_TRR&quot;,&quot;PRIOR_LUNG_SURG_TYPE_OSTXT_TRR&quot;,&quot;PRIOR_LUNG_SURG_TYPE_TRR&quot;,&quot;PRVTXDIF&quot;,
-                     &quot;RESUSCIT_DUR&quot;,&quot;RVAD_AT_LISTING&quot;, &quot;RVAD_WHILE_LISTED&quot;,&quot;TRANSPLANT_COUNTRY&quot;,&quot;TXINT&quot; ,&quot;TXKID&quot;,&quot;TXLIV&quot;,&quot;TXLNG&quot;,&quot;TXPAN&quot;)]&lt;-NULL
- 
- #these variables are not useful because their (pattern of) distribution is not helpful
+<blockquote>
+<h3 id="in-the-following-section-variables-are-recategorized-drived-and-developed-based-on-studying-their-definitions-and-distributions">In the following section variables are recategorized, drived, and developed based on studying their definitions and distributions:</h3>
+</blockquote>
+<ul>
+<li>Variables are recategorized after studying their values</li>
+<li>If more than 90% of the observations for a variable is NA, that variable is dropped</li>
+<li>IF more than 90% of the observations for a variable is in just one category, that variable is dropped</li>
+</ul>
+<pre class="r"><code> #these variables are not useful because their (pattern of) distribution is not helpful
  # I drop maligancy (MALIG_TY,MALIG_TY_TCR) variables because the levels of categories are not distinguishable very well, also there is too many NAs
  #one way is divide it by larger categories like different cancers, but even after this the number of observations in the levels
  # will be too low.
@@ -662,20 +652,6 @@ heart.df.cleaned&lt;-cat_changer(heart.df.cleaned,var=&quot;HLAMIS&quot;,val_old
                      &quot;MALIG_TY&quot;,&quot;MALIG_TY_TCR&quot;,&quot;OPO_CTR_CODE&quot;,&quot;ORGAN&quot;,&quot;OTH_LIFE_SUP_OSTXT_TCR&quot;,&quot;OTH_LIFE_SUP_OSTXT_TRR&quot;,
                      &quot;PERM_STATE&quot;,&quot;PRIOR_CARD_SURG_TYPE_OSTXT_TCR&quot;,&quot;PRIOR_CARD_SURG_TYPE_OSTXT_TRR&quot;,&quot;PT_CODE&quot;,
                      &quot;TRR_ID_CODE&quot;)]&lt;-NULL
- 
- #the following variables(s) almost all the patients are in one category
- #age group is &quot;A&quot; because we already selected the adult patients
- # I checked them in the entire dataset , too. so they may not even in our limited observations but I considered
- # them as almost one-level categorical variable because of the original large dataset
- heart.df.cleaned[ c(&quot;HIST_MI&quot;,&quot;END_BLU_FLG&quot;,&quot;END_CREAT&quot;,&quot;END_LLU_FLG&quot;,&quot;END_RLU_FLG&quot;,&quot;EDUCATION_DON&quot;,
-                     &quot;CITIZENSHIP&quot;,&quot;CITIZENSHIP_DON&quot;,&quot;CANCER_SITE_DON&quot;,&quot;HIST_CANCER_DON&quot;,
-                     &quot;SKIN_CANCER_DON&quot;,&quot;EXTRACRANIAL_CANCER_DON&quot;,&quot;INTRACRANIAL_CANCER_DON&quot;,&quot;AGE_GROUP&quot;,&quot;BIOPSY_DGN&quot;,
-                     &quot;DIURETICS_DON&quot;,&quot;INIT_RLU_FLG&quot;,&quot;INIT_LLU_FLG&quot;,&quot;INIT_BLU_FLG&quot;,&quot;DON_TY&quot;,&quot;HIV_SEROSTATUS&quot;,&quot;HTLV2_OLD_DON&quot;,
-                     &quot;INHALED_NO&quot;, &quot;INHALED_NO_TRR&quot;,&quot;LVAD_AT_LISTING&quot;,&quot;LVAD_WHILE_LISTED&quot;,&quot;MULTIORG&quot;, &quot;NON_HRT_DON&quot;,&quot;PGE_TRR&quot;,
-                     &quot;PO2_DONE_DON&quot;,&quot;PROS_INFUS_TCR&quot;,&quot;PROS_INFUS_TRR&quot;,&quot;PROSTACYCLIN_TCR&quot;,&quot;PULM_INF_CONF_DON&quot;,&quot;RECOV_OUT_US&quot;,&quot;REM_CD&quot;,&quot;RESIST_INF&quot;,
-                     &quot;TX_PROCEDUR_TY&quot;, &quot;TX_TYPE&quot;, &quot;TXED&quot; , &quot;TXHRT&quot;,&quot;VDRL_DON&quot;)]&lt;-NULL
- 
-
 
    # Here the NA equivalent characters would change to NA
   {
@@ -707,7 +683,7 @@ heart.df.cleaned&lt;-cat_changer(heart.df.cleaned,var=&quot;HLAMIS&quot;,val_old
  # DAYSWAIT_CHRON, END_BMI_CALC, HEMO_CO_TCR,HEMO_PA_DIA_TCR,HEMO_PA_DIA_TRR,HEMO_PA_MN_TCR,HEMO_PCW_TCR,HEMO_SYS_TCR
  # LV_EJECT :https://www.uwhealth.org/health/topic/special/heart-failure-with-reduced-ejection-fraction-systolic-heart-failure/tx4090abc.html 
  # &quot;PO2&quot; ,&quot;PO2_FIO2_DON&quot;, &quot;SGOT_DON&quot;,&quot;SGPT_DON&quot;, &quot;TBILI_DON&quot;, &quot;TOT_SERUM_ALBUM&quot;
- 
+
  
   val_old&lt;-c(1,2,3,4,5,6,7,998)
   val_new&lt;-c(&quot;NO&quot;,&quot;BNOR&quot;,&quot;BAPS&quot;,&quot;BAOTH&quot;,&quot;BAOTH&quot;,&quot;BAOTH&quot;,&quot;BAOTH&quot;,NA)
@@ -727,6 +703,9 @@ heart.df.cleaned&lt;-cat_changer(heart.df.cleaned,var=&quot;HLAMIS&quot;,val_old
   heart.df.cleaned&lt;-cat_changer(heart.df.cleaned,var=&quot;HBV_SUR_ANTIGEN&quot;,val_old,val_new)
   heart.df.cleaned&lt;-cat_changer(heart.df.cleaned,var=&quot;HCV_SEROSTATUS&quot;,val_old,val_new)
   heart.df.cleaned&lt;-cat_changer(heart.df.cleaned,var=&quot;HEP_C_ANTI_DON&quot;,val_old,val_new)
+  heart.df.cleaned&lt;-cat_changer(heart.df.cleaned,var=&quot;HTLV2_OLD_DON&quot;,val_old,val_new)
+  # the next one does not have SERStAT how ever after checking it's values I understand I can use same function as above 
+  heart.df.cleaned&lt;-cat_changer(heart.df.cleaned,var=&quot;HIV_SEROSTATUS&quot;,val_old,val_new)
   
   val_old&lt;-c(1,2,3)
   val_new&lt;-c(&quot;NO&quot;, &quot;YES&quot;,&quot;YES&quot;)
@@ -813,7 +792,29 @@ heart.df.cleaned&lt;-cbind(heart.df.cleaned,new_vars)
 
 val_old&lt;-c(1,2,3,998)
 val_new&lt;-c(&quot;ONE&quot;, &quot;MORE&quot;,&quot;MORE&quot;,NA)
-heart.df.cleaned&lt;-cat_changer(heart.df.cleaned,var=&quot;STERNOTOMY_TRR&quot;,val_old,val_new)</code></pre>
+heart.df.cleaned&lt;-cat_changer(heart.df.cleaned,var=&quot;STERNOTOMY_TRR&quot;,val_old,val_new)
+
+
+
+#===================================================================
+# Here I drop columns that 90% of their data is NA
+NA_Col_Rate&lt;-col_missing_function(heart.df.cleaned)
+NA_Col_Rate$varname&lt;-rownames(NA_Col_Rate)
+NA_Col_Rate&lt;-NA_Col_Rate[which(NA_Col_Rate$na_count_col&gt;0.9),]
+NA_Col_Rate&lt;-NA_Col_Rate$varname
+NA_Col_Rate&lt;-NA_Col_Rate[(!NA_Col_Rate  %in% &quot;PT_OTH4_OSTXT_DON&quot;)]
+heart.df.cleaned[NA_Col_Rate]&lt;-NULL
+#===================================================================
+ # Here are drop variables that more than 90% of the observations are in one category
+ cat_dis &lt;- vector(mode=&quot;numeric&quot;, length=ncol(heart.df.cleaned))
+ for(i in 1:ncol(heart.df.cleaned)){
+   struct&lt;-as.data.frame(table(heart.df.cleaned[i]))
+   max_cat&lt;-max(struct$Freq)
+   all_freq&lt;-sum(struct$Freq)
+   if((max_cat/all_freq)&gt;0.9){cat_dis[i]&lt;-1}
+ }
+ heart.df.cleaned[(cat_dis==1)]&lt;-NULL
+#===================================================================</code></pre>
 <p><br /> <br /> <br /> <br /> <strong>Here are a report about the remaining variables (discarded means irrelevant/not interesting variables)</strong></p>
 <pre class="r"><code>rem_type2&lt;-as.data.frame(table(heart.form[which(heart.form$VARIABLE.NAME %in% names(heart.df.cleaned)), &quot;INTERPRETATION_TYPE&quot;]))
 names(rem_type2)&lt;-c(&quot;Variable Type&quot;,&quot;Frequency&quot;)
@@ -821,23 +822,22 @@ rem_type2$`Variable Type`&lt;-c(&quot;Categorical&quot;,&quot;Initially Discarde
 
 cat(&quot;here is the brand new variables that I developed from the dataset&quot;)</code></pre>
 <pre><code>## here is the brand new variables that I developed from the dataset</code></pre>
-<pre class="r"><code>str(heart.df.cleaned[,c(&quot;BMI_CHNG&quot;,&quot;WGT_CHNG&quot;,&quot;HGT_CHNG&quot;,&quot;AGE_MAT&quot;,&quot;BMI_MAT&quot;,&quot;GENDER_MAT&quot;,&quot;ETH_MAT&quot;,&quot;CARD_SURG&quot;,&quot;TX_YEAR_CAT&quot;,&quot;HEPARIN&quot;, &quot;ANCEF&quot;, &quot;DOPAMINE&quot;, &quot;ZOSYN&quot;)])</code></pre>
-<pre><code>## 'data.frame':    48442 obs. of  13 variables:
-##  $ BMI_CHNG   : num  0 0 0 0 0 ...
-##  $ WGT_CHNG   : num  0 0 0 0 0 ...
-##  $ HGT_CHNG   : num  0 0 0 0 0 ...
-##  $ AGE_MAT    : num  28 26 19 32 28 24 14 6 43 19 ...
-##  $ BMI_MAT    : num  5.197 9.388 2.725 0.249 5.64 ...
-##  $ GENDER_MAT : chr  &quot;Y&quot; &quot;N&quot; &quot;Y&quot; &quot;N&quot; ...
-##  $ ETH_MAT    : chr  &quot;N&quot; &quot;Y&quot; &quot;N&quot; &quot;Y&quot; ...
-##  $ CARD_SURG  : chr  NA NA NA NA ...
-##  $ TX_YEAR_CAT: chr  &quot;A&quot; &quot;A&quot; &quot;A&quot; &quot;A&quot; ...
-##  $ HEPARIN    : chr  NA NA NA NA ...
-##  $ ANCEF      : chr  NA NA NA NA ...
-##  $ DOPAMINE   : chr  NA NA NA NA ...
-##  $ ZOSYN      : chr  NA NA NA NA ...</code></pre>
+<pre class="r"><code>str(heart.df.cleaned[,c(&quot;BMI_CHNG&quot;,&quot;WGT_CHNG&quot;,&quot;HGT_CHNG&quot;,&quot;AGE_MAT&quot;,&quot;BMI_MAT&quot;,&quot;GENDER_MAT&quot;,&quot;ETH_MAT&quot;,&quot;CARD_SURG&quot;,&quot;HEPARIN&quot;, &quot;ANCEF&quot;, &quot;DOPAMINE&quot;, &quot;ZOSYN&quot;)])</code></pre>
+<pre><code>## 'data.frame':    48442 obs. of  12 variables:
+##  $ BMI_CHNG  : num  0 0 0 0 0 ...
+##  $ WGT_CHNG  : num  0 0 0 0 0 ...
+##  $ HGT_CHNG  : num  0 0 0 0 0 ...
+##  $ AGE_MAT   : num  28 26 19 32 28 24 14 6 43 19 ...
+##  $ BMI_MAT   : num  5.197 9.388 2.725 0.249 5.64 ...
+##  $ GENDER_MAT: chr  &quot;Y&quot; &quot;N&quot; &quot;Y&quot; &quot;N&quot; ...
+##  $ ETH_MAT   : chr  &quot;N&quot; &quot;Y&quot; &quot;N&quot; &quot;Y&quot; ...
+##  $ CARD_SURG : chr  NA NA NA NA ...
+##  $ HEPARIN   : chr  NA NA NA NA ...
+##  $ ANCEF     : chr  NA NA NA NA ...
+##  $ DOPAMINE  : chr  NA NA NA NA ...
+##  $ ZOSYN     : chr  NA NA NA NA ...</code></pre>
 <pre class="r"><code>cat(&quot;Number of patients: &quot;,nrow(heart.df.cleaned),&quot;&amp; Number of variables: &quot;,ncol(heart.df.cleaned))</code></pre>
-<pre><code>## Number of patients:  48442 &amp; Number of variables:  167</code></pre>
+<pre><code>## Number of patients:  48442 &amp; Number of variables:  126</code></pre>
 <div class="footnotes">
 <hr />
 <ol>

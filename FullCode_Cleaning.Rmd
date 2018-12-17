@@ -421,12 +421,11 @@ heart.df.cleaned<-cat_changer(heart.df.cleaned,var="HLAMIS",val_old,val_new)
 
   
 ```
+> ### In the following section variables are recategorized, drived, and developed based on studying their definitions and distributions:
 
-<br />
-<br />
-<br />
-<br />
-**inthe following section variables are recategorized, drived, and developed based on studying their definitions and distributions**
+* Variables are  recategorized after studying their values
+* If more than 90% of the observations for a variable is NA, that variable is dropped
+* IF more than 90% of the observations for a variable is in just one category, that variable is dropped
 ```{r , message=FALSE, cache=FALSE, error=FALSE}
 
  #these variables are not useful because their (pattern of) distribution is not helpful
@@ -590,7 +589,6 @@ NA_Col_Rate<-col_missing_function(heart.df.cleaned)
 NA_Col_Rate$varname<-rownames(NA_Col_Rate)
 NA_Col_Rate<-NA_Col_Rate[which(NA_Col_Rate$na_count_col>0.9),]
 NA_Col_Rate<-NA_Col_Rate$varname
-NA_Col_Rate<-NA_Col_Rate[(!NA_Col_Rate  %in% "PT_OTH4_OSTXT_DON")]
 heart.df.cleaned[NA_Col_Rate]<-NULL
 #===================================================================
  # Here are drop variables that more than 90% of the observations are in one category
@@ -603,9 +601,33 @@ heart.df.cleaned[NA_Col_Rate]<-NULL
  }
  heart.df.cleaned[(cat_dis==1)]<-NULL
 #===================================================================
+#temp_save
+# Here I define categorical and numerical variables
+initial_num<-heart.form$VARIABLE.NAME[which(heart.form$INTERPRETATION_TYPE=="NUM")]
+mutated_num<-c("BMI_CHNG" ,"WGT_CHNG" ,"HGT_CHNG" ,"AGE_MAT","BMI_MAT","PVR")
+pool_num<-c(as.character(initial_num),mutated_num)
+# the below is the numerical variables in the cleaned dataset
+pool_num_clean<-pool_num[which(pool_num %in% names(heart.df.cleaned))]
 
+initial_char<-heart.form$VARIABLE.NAME[which(heart.form$INTERPRETATION_TYPE=="CHAR")] 
+mutated_char<-c("GENDER_MAT","ETH_MAT" ,"CARD_SURG" ,"HEPARIN" ,"ANCEF" ,"DOPAMINE","ZOSYN")
+pool_char<-c(as.character(initial_char),mutated_char)
+# the below is the character variables in the cleaned dataset
+pool_char_clean<-pool_char[which(pool_char %in% names(heart.df.cleaned))]
 
+#=================================================================== 
+# Here are drop the numerical variables that more than 30% of the observations are NA
+# we decided not to impute numerical values so a more conservative approach is adopted
+NA_Col_Rate<-col_missing_function(heart.df.cleaned[pool_num_clean])
+NA_Col_Rate$varname<-rownames(NA_Col_Rate)
+NA_Col_Rate<-NA_Col_Rate[which(NA_Col_Rate$na_count_col>0.3),]
+NA_Col_Rate<-NA_Col_Rate$varname
+heart.df.cleaned[NA_Col_Rate]<-NULL
+#===================================================================
+# the below is the numerical variables in the cleaned dataset (I update it after dropping some variables)
+pool_num_clean<-pool_num[which(pool_num %in% names(heart.df.cleaned))] 
 
+#save1
 ```
 <br />
 <br />
@@ -619,12 +641,101 @@ names(rem_type2)<-c("Variable Type","Frequency")
 rem_type2$`Variable Type`<-c("Categorical","Initially Discarded","Date","Numerical")
 
 cat("here is the brand new variables that I developed from the dataset")
-str(heart.df.cleaned[,c("BMI_CHNG","WGT_CHNG","HGT_CHNG","AGE_MAT","BMI_MAT","GENDER_MAT","ETH_MAT","CARD_SURG","TX_YEAR_CAT","HEPARIN", "ANCEF", "DOPAMINE", "ZOSYN")])
+str(heart.df.cleaned[,c("PVR","BMI_CHNG","WGT_CHNG","HGT_CHNG","AGE_MAT","BMI_MAT","GENDER_MAT","ETH_MAT","CARD_SURG","HEPARIN", "ANCEF", "DOPAMINE", "ZOSYN")])
 
 
 cat("Number of patients: ",nrow(heart.df.cleaned),"& Number of variables: ",ncol(heart.df.cleaned))
 
 ```
+> ### In the following section is for identifying holdout and train sets and making them ready for the last two sections which feature selection and prediction:
+
+* categorical variables are converted to dummy variables
+* "UNKOWN" is imputed for NA values in the categorical variables
+* in case of having NA for numerical values, associated row is dropped
+* IDs of the holdout and train sets are selected
+* a portion of holdout sets have same observations, so later they can be used for monotonicity evaluation
+```{r , message=FALSE, cache=FALSE, error=FALSE}
+
+# here I made 11 consecutive dependent variables, month1, year1, year2, year3, ..., year10
+{
+  p_unit<-c(1/12,1,2,3,4,5,6,7,8,9,10)
+  predict_length<-365
+  
+  heart.df.cleaned$year0<-NA
+  heart.df.cleaned$year1<-NA
+  heart.df.cleaned$year2<-NA
+  heart.df.cleaned$year3<-NA
+  heart.df.cleaned$year4<-NA
+  heart.df.cleaned$year5<-NA
+  heart.df.cleaned$year6<-NA
+  heart.df.cleaned$year7<-NA
+  heart.df.cleaned$year8<-NA
+  heart.df.cleaned$year9<-NA
+  heart.df.cleaned$year10<-NA
+  
+  heart.df.cleaned$GSTATUS<-heart.df.cleaned$GSTATUS
+  heart.df.cleaned$GTIME<-heart.df.cleaned$GTIME
+  
+  heart.df.cleaned$GSTATUS<-as.character(heart.df.cleaned$GSTATUS)
+  
+  heart.df.cleaned<-heart.df.cleaned[complete.cases(heart.df.cleaned$GTIME),]
+  
+  for(i in 1:nrow(heart.df.cleaned)){
+    
+    heart.df.cleaned$year0[i]<-class_generator_bino(heart.df.cleaned$GSTATUS[i], heart.df.cleaned$GTIME[i] ,p_unit[1],predict_length)
+    heart.df.cleaned$year1[i]<-class_generator_bino(heart.df.cleaned$GSTATUS[i], heart.df.cleaned$GTIME[i] ,p_unit[2],predict_length)
+    heart.df.cleaned$year2[i]<-class_generator_bino(heart.df.cleaned$GSTATUS[i], heart.df.cleaned$GTIME[i] ,p_unit[3],predict_length)
+    heart.df.cleaned$year3[i]<-class_generator_bino(heart.df.cleaned$GSTATUS[i], heart.df.cleaned$GTIME[i] ,p_unit[4],predict_length)
+    heart.df.cleaned$year4[i]<-class_generator_bino(heart.df.cleaned$GSTATUS[i], heart.df.cleaned$GTIME[i] ,p_unit[5],predict_length)
+    heart.df.cleaned$year5[i]<-class_generator_bino(heart.df.cleaned$GSTATUS[i], heart.df.cleaned$GTIME[i] ,p_unit[6],predict_length)
+    heart.df.cleaned$year6[i]<-class_generator_bino(heart.df.cleaned$GSTATUS[i], heart.df.cleaned$GTIME[i] ,p_unit[7],predict_length)
+    heart.df.cleaned$year7[i]<-class_generator_bino(heart.df.cleaned$GSTATUS[i], heart.df.cleaned$GTIME[i] ,p_unit[8],predict_length)
+    heart.df.cleaned$year8[i]<-class_generator_bino(heart.df.cleaned$GSTATUS[i], heart.df.cleaned$GTIME[i] ,p_unit[9],predict_length)
+    heart.df.cleaned$year9[i]<-class_generator_bino(heart.df.cleaned$GSTATUS[i], heart.df.cleaned$GTIME[i] ,p_unit[10],predict_length)
+    heart.df.cleaned$year10[i]<-class_generator_bino(heart.df.cleaned$GSTATUS[i], heart.df.cleaned$GTIME[i] ,p_unit[11],predict_length)
+  }
+  
+  #heart.df.cleaned<-heart.df.cleaned[complete.cases(heart.df.cleaned$year10),]
+  heart.df.cleaned$GSTATUS<-NULL
+  heart.df.cleaned$GTIME<-NULL
+  
+}
+#save2
+#####################
+
+# I update numerical and categorical variables here:
+pool_num_clean<-pool_num[which(pool_num %in% names(heart.df.cleaned))] 
+pool_char_clean<-pool_char[which(pool_char %in% names(heart.df.cleaned))]
+
+
+heart.df.cleaned<-heart.df.cleaned[complete.cases(heart.df.cleaned[pool_num_clean]),]
+
+pool_num_clean<-c(pool_num_clean,"year0", "year1", "year2", "year3", "year4", "year5", "year6", "year7","year8", "year9", "year10")
+pool_char_clean<-pool_char[which(pool_char %in% names(heart.df.cleaned))]
+
+# I made a new version of data and then drop the numerical NAs and change the NA in categorical data to "UNKOWN"
+
+
+heart.df.cleaned_char<-heart.df.cleaned[pool_char_clean]
+heart.df.cleaned_char[is.na(heart.df.cleaned_char)] <- "UNKOWN"
+heart.df.cleaned_num<-heart.df.cleaned[pool_num_clean]
+
+heart.df.cleaned2<-cbind(heart.df.cleaned_num,heart.df.cleaned_char,heart.df.cleaned[c("year0", "year1", "year2", "year3",
+                                                                                      "year4", "year5", "year6", "year7","year8", "year9", "year10")])
+names(heart.df.cleaned[!(names(heart.df.cleaned) %in% names(heart.df.cleaned2) )])
+
+rm(list=c("heart.df.cleaned_temp"))
+
+
+
+```
+
+
+
+
+
+
+
 
 
 
