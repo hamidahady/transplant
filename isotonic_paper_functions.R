@@ -2355,12 +2355,12 @@ class_generator_bino <- function(gstatus, gtime, p_unit,predict_length){
   if(gtime < p_unit*predict_length){
     if(is.na(gstatus)){return(NA)}else{
       if(gstatus==0){return(NA)}
-      if(gstatus==1){return(1)}
+      if(gstatus==1){return(0)}
     }
     
     
   }else{
-    return(0)
+    return(1)
   }
 }
 #_________________________
