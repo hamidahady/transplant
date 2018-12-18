@@ -84,6 +84,7 @@ source("https://raw.githubusercontent.com/hamidahady/transplant/Hamid/isotonic_p
   
   heart.df<-rbind(file1,file2,file3,file4,file5,file6,file7,file8,file9,file10,file11,file12,file13,file14,file15,file16,
                   file17,file18)
+  heart.df$ID<-row.names(heart.df)
   
   rm(list = c("file1","file2","file3","file4","file5","file6","file7","file8","file9","file10","file11","file12","file13",
               "file14","file15","file16","file17","file18"))
@@ -92,6 +93,7 @@ source("https://raw.githubusercontent.com/hamidahady/transplant/Hamid/isotonic_p
 
 # heart.form contains the variable definitions of each variable in data
 heart.form <- read.csv("https://raw.githubusercontent.com/hamidahady/transplant/Hamid/data/var_desc.csv")  
+
 
 ```
 > ### In the next Section, we drop some variables and observations, based on these criterias:
@@ -116,6 +118,8 @@ var.end.dates <- trimws(heart.form$VAR.END.DATE) %>% str_trim()
 if.var.did.not.end <- which(var.end.dates=="")
 names.of.var.did.not.end <- heart.form[if.var.did.not.end, 1] 
 
+names.of.var.did.not.end <- c(as.character(names.of.var.did.not.end),"ID")
+
 # Identifying the variables that ended
 vars_ended <-heart.form[which(heart.form$VARIABLE.NAME %in% names(heart.df)[!(names(heart.df) %in% names.of.var.did.not.end)]),(1:2)]
 
@@ -130,6 +134,8 @@ vars.added.NA <- subset(heart.form,is.na(YR_ADDED),select = c(1))
 vars.added.all <- rbind(vars.added.before.2000,vars.added.NA)
 vars.added.all <- vars.added.all[["VARIABLE.NAME"]] %>% 
   as.character()
+
+vars.added.all<- c(as.character(vars.added.all),"ID")
 
 # Subsetting the data nd getting rid of variables that are ended and extreme patients or patients that are less than 18
 heart.df.cleaned <- subset(heart.df, WL_ORG=="HR") %>% # Heart 
@@ -280,7 +286,7 @@ heart.df.cleaned <- subset(heart.df.cleaned) %>%
  heart.df.cleaned[c("DEATH_CIRCUM_DON","DEATH_MECH_DON")]<-NULL
 
 val_old<-c(1,2,3,4,999,"Unknown")
-val_new<-c("ANOXIA","CEREBROVASCULAR/STROKE","HEAD TRAUMA","OTHER","OTHER",NA)
+val_new<-c("ANOXIA","CEREBROVASCULAR_STROKE","HEAD_TRAUMA","OTHER","OTHER",NA)
 heart.df.cleaned<-cat_changer(heart.df.cleaned,var="COD_CAD_DON",val_old,val_new)
   
 val_old<-c("A","A1","A2","B","O","AB","A1B","A2B")
@@ -581,7 +587,7 @@ val_old<-c(1,2,3,998)
 val_new<-c("ONE", "MORE","MORE",NA)
 heart.df.cleaned<-cat_changer(heart.df.cleaned,var="STERNOTOMY_TRR",val_old,val_new)
 
-
+rm(list=c("new_vars"))
 
 #===================================================================
 # Here I drop columns that 90% of their data is NA
@@ -700,32 +706,38 @@ cat("Number of patients: ",nrow(heart.df.cleaned),"& Number of variables: ",ncol
   heart.df.cleaned$GTIME<-NULL
   
 }
-#save2
+#temp
 #####################
 
 # I update numerical and categorical variables here:
 pool_num_clean<-pool_num[which(pool_num %in% names(heart.df.cleaned))] 
 pool_char_clean<-pool_char[which(pool_char %in% names(heart.df.cleaned))]
 
-
 heart.df.cleaned<-heart.df.cleaned[complete.cases(heart.df.cleaned[pool_num_clean]),]
 
-pool_num_clean<-c(pool_num_clean,"year0", "year1", "year2", "year3", "year4", "year5", "year6", "year7","year8", "year9", "year10")
-pool_char_clean<-pool_char[which(pool_char %in% names(heart.df.cleaned))]
-
 # I made a new version of data and then drop the numerical NAs and change the NA in categorical data to "UNKOWN"
-
 
 heart.df.cleaned_char<-heart.df.cleaned[pool_char_clean]
 heart.df.cleaned_char[is.na(heart.df.cleaned_char)] <- "UNKOWN"
 heart.df.cleaned_num<-heart.df.cleaned[pool_num_clean]
 
-heart.df.cleaned2<-cbind(heart.df.cleaned_num,heart.df.cleaned_char,heart.df.cleaned[c("year0", "year1", "year2", "year3",
-                                                                                      "year4", "year5", "year6", "year7","year8", "year9", "year10")])
-names(heart.df.cleaned[!(names(heart.df.cleaned) %in% names(heart.df.cleaned2) )])
+heart.df.cleaned<-cbind(heart.df.cleaned_num,heart.df.cleaned_char,heart.df.cleaned[c("year0", "year1", "year2", "year3",
+                                                                                      "year4", "year5", "year6", "year7","year8", "year9", "year10","ID")])
 
-rm(list=c("heart.df.cleaned_temp"))
 
+pool_char_clean<-c(pool_char_clean,"year0", "year1", "year2", "year3", "year4", "year5", "year6", "year7","year8", "year9", "year10")
+
+
+rm(list=c("heart.df.cleaned_char","heart.df.cleaned_num"))
+
+
+#next part for ensuring if type of each variable is recorded corrctly
+for(i in names(heart.df.cleaned)){
+  if(i %in% pool_char_clean){heart.df.cleaned[i]<-as.character(heart.df.cleaned[,i])}
+  if(i %in% pool_num_clean){heart.df.cleaned[i]<-as.numeric(heart.df.cleaned[,i])}
+}
+
+#save2
 
 
 ```
