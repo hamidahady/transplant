@@ -829,7 +829,8 @@ invariant_checker <- function(vector){
 #_________________________
 # Using Random Forrest for Finding importing features for binomial prediction
 
-R_Forrest_bin<-function(data,TARGET){
+RF_bin<-function(data,TARGET,seed=110){
+  set.seed(seed)
   dataset<-data[!names(data) %in% TARGET]
   dataset$TARGET<-as.factor(data[,TARGET])
   
