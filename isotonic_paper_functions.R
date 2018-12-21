@@ -28,6 +28,7 @@ cat_changer<-function(data_set,var,val_old,val_new){
 
 # It does RUS function based on a coefficient for balancing levels of the trainset
 # I usually develop the coefficient based on the distribution of the holdout set
+
 RUS_func_dist<- function(input_data,TARGET,coef){
   
   Train_Two <- input_data[ which(input_data[TARGET]=="Two"), ]
@@ -69,9 +70,11 @@ createDummyvars<-function(data0){
   return(dum_data)
 }
 #============================================================================
+# input_data<-temp
+# char_var<-var_ind_char
 dummy_maker<-function(input_data,char_var){
   for (i in 1:ncol(input_data)){
-    if(is.character(input_data[,i])){
+    if(names(input_data[i]) %in% char_var){
       temp<-createDummyvars(input_data[i])
       names(temp)<-paste(names(input_data[i]),levels(as.factor(input_data[,i])),sep="_")
       
@@ -84,9 +87,10 @@ dummy_maker<-function(input_data,char_var){
 #============================================================================
 #in this version of dummy making, I do not drop one of the levels, because correlation
 #in not a major issue in machine learning
+
 dummy_maker2<-function(input_data,char_var){
   for (i in 1:ncol(input_data)){
-    if(is.character(input_data[,i])){
+    if(names(input_data[i]) %in% char_var){
       temp<-createDummyvars(input_data[i])
       names(temp)<-paste(names(input_data[i]),levels(as.factor(input_data[,i])),sep="_")
       
@@ -824,7 +828,25 @@ invariant_checker <- function(vector){
 }
 #_________________________
 # Using Random Forrest for Finding importing features for binomial prediction
-R_Forrest_bin<-function(data,target){
+
+R_Forrest_bin<-function(data,TARGET){
+  dataset<-data[!names(data) %in% TARGET]
+  dataset$TARGET<-as.factor(data[,TARGET])
+  
+  Random_Forrest.train <- Boruta(TARGET~., data = dataset, doTrace = 2)
+  Random_Forrest_fs<-as.data.frame(Random_Forrest.train$finalDecision)
+  names(Random_Forrest_fs)[1]<-paste("criteria")
+  Random_Forrest_imp<-as.data.frame.table(subset(Random_Forrest_fs, Random_Forrest_fs[,1] == "Confirmed"))
+  names(Random_Forrest_imp)[1]<-paste("variables")
+  #Random_Forrest_imp_tmp<-Random_Forrest_imp
+  #checking to see if variables are from before 2014
+  names(Random_Forrest_imp)[2]<-c("version")
+  R_Forrest<-as.data.frame(Random_Forrest_imp$variables)
+  colnames(R_Forrest)<-c("variables")
+  return(R_Forrest)
+}
+#_________________________
+R_Forrest_bin2<-function(data,target){
   dataset<-data
   dataset$TARGET<-as.factor(target)
   
@@ -842,7 +864,33 @@ R_Forrest_bin<-function(data,target){
 }
 #_________________________
 
-Lasso_bin<-function(df,yvar,main_object,folds=5,trace=F,alpha=1){
+# df<-data
+# yvar<-"year10"
+Lasso_bin<-function(df,yvar,folds=5,trace=F,alpha=1,seed=110){
+  set.seed(seed)
+  dff<-df[!names(df) %in% yvar]
+  
+  for(i in ncol(dff)){
+    dff[i]<-as.numeric(dff[,i])
+  }
+  
+  x<-data.matrix(dff)
+
+  glmnet1<-glmnet::cv.glmnet(x=x,y=as.factor(df[,yvar]),type.measure='auc',nfolds=folds,alpha=alpha, family="binomial")
+  
+  co<-coef(glmnet1,s = "lambda.1se")
+  #co<-coef(glmnet1,s = "lambda.min")
+  
+  inds<-which(co[,1]!=0)
+  variables<-row.names(co)[inds]
+  variables<-as.data.frame(variables[!(variables %in% '(Intercept)')])
+  colnames(variables)<-c("variables")
+
+  return(variables)
+}
+
+#_________________________
+Lasso_bin2<-function(df,yvar,main_object,folds=5,trace=F,alpha=1){
   x<-model.matrix(as.formula(paste(yvar,"~.")),data=df)
   x=x[,-1] ##remove intercept
   
@@ -865,7 +913,8 @@ Lasso_bin<-function(df,yvar,main_object,folds=5,trace=F,alpha=1){
 }
 #_________________________
 
-FFS_bin<-function(data){
+FFS_bin<-function(data,seed=110){
+  set.seed(seed)
   disc<-"MDL"
   threshold=0.001
   attrs.nominal=numeric()
@@ -875,9 +924,9 @@ FFS_bin<-function(data){
   FF_vars$Information.Gain<-NULL
   FF_vars$NumberFeature<-NULL
   names(FF_vars)<-"variables"
-  FFS<-as.data.frame(FF_vars$variables)
-  colnames(FFS)<-c("variables")
-  return(FFS)
+  # FFSV<-as.data.frame(FF_vars$variables)
+  # colnames(FFSV)<-c("variables")
+  return(FF_vars)
 }
 #_________________________
 
@@ -2502,7 +2551,7 @@ pre_process<-function(x){
   return(x)}
 
 
-RUS_func <- function(input_data,TARGET){
+RUS_func_old <- function(input_data,TARGET){
   
   Train_Two <- input_data[ which(input_data[TARGET]=="Two"), ]
   Train_One <- input_data[ which(input_data[TARGET]=="One"), ]
@@ -2512,6 +2561,23 @@ RUS_func <- function(input_data,TARGET){
   }else{
     sample_size<-nrow(Train_One)
     Train_Two<-Train_Two[sample(nrow(Train_Two), sample_size), ]
+  }
+  input_data<-rbind(Train_One,Train_Two)
+  
+  return(input_data)
+}
+
+RUS_func <- function(input_data,TARGET){
+  Train_Two <- input_data[ which(input_data[TARGET]=="Two"), ]
+  Train_One <- input_data[ which(input_data[TARGET]=="One"), ]
+  if(nrow(Train_Two)<=nrow(Train_One)){
+    sample_size<-nrow(Train_Two)
+    Train_One <- Train_One[sample(nrow(Train_One), sample_size, replace=T), ]
+    Train_Two <- Train_Two[sample(nrow(Train_Two), sample_size, replace=T), ]
+  }else{
+    sample_size<-nrow(Train_One)
+    Train_One <- Train_One[sample(nrow(Train_One), sample_size, replace=T), ]
+    Train_Two <- Train_Two[sample(nrow(Train_Two), sample_size, replace=T), ]
   }
   input_data<-rbind(Train_One,Train_Two)
   
@@ -3737,7 +3803,7 @@ Random_Forrest<-function(input_object){
 #=============================================================
 #==============Lasso Feature selection for Binomial TARGETS
 #=============================================================
-Lasso_Binomial<-function(input_object){
+Lasso_bin2omial<-function(input_object){
   if(input_object$parameters["pred_type","content"]=="Binary"){
     if(as.numeric(input_object$parameters["FS_Method_Lasso","content"])>0){
       data<-input_object$data_ind
@@ -3745,47 +3811,47 @@ Lasso_Binomial<-function(input_object){
       
       year0_df<-data
       year0_df$TARGET<-input_object$data_targets$year0
-      input_object$bin_features$LASSO_year0<-Lasso_bin(year0_df,"TARGET",input_object,folds=5,trace=F,alpha=1)
+      input_object$bin_features$LASSO_year0<-Lasso_bin2(year0_df,"TARGET",input_object,folds=5,trace=F,alpha=1)
       
       year1_df<-data
       year1_df$TARGET<-input_object$data_targets$year1
-      input_object$bin_features$LASSO_year1<-Lasso_bin(year1_df,"TARGET",input_object,folds=5,trace=F,alpha=1)
+      input_object$bin_features$LASSO_year1<-Lasso_bin2(year1_df,"TARGET",input_object,folds=5,trace=F,alpha=1)
       
       year2_df<-data
       year2_df$TARGET<-input_object$data_targets$year2
-      input_object$bin_features$LASSO_year2<-Lasso_bin(year2_df,"TARGET",input_object,folds=5,trace=F,alpha=1)
+      input_object$bin_features$LASSO_year2<-Lasso_bin2(year2_df,"TARGET",input_object,folds=5,trace=F,alpha=1)
       
       year3_df<-data
       year3_df$TARGET<-input_object$data_targets$year3
-      input_object$bin_features$LASSO_year3<-Lasso_bin(year3_df,"TARGET",input_object,folds=5,trace=F,alpha=1)
+      input_object$bin_features$LASSO_year3<-Lasso_bin2(year3_df,"TARGET",input_object,folds=5,trace=F,alpha=1)
       
       year4_df<-data
       year4_df$TARGET<-input_object$data_targets$year4
-      input_object$bin_features$LASSO_year4<-Lasso_bin(year4_df,"TARGET",input_object,folds=5,trace=F,alpha=1)
+      input_object$bin_features$LASSO_year4<-Lasso_bin2(year4_df,"TARGET",input_object,folds=5,trace=F,alpha=1)
       
       year5_df<-data
       year5_df$TARGET<-input_object$data_targets$year5
-      input_object$bin_features$LASSO_year5<-Lasso_bin(year5_df,"TARGET",input_object,folds=5,trace=F,alpha=1)
+      input_object$bin_features$LASSO_year5<-Lasso_bin2(year5_df,"TARGET",input_object,folds=5,trace=F,alpha=1)
       
       year6_df<-data
       year6_df$TARGET<-input_object$data_targets$year6
-      input_object$bin_features$LASSO_year6<-Lasso_bin(year6_df,"TARGET",input_object,folds=5,trace=F,alpha=1)
+      input_object$bin_features$LASSO_year6<-Lasso_bin2(year6_df,"TARGET",input_object,folds=5,trace=F,alpha=1)
       
       year7_df<-data
       year7_df$TARGET<-input_object$data_targets$year7
-      input_object$bin_features$LASSO_year7<-Lasso_bin(year7_df,"TARGET",input_object,folds=5,trace=F,alpha=1)
+      input_object$bin_features$LASSO_year7<-Lasso_bin2(year7_df,"TARGET",input_object,folds=5,trace=F,alpha=1)
       
       year8_df<-data
       year8_df$TARGET<-input_object$data_targets$year8
-      input_object$bin_features$LASSO_year8<-Lasso_bin(year8_df,"TARGET",input_object,folds=5,trace=F,alpha=1)
+      input_object$bin_features$LASSO_year8<-Lasso_bin2(year8_df,"TARGET",input_object,folds=5,trace=F,alpha=1)
       
       year9_df<-data
       year9_df$TARGET<-input_object$data_targets$year9
-      input_object$bin_features$LASSO_year9<-Lasso_bin(year9_df,"TARGET",input_object,folds=5,trace=F,alpha=1)
+      input_object$bin_features$LASSO_year9<-Lasso_bin2(year9_df,"TARGET",input_object,folds=5,trace=F,alpha=1)
       
       year10_df<-data
       year10_df$TARGET<-input_object$data_targets$year10
-      input_object$bin_features$LASSO_year10<-Lasso_bin(year10_df,"TARGET",input_object,folds=5,trace=F,alpha=1)
+      input_object$bin_features$LASSO_year10<-Lasso_bin2(year10_df,"TARGET",input_object,folds=5,trace=F,alpha=1)
       
     }}
   # #delete later
