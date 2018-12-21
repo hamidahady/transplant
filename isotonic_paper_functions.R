@@ -829,8 +829,19 @@ invariant_checker <- function(vector){
 #_________________________
 # Using Random Forrest for Finding importing features for binomial prediction
 
-RF_bin<-function(data,TARGET,seed=110){
+RF_bin<-function(data,TARGET,seed=110, output_location="current",save_ondrive="YES"){
   set.seed(seed)
+  if(output_location=="current"){
+    location_<-getwd()
+  }else{
+    
+    if(class(try(setwd(output_location),silent = TRUE))!="try-error"){location_<-setwd(output_location)}else{
+      location_<-getwd()
+    }}
+  
+  location_file<-paste(location_,"/","RF_Features_",TARGET,"_",Sys.info()["nodename"],".",
+                       gsub(" ", "",gsub(":", "-", format(Sys.time(), "%b.%Y.%d.%a.%X"))),".rds",sep="")
+  
   dataset<-data[!names(data) %in% TARGET]
   dataset$TARGET<-as.factor(data[,TARGET])
   
@@ -844,8 +855,11 @@ RF_bin<-function(data,TARGET,seed=110){
   names(Random_Forrest_imp)[2]<-c("version")
   R_Forrest<-as.data.frame(Random_Forrest_imp$variables)
   colnames(R_Forrest)<-c("variables")
+  if(toupper(save_ondrive)=="YES"){
+    save(R_Forrest,file = location_file)}
   return(R_Forrest)
 }
+
 #_________________________
 R_Forrest_bin2<-function(data,target){
   dataset<-data
