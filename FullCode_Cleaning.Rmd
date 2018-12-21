@@ -970,52 +970,52 @@ if(pre_calculated_RF_features=="NO"){
 # I did parallel processing fo this part
 tasks_RF <- list(
   
-  RF_0 = function() {RF_bin(df=heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
+  RF_0 = function() {RF_bin(!nheart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
                                   keep_NA[["ID0"]],c(names(heart.df.cleaned.dum)[
                                   !names(heart.df.cleaned.dum) %in% exclud],"year0")],
                                   TARGET="year0")},
   
-  RF_1 = function() {RF_bin(df=heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
+  RF_1 = function() {RF_bin(!nheart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
                                   keep_NA[["ID1"]],c(names(heart.df.cleaned.dum)[
                                   !names(heart.df.cleaned.dum) %in% exclud],"year1")],
                                   TARGET="year1")},
   
-  RF_2 = function() {RF_bin(df=heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
+  RF_2 = function() {RF_bin(!nheart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
                                   keep_NA[["ID2"]],c(names(heart.df.cleaned.dum)[
                                   !names(heart.df.cleaned.dum) %in% exclud],"year2")],
                                   TARGET="year2")},
   
-  RF_3 = function() {RF_bin(df=heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
+  RF_3 = function() {RF_bin(!nheart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
                                   keep_NA[["ID3"]],c(names(heart.df.cleaned.dum)[
                                   !names(heart.df.cleaned.dum) %in% exclud],"year3")],
                                   TARGET="year3")},
   
-  RF_4 = function() {RF_bin(df=heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
+  RF_4 = function() {RF_bin(!nheart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
                                   keep_NA[["ID4"]],c(names(heart.df.cleaned.dum)[
                                   !names(heart.df.cleaned.dum) %in% exclud],"year4")],
                                   TARGET="year4")},
   
-  RF_5 = function() {RF_bin(df=heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
+  RF_5 = function() {RF_bin(!nheart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
                                   keep_NA[["ID5"]],c(names(heart.df.cleaned.dum)[
                                   !names(heart.df.cleaned.dum) %in% exclud],"year5")],
                                   TARGET="year5")},
   
-  RF_6 = function() {RF_bin(df=heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
+  RF_6 = function() {RF_bin(!nheart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
                                   keep_NA[["ID6"]],c(names(heart.df.cleaned.dum)[
                                   !names(heart.df.cleaned.dum) %in% exclud],"year6")],
                                   TARGET="year6")},
   
-  RF_7 = function() {RF_bin(df=heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
+  RF_7 = function() {RF_bin(!nheart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
                                   keep_NA[["ID7"]],c(names(heart.df.cleaned.dum)[
                                   !names(heart.df.cleaned.dum) %in% exclud],"year7")],
                                   TARGET="year7")},
   
-  RF_8 = function() {RF_bin(df=heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
+  RF_8 = function() {RF_bin(!nheart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
                                   keep_NA[["ID8"]],c(names(heart.df.cleaned.dum)[
                                   !names(heart.df.cleaned.dum) %in% exclud],"year8")],
                                   TARGET="year8")},
   
-  RF_9 = function() {RF_bin(df=heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
+  RF_9 = function() {RF_bin(!nheart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
                                   keep_NA[["ID9"]],c(names(heart.df.cleaned.dum)[
                                   !names(heart.df.cleaned.dum) %in% exclud],"year9")],
                                   TARGET="year9")},
