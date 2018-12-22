@@ -794,7 +794,7 @@ for(i in names(heart.df.cleaned)){
   exclud<-c("year0","year1", "year2", "year3", "year4", "year5", "year6", "year7","year8", "year9", "year10","ID")
   var_ind_char<-pool_char_clean[!pool_char_clean %in% exclud]
   
-  # the following section needs a lot of RAM memory, so I divide the data
+  # the following section is for creating dummy maker variables for indipendent categorical variables
   heart.df.cleaned.dum<-dummy_maker(heart.df.cleaned,var_ind_char)
  
 }
@@ -962,7 +962,9 @@ for(i in 0:10){
 # RF takes more time so I do it in parallel
 features$RF<-list()
 # feature selection with rnadom forrest takes a significant time, I already did this part and load
-# from github
+# from github, however by changing "pre_calculated_RF_features" to know, you can run this feature 
+# selection algorithm
+  
 pre_calculated_RF_features<-"YES"
 #pre_calculated_RF_features<-"NO"
 
@@ -1035,6 +1037,20 @@ for(i in 0:10){
 }
 }else{
   
+  for(i in 0:10){
+    
+  features$RF[[paste("year",i,sep="")]]<-read.csv( paste("https://raw.githubusercontent.com/hamidahady/transplant/Hamid/data/features/RF_Features_year",i,".csv",sep = ""))
+                }
+  
+}
+
+
+#now I merge all the features
+features$all<-list()
+for(i in 0:10){
+  features$all[[paste("year",i,sep="")]]<-merge(merge(features$FFS[[paste("year",i,sep="")]],features$LASSO[[paste("year",i,sep="")]],
+                                                all.x=TRUE, all.y=TRUE),features$RF[[paste("year",i,sep="")]],
+                                                all.x=TRUE, all.y=TRUE)
 }
 
 ```
