@@ -116,10 +116,26 @@ dummy_maker2<-function(input_data,char_var){
 # fold_no<-5
 # vars_all<-var_desc$VARIABLE.NAME
 
-
-pred_func<-function(train,hold_out,formul,method_sam,seed_no=110,output_name="results",output_location="current",
-                    save_ondrive="yes", log=1,svm=1,nnet=1,rf_bag=1,
-                    rf_bag_stack=1,c5_boost=1, gbm_boost=1,cart_bag=1,repeat_no=1, fold_no=5,comments="nothing"){
+pred_func<-function(train,hold_out,formul,methods_input="NO",method_sam,seed_no=110,output_name="results",output_location="current",
+                    save_ondrive="yes", log=0,svm=0,nnet=0,rf_bag=0,
+                    rf_bag_stack=0,c5_boost=0, gbm_boost=0,cart_bag=0,repeat_no=1, fold_no=5,comments="nothing"){
+  
+  
+  if(sum(methods_input !="NO")>0){
+    methods_input<-paste(methods_input, collapse = "") 
+    if(grepl("log", methods_input)){log=1}
+    if(grepl("svm", methods_input)){svm=1}
+    if(grepl("nnet", methods_input)){nnet=1}
+    if(grepl("rf_bag", methods_input)){rf_bag=1}
+    if(grepl("rf_bag_stack", methods_input)){rf_bag_stack=1}
+    if(grepl("c5_boost", methods_input)){c5_boost=1}
+    if(grepl("cart_bag", methods_input)){cart_bag=1}
+  }
+  
+  
+  # If no algorithm is chosen, it just run with logistic regression as default
+  if(log+svm+nnet+rf_bag+rf_bag_stack+c5_boost+gbm_boost+cart_bag==0){log<-1}
+  
   
   if(output_location=="current"){
     location_<-getwd()
