@@ -1044,6 +1044,15 @@ for(i in 0:10){
   
 }
 
+
+#now I merge all the features
+features$all<-list()
+for(i in 0:10){
+  features$all[[paste("year",i,sep="")]]<-merge(merge(features$FFS[[paste("year",i,sep="")]],features$LASSO[[paste("year",i,sep="")]],
+                                                all.x=TRUE, all.y=TRUE),features$RF[[paste("year",i,sep="")]],
+                                                all.x=TRUE, all.y=TRUE)
+}
+
 ```
 
 
