@@ -819,12 +819,12 @@ for(i in names(heart.df.cleaned)){
 #=============================================================
 features$FFS<-list()
       
-for(i in 0:10){
-        data<-heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
-                                   keep_NA[[paste("ID",i,sep="")]],c(names(heart.df.cleaned.dum)[
-                                   !names(heart.df.cleaned.dum) %in% exclud],paste("year",i,sep=""))]
-        features$FFS[[paste("year",i,sep="")]]<-FFS_bin(data)
-}
+# for(i in 0:10){
+#         data<-heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
+#                                    keep_NA[[paste("ID",i,sep="")]],c(names(heart.df.cleaned.dum)[
+#                                    !names(heart.df.cleaned.dum) %in% exclud],paste("year",i,sep=""))]
+#         features$FFS[[paste("year",i,sep="")]]<-FFS_bin(data)
+# }
 
 tasks_FFS <- list(
   
@@ -954,8 +954,6 @@ for(i in 0:10){
     features$LASSO[[paste("year",i,sep="")]]<-eval(parse(text = paste("out_LASSO$LASSO_",i,sep = "")))
   }
   
-#save3
-  
 #=============================================
 #==============Random Forest Feature Selection
 #=============================================
@@ -1052,6 +1050,8 @@ for(i in 0:10){
                                                 all.x=TRUE, all.y=TRUE),features$RF[[paste("year",i,sep="")]],
                                                 all.x=TRUE, all.y=TRUE)
 }
+
+#save3
 
 ```
 
