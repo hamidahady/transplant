@@ -594,6 +594,9 @@ val_old<-c(1,2,3,998)
 val_new<-c("ONE", "MORE","MORE",NA)
 heart.df.cleaned<-cat_changer(heart.df.cleaned,var="STERNOTOMY_TRR",val_old,val_new)
 
+# I drop the TX_YEAR from dataset since we want to have a more versatile model
+heart.df.cleaned$TX_YEAR<-NULL
+
 rm(list=c("new_vars"))
 
 #===================================================================
