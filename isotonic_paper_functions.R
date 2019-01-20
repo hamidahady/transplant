@@ -4,7 +4,7 @@
 # val_old: name of old catgory
 # val_new: name of new category
 
-cat_changer <- function(data_set,var,val_old,val_new){
+cat_changer <- function(data_set,var,val_old, val_new){
   temp_var <- dplyr::pull(data_set,var)
   cum_index <-c()
   for (i in 1:length(val_old)){
