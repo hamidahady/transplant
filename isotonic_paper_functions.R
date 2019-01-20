@@ -4,26 +4,40 @@
 # val_old: name of old catgory
 # val_new: name of new category
 
-cat_changer<-function(data_set,var,val_old,val_new){
-  
-  datafram_cat<-data.frame("val_old"=val_old ,"val_new"=val_new )
-  
-  for(i in 1:nrow(data_set)){
-    if(!is.na(data_set[i,var])){
-      
-      if(sum(datafram_cat$val_old %in% data_set[i,var])==0){
-        data_set[i,var]<-"OTHER"
-      }else{
-        data_set[i,var]<-as.character(datafram_cat[which(datafram_cat$val_old %in% data_set[i,var]),"val_new"])
-      }
-      
-      
-    }
+cat_changer <- function(data_set,var,val_old,val_new){
+  temp_var <- dplyr::pull(data_set,var)
+  cum_index <-c()
+  for (i in 1:length(val_old)){
+    index <- which(data_set[,var]==val_old[i])
+    temp_var[index] <- val_new[i]
+    cum_index <- c(cum_index,index)
   }
-  
-  
+  na.index <- which(is.na(data_set[,var]))
+  temp_var[-sort(c(cum_index, na.index))] <- "OTHER"
+  data_set[,var] <- temp_var
   return(data_set)
 }
+
+# cat_changer<-function(data_set,var,val_old,val_new){
+#   
+#   datafram_cat<-data.frame("val_old"=val_old ,"val_new"=val_new )
+#   
+#   for(i in 1:nrow(data_set)){
+#     if(!is.na(data_set[i,var])){
+#       
+#       if(sum(datafram_cat$val_old %in% data_set[i,var])==0){
+#         data_set[i,var]<-"OTHER"
+#       }else{
+#         data_set[i,var]<-as.character(datafram_cat[which(datafram_cat$val_old %in% data_set[i,var]),"val_new"])
+#       }
+#       
+#       
+#     }
+#   }
+#   
+#   
+#   return(data_set)
+# }
 ###################################
 
 # It does RUS function based on a coefficient for balancing levels of the trainset
