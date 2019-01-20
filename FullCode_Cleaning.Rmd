@@ -413,7 +413,7 @@ heart.df.cleaned<-cat_changer(heart.df.cleaned,var="HLAMIS",val_old,val_new)
 
 
   val_old<-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14)
-  val_new<-c("pv","pbma","pbmcffs","pbmoth","pbmoth","pbmoth","pbmoth","other","other","other","other","other","other","other")
+  val_new<-c("pv","pbma","pbmcffs","pbmoth","pbmoth","pbmoth","pbmoth","OTHER","OTHER","OTHER","OTHER","OTHER","OTHER","OTHER")
   heart.df.cleaned<-cat_changer(heart.df.cleaned,var="PRI_PAYMENT_TCR",val_old,val_new)
   heart.df.cleaned<-cat_changer(heart.df.cleaned,var="PRI_PAYMENT_TRR",val_old,val_new)
 
