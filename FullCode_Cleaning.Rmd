@@ -832,47 +832,47 @@ features$FFS<-list()
 tasks_FFS <- list(
   
   FFS_0 = function() {FFS_bin(heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
-                                 keep_NA[["ID0"]],c(names(heart.df.cleaned.dum)[
+                                 keep_NA[["ID_train0"]],c(names(heart.df.cleaned.dum)[
                                  !names(heart.df.cleaned.dum) %in% exclud])])},
   
   FFS_1 = function() {FFS_bin(heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
-                                 keep_NA[["ID1"]],c(names(heart.df.cleaned.dum)[
+                                 keep_NA[["ID_train1"]],c(names(heart.df.cleaned.dum)[
                                  !names(heart.df.cleaned.dum) %in% exclud])])},
   
   FFS_2 = function() {FFS_bin(heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
-                                 keep_NA[["ID2"]],c(names(heart.df.cleaned.dum)[
+                                 keep_NA[["ID_train2"]],c(names(heart.df.cleaned.dum)[
                                  !names(heart.df.cleaned.dum) %in% exclud])])},
   
   FFS_3 = function() {FFS_bin(heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
-                                  keep_NA[["ID3"]],c(names(heart.df.cleaned.dum)[
+                                  keep_NA[["ID_train3"]],c(names(heart.df.cleaned.dum)[
                                   !names(heart.df.cleaned.dum) %in% exclud])])},
   
   FFS_4 = function() {FFS_bin(heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
-                                 keep_NA[["ID4"]],c(names(heart.df.cleaned.dum)[
+                                 keep_NA[["ID_train4"]],c(names(heart.df.cleaned.dum)[
                                 !names(heart.df.cleaned.dum) %in% exclud])])},
   
   FFS_5 = function() {FFS_bin(heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
-                                 keep_NA[["ID5"]],c(names(heart.df.cleaned.dum)[
+                                 keep_NA[["ID_train5"]],c(names(heart.df.cleaned.dum)[
                                  !names(heart.df.cleaned.dum) %in% exclud])])},
   
   FFS_6 = function() {FFS_bin(heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
-                                 keep_NA[["ID6"]],c(names(heart.df.cleaned.dum)[
+                                 keep_NA[["ID_train6"]],c(names(heart.df.cleaned.dum)[
                                  !names(heart.df.cleaned.dum) %in% exclud])])},
   
   FFS_7 = function() {FFS_bin(heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
-                                 keep_NA[["ID7"]],c(names(heart.df.cleaned.dum)[
+                                 keep_NA[["ID_train7"]],c(names(heart.df.cleaned.dum)[
                                  !names(heart.df.cleaned.dum) %in% exclud])])},
   
   FFS_8 = function() {FFS_bin(heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
-                                 keep_NA[["ID8"]],c(names(heart.df.cleaned.dum)[
+                                 keep_NA[["ID_train8"]],c(names(heart.df.cleaned.dum)[
                                  !names(heart.df.cleaned.dum) %in% exclud])])},
   
   FFS_9 = function() {FFS_bin(heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
-                                 keep_NA[["ID9"]],c(names(heart.df.cleaned.dum)[
+                                 keep_NA[["ID_train9"]],c(names(heart.df.cleaned.dum)[
                                  !names(heart.df.cleaned.dum) %in% exclud])])},
   
   FFS_10 = function() {FFS_bin(heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
-                                  keep_NA[["ID10"]],c(names(heart.df.cleaned.dum)[
+                                  keep_NA[["ID_train10"]],c(names(heart.df.cleaned.dum)[
                                   !names(heart.df.cleaned.dum) %in% exclud])])}
   
 )
@@ -894,57 +894,57 @@ features$LASSO<-list()
   tasks_LASSO <- list(
     
     LASSO_0 = function() {Lasso_bin(df=heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
-                          keep_NA[["ID0"]],c(names(heart.df.cleaned.dum)[
+                          keep_NA[["ID_train0"]],c(names(heart.df.cleaned.dum)[
                           !names(heart.df.cleaned.dum) %in% exclud],"year0")],
                           yvar="year0",folds=5,trace=F,alpha=1)},
     
     LASSO_1 = function() {Lasso_bin(df=heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
-                          keep_NA[["ID1"]],c(names(heart.df.cleaned.dum)[
+                          keep_NA[["ID_train1"]],c(names(heart.df.cleaned.dum)[
                           !names(heart.df.cleaned.dum) %in% exclud],"year1")],
                           yvar="year1",folds=5,trace=F,alpha=1)},
     
     LASSO_2 = function() {Lasso_bin(df=heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
-                          keep_NA[["ID2"]],c(names(heart.df.cleaned.dum)[
+                          keep_NA[["ID_train2"]],c(names(heart.df.cleaned.dum)[
                           !names(heart.df.cleaned.dum) %in% exclud],"year2")],
                           yvar="year2",folds=5,trace=F,alpha=1)},
     
     LASSO_3 = function() {Lasso_bin(df=heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
-                          keep_NA[["ID3"]],c(names(heart.df.cleaned.dum)[
+                          keep_NA[["ID_train3"]],c(names(heart.df.cleaned.dum)[
                           !names(heart.df.cleaned.dum) %in% exclud],"year3")],
                           yvar="year3",folds=5,trace=F,alpha=1)},
     
     LASSO_4 = function() {Lasso_bin(df=heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
-                          keep_NA[["ID4"]],c(names(heart.df.cleaned.dum)[
+                          keep_NA[["ID_train4"]],c(names(heart.df.cleaned.dum)[
                           !names(heart.df.cleaned.dum) %in% exclud],"year4")],
                           yvar="year4",folds=5,trace=F,alpha=1)},
 
     LASSO_5 = function() {Lasso_bin(df=heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
-                          keep_NA[["ID5"]],c(names(heart.df.cleaned.dum)[
+                          keep_NA[["ID_train5"]],c(names(heart.df.cleaned.dum)[
                           !names(heart.df.cleaned.dum) %in% exclud],"year5")],
                           yvar="year5",folds=5,trace=F,alpha=1)},
     
     LASSO_6 = function() {Lasso_bin(df=heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
-                          keep_NA[["ID6"]],c(names(heart.df.cleaned.dum)[
+                          keep_NA[["ID_train6"]],c(names(heart.df.cleaned.dum)[
                           !names(heart.df.cleaned.dum) %in% exclud],"year6")],
                           yvar="year6",folds=5,trace=F,alpha=1)},
     
     LASSO_7 = function() {Lasso_bin(df=heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
-                          keep_NA[["ID7"]],c(names(heart.df.cleaned.dum)[
+                          keep_NA[["ID_train7"]],c(names(heart.df.cleaned.dum)[
                           !names(heart.df.cleaned.dum) %in% exclud],"year7")],
                           yvar="year7",folds=5,trace=F,alpha=1)},
     
     LASSO_8 = function() {Lasso_bin(df=heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
-                          keep_NA[["ID8"]],c(names(heart.df.cleaned.dum)[
+                          keep_NA[["ID_train8"]],c(names(heart.df.cleaned.dum)[
                           !names(heart.df.cleaned.dum) %in% exclud],"year8")],
                           yvar="year8",folds=5,trace=F,alpha=1)},
     
     LASSO_9 = function() {Lasso_bin(df=heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
-                          keep_NA[["ID9"]],c(names(heart.df.cleaned.dum)[
+                          keep_NA[["ID_train9"]],c(names(heart.df.cleaned.dum)[
                           !names(heart.df.cleaned.dum) %in% exclud],"year9")],
                           yvar="year9",folds=5,trace=F,alpha=1)},
     
     LASSO_10 = function() {Lasso_bin(df=heart.df.cleaned.dum[heart.df.cleaned.dum$ID %in% 
-                          keep_NA[["ID10"]],c(names(heart.df.cleaned.dum)[
+                          keep_NA[["ID_train10"]],c(names(heart.df.cleaned.dum)[
                           !names(heart.df.cleaned.dum) %in% exclud],"year10")],
                           yvar="year10",folds=5,trace=F,alpha=1)}
     
