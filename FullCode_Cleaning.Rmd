@@ -302,7 +302,7 @@ heart.df.cleaned<-cat_changer(heart.df.cleaned,var="ABO",val_old,val_new)
 heart.df.cleaned<-cat_changer(heart.df.cleaned,var="ABO_DON",val_old,val_new)
 
 val_old<-c(1,2,3,4,5,998)
-val_new<-c("no","one","two","other","other",NA)
+val_new<-c("no","one","two","OTHER","OTHER",NA)
 heart.df.cleaned<-cat_changer(heart.df.cleaned,var="DIAB",val_old,val_new)
 
   # previous cardiac surgery /merge of (PRIOR_CARD_SURG_TCR, PRIOR_CARD_SURG_TRR)
