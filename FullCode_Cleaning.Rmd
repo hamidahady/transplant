@@ -105,7 +105,7 @@ heart.form <- read.csv("https://raw.githubusercontent.com/hamidahady/transplant/
 ```
 > ### In the next Section, we drop some variables and observations, based on these criterias:
 
-* variables associated to before the surgery data
+* variables that are associated to post transplantation
 * variables that did not end & those added before 2000
 * variables that are not interesting/relevant for survival analysis (e.g. follow up number, Donor ID, Dates, and ...)
 * patients who are older than 18 years old
@@ -955,8 +955,9 @@ features$LASSO<-list()
   
 for(i in 0:10){
     features$LASSO[[paste("year",i,sep="")]]<-eval(parse(text = paste("out_LASSO$LASSO_",i,sep = "")))
-  }
+}
   
+
 #=============================================
 #==============Random Forest Feature Selection
 #=============================================
