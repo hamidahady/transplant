@@ -432,7 +432,7 @@ heart.df.cleaned<-cat_changer(heart.df.cleaned,var="HLAMIS",val_old,val_new)
   # I rather keep them than drop them because if this category will not important anyway and not selected as an important feature
   heart.df.cleaned<-cat_changer(heart.df.cleaned,var="FUNC_STAT_TCR",val_old,val_new)
 
-  
+  #save temp
 ```
 > ### In the following section variables are recategorized, drived, and developed based on studying their definitions and distributions:
 
@@ -548,13 +548,13 @@ val_old<-c(0,1,2,3,4,5,6,7,8,9,10)
 val_new<-c("ZERO", "MORE","MORE","MORE","MORE", "MORE","MORE","MORE","MORE", "MORE", "MORE")
 heart.df.cleaned<-cat_changer(heart.df.cleaned,var="NUM_PREV_TX",val_old,val_new)
 
-# CABG: Coronary artery bypass graft
-val_old<-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31)
-val_new<-c("CABG","VALV", "CABG","OTHER", "CABG","VALV", "CABG","OTHER", "CABG","VALV",
-           "CABG","OTHER", "CABG","VALV", "CABG","OTHER", "CABG","VALV", "CABG","OTHER",
-           "CABG","VALV", "CABG","OTHER", "CABG","VALV", "CABG","OTHER", "CABG","VALV", "CABG")
-heart.df.cleaned<-cat_changer(heart.df.cleaned,var="PRIOR_CARD_SURG_TYPE_TCR",val_old,val_new)
-heart.df.cleaned<-cat_changer(heart.df.cleaned,var="PRIOR_CARD_SURG_TYPE_TRR",val_old,val_new)
+# # CABG: Coronary artery bypass graft
+# val_old<-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31)
+# val_new<-c("CABG","VALV", "CABG","OTHER", "CABG","VALV", "CABG","OTHER", "CABG","VALV",
+#            "CABG","OTHER", "CABG","VALV", "CABG","OTHER", "CABG","VALV", "CABG","OTHER",
+#            "CABG","VALV", "CABG","OTHER", "CABG","VALV", "CABG","OTHER", "CABG","VALV", "CABG")
+# heart.df.cleaned<-cat_changer(heart.df.cleaned,var="PRIOR_CARD_SURG_TYPE_TCR",val_old,val_new)
+# heart.df.cleaned<-cat_changer(heart.df.cleaned,var="PRIOR_CARD_SURG_TYPE_TRR",val_old,val_new)
 
 # search for procurement in this form: All_Forms_eg_RH.pdf
 # CABG: Coronary artery bypass graft
@@ -616,6 +616,7 @@ heart.df.cleaned[NA_Col_Rate]<-NULL
    if((max_cat/all_freq)>0.9){cat_dis[i]<-1}
  }
  heart.df.cleaned[(cat_dis==1)]<-NULL
+ #ECMO which is a mutated variable is dropped here
 #===================================================================
 #temp_save
 # Here I define categorical and numerical variables
@@ -626,7 +627,7 @@ pool_num<-c(as.character(initial_num),mutated_num)
 pool_num_clean<-pool_num[which(pool_num %in% names(heart.df.cleaned))]
 
 initial_char<-heart.form$VARIABLE.NAME[which(heart.form$INTERPRETATION_TYPE=="CHAR")] 
-mutated_char<-c("GENDER_MAT","ETH_MAT" ,"CARD_SURG" ,"HEPARIN" ,"ANCEF" ,"DOPAMINE","ZOSYN")
+mutated_char<-c("GENDER_MAT","ETH_MAT" ,"CARD_SURG","ECMO" ,"HEPARIN" ,"ANCEF" ,"DOPAMINE","ZOSYN")
 pool_char<-c(as.character(initial_char),mutated_char)
 # the below is the character variables in the cleaned dataset
 pool_char_clean<-pool_char[which(pool_char %in% names(heart.df.cleaned))]
@@ -966,7 +967,7 @@ features$RF<-list()
 # feature selection with rnadom forrest takes a significant time, I already did this part and load
 # from github, however by changing "pre_calculated_RF_features" to know, you can run this feature 
 # selection algorithm
-  
+   
 pre_calculated_RF_features<-"YES"
 #pre_calculated_RF_features<-"NO"
 
